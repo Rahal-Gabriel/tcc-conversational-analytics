@@ -1,0 +1,4 @@
+# Dependencias do prototipo. Mantemos o conjunto minimo: a chamada HTTP a
+# API da Anthropic usa a biblioteca padrao (urllib), sem SDK pesado.
+faker>=25.0
+duckdb>=1.0
