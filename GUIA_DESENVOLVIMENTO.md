@@ -160,3 +160,10 @@ Perfis sugeridos e tabelas autorizadas:
 - `run_all.py oracle` completa com autoteste consistente (a tubulação está
   correta).
 - Os números de pesquisa só são coletados com `run_all.py llm` e chave válida.
+
+## Versionamento
+
+- Ao fim de cada etapa, sempre versionar com a sequência `git commit` seguido
+  de `git push` para o repositório remoto (origin). Nenhuma etapa fica só no
+  commit local.
+- A mensagem de commit deve descrever a etapa em português, registro técnico.
