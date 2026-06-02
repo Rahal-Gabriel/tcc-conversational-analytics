@@ -1,0 +1,41 @@
+# Integracao continua: protege a "Definicao de pronto" do GUIA_DESENVOLVIMENTO.md.
+# Roda a cada push e PR na main. Usa apenas o motor oraculo e os testes
+# rapidos dos modulos, que nao precisam de chave de API nem custam nada.
+# O modo LLM (run_all.py llm) NUNCA roda aqui: exige chave e tem custo.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do repositorio
+        uses: actions/checkout@v4
+
+      - name: Configura Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instala dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Testes rapidos por modulo (bloco __main__ de cada um). Conforme novas
+      # etapas forem implementadas, acrescente os modulos aqui.
+      - name: Testes rapidos dos modulos
+        run: |
+          python -m src.config
+
+      # Autoteste da tubulacao completa com o motor oraculo. Descomente quando
+      # run_all.py estiver implementado.
+      # - name: Autoteste do pipeline (oraculo)
+      #   run: python run_all.py oracle

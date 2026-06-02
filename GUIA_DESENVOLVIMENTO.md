@@ -163,7 +163,24 @@ Perfis sugeridos e tabelas autorizadas:
 
 ## Versionamento
 
+- Branch principal: `main`, sempre funcional e reprodutível. Não commitar
+  direto nela durante o desenvolvimento das etapas.
+- Cada etapa vive em um branch curto (`feat/...`, `fix/...`, `docs/...`) e
+  entra na `main` por um Pull Request com squash merge (uma etapa, um commit
+  na `main`). O PR é a superfície de revisão do diff.
 - Ao fim de cada etapa, sempre versionar com a sequência `git commit` seguido
   de `git push` para o repositório remoto (origin). Nenhuma etapa fica só no
   commit local.
-- A mensagem de commit deve descrever a etapa em português, registro técnico.
+- Mensagens de commit em português, registro técnico, com prefixo semântico
+  leve (`feat:`, `fix:`, `docs:`, `test:`, `chore:`).
+- Marcar com tag git os marcos reprodutíveis, em especial o commit que gerou
+  os números do TCC (o par código + SEED que produziu os resultados).
+
+## Integração contínua
+
+- O workflow `.github/workflows/ci.yml` roda a cada push e PR na `main`:
+  instala dependências e executa os testes rápidos dos módulos (e, quando
+  existir, o `run_all.py oracle`).
+- A CI usa apenas o motor oráculo, que não precisa de chave nem tem custo. O
+  modo LLM nunca roda na CI. Se algum dia precisar, fica em workflow manual
+  com a chave em GitHub Actions Secret, jamais no repositório.
