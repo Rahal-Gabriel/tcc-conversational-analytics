@@ -20,13 +20,14 @@ Orientacoes detalhadas de desenvolvimento estao em [GUIA_DESENVOLVIMENTO.md](GUI
 
 ## Requisitos
 
-- Python 3.12
+- Python 3.12 (versao fixada em [.python-version](.python-version); a CI usa a
+  mesma)
 - Dependencias em [requirements.txt](requirements.txt) (faker, duckdb)
 
 ## Instalacao
 
 ```bash
-python3 -m venv .venv
+python3.12 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
