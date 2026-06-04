@@ -139,7 +139,7 @@ Lakehouse), `GOV` (governança de entrada), `NL2SQL` (motor Text-to-SQL),
 | arquitetura/02_DECISOES_ARQUITETURAIS | PARCIAL |
 | arquitetura/03_REGRAS_CRITICAS | PARCIAL |
 | camadas/01_PIPELINE_LAKEHOUSE | IMPLEMENTADO (Bronze, Silver e Gold) |
-| camadas/02_GOVERNANCA_ENTRADA | PROJETADO |
+| camadas/02_GOVERNANCA_ENTRADA | IMPLEMENTADO |
 | camadas/03_MOTOR_TEXT2SQL | PROJETADO |
 | camadas/04_VALIDACAO_SAIDA | PROJETADO |
 | governanca/01_CONFORMIDADE_REGULATORIA | PARCIAL |

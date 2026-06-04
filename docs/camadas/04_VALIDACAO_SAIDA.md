@@ -53,9 +53,12 @@ A serem implementados em `src/governance.py`.
 - **Motivação**: Rastreabilidade e prestação de contas, exigidas tanto pela
   LGPD (responsabilização) quanto pelas normas da ANVISA (rastreabilidade do
   software de saúde).
-- **Status**: PROJETADO.
-- **Código**: `src/config.py:39` (`AUDIT_LOG_PATH`); `src/governance.py` (a
-  implementar).
+- **Status**: PARCIAL. O registro de entrada (pergunta) já está implementado em
+  `src/governance.py:registrar_pergunta`; falta o registro da resposta, que
+  entra junto com a validação de saída desta camada.
+- **Código**: `src/config.py:37` (`AUDIT_LOG_PATH`);
+  `src/governance.py:registrar_pergunta` (entrada); registro de resposta a
+  implementar.
 - **Relacionado**: [REG-LGPD-007](../governanca/01_CONFORMIDADE_REGULATORIA.md),
   [REG-ANVISA-001](../governanca/01_CONFORMIDADE_REGULATORIA.md).
 
@@ -75,9 +78,10 @@ A completude do log é um dos indicadores de avaliação
 
 | Item | Local | Status |
 |---|---|---|
-| Campos sensíveis | `src/config.py:51` | IMPLEMENTADO |
-| Caminho do log de auditoria | `src/config.py:39` | IMPLEMENTADO |
-| Aterramento, filtro e auditoria | `src/governance.py` | PROJETADO |
+| Campos sensíveis | `src/config.py:59` (`CAMPOS_SENSIVEIS`) | IMPLEMENTADO |
+| Caminho do log de auditoria | `src/config.py:37` (`AUDIT_LOG_PATH`) | IMPLEMENTADO |
+| Registro de auditoria da entrada | `src/governance.py:registrar_pergunta` | IMPLEMENTADO |
+| Aterramento, filtro de saída e registro da resposta | `src/governance.py` | PROJETADO |
 
 ## 5. Teste rápido (a implementar)
 
