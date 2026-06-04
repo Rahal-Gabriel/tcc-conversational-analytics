@@ -34,6 +34,20 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+### Alternativa reprodutivel (Docker)
+
+Para reproduzir o experimento no mesmo ambiente em qualquer maquina (versao de
+Python, do DuckDB e do sistema fixadas pela imagem):
+
+```bash
+docker build -t tcc-conversational-analytics:repro .
+docker run --rm tcc-conversational-analytics:repro   # verificacao rapida, sem chave
+```
+
+A chave da API nunca entra na imagem; quando precisar do modo LLM, injete-a em
+runtime com `-e ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY"`. Detalhes em
+[docs/avaliacao/02_REPRODUTIBILIDADE_CI.md](docs/avaliacao/02_REPRODUTIBILIDADE_CI.md).
+
 ## Configuracao do LLM
 
 As credenciais e o modelo sao lidos do ambiente, nunca embutidos no codigo:

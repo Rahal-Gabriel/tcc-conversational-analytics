@@ -1,4 +1,8 @@
 # Dependencias do prototipo. Mantemos o conjunto minimo: a chamada HTTP a
 # API da Anthropic usa a biblioteca padrao (urllib), sem SDK pesado.
-faker>=25.0
-duckdb>=1.0
+#
+# Versoes travadas (==) por reprodutibilidade: a mesma SEED so reproduz os
+# mesmos dados se a versao do Faker e do DuckDB tambem for a mesma. Ver
+# docs/avaliacao/02_REPRODUTIBILIDADE_CI.md (RNC-003).
+faker==40.21.0
+duckdb==1.5.3

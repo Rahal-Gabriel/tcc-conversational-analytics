@@ -84,14 +84,15 @@ camadas e não se restringe ao motor de IA (11 requisitos `REG-*`).
 - Determinismo por `SEED` e `SIM_TODAY`: a mesma configuração reproduz os mesmos
   dados e números, inclusive entre Python 3.12 e 3.14.
 - Versionamento por etapa (branch curto + PR squash) e ambiente fixado em
-  Python 3.12.
+  Python 3.12, com dependências travadas (`==`) e imagem Docker reprodutível
+  (base por digest), de modo que o experimento roda igual em qualquer máquina.
 - CI verde a cada push e PR na `main`, usando apenas o motor oráculo, sem chave
   e sem custo.
 - Separação explícita entre motor LLM (números do TCC) e oráculo (autoteste).
 
 - **Status**: VALIDADO.
 - **Evidência**: [avaliacao/02_REPRODUTIBILIDADE_CI.md](../avaliacao/02_REPRODUTIBILIDADE_CI.md);
-  `.github/workflows/ci.yml`.
+  `.github/workflows/ci.yml`; `Dockerfile`, `.dockerignore`, `requirements.txt`.
 
 ### RES-004: Arquitetura de referência documentada
 

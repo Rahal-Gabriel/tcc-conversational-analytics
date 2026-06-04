@@ -1,0 +1,22 @@
+# Mantem a imagem enxuta e segura: nao copia ambiente local, dados gerados,
+# resultados, caches nem segredos para dentro do build.
+
+# Ambiente virtual local (a imagem instala suas proprias dependencias).
+.venv/
+
+# Artefatos gerados em runtime, nao versionados e nao reprodutiveis no build.
+data/
+results/
+
+# Caches do Python.
+__pycache__/
+*.pyc
+
+# Metadados de ferramentas e do git.
+.git/
+.github/
+.claude/
+
+# Segredos e configuracao local (RNC-004): nunca entram na imagem.
+.env
+*.env

@@ -39,3 +39,18 @@ jobs:
       # run_all.py estiver implementado.
       # - name: Autoteste do pipeline (oraculo)
       #   run: python run_all.py oracle
+
+  # Prova que a imagem reprodutivel constroi e roda o mesmo teste rapido que o
+  # job acima. E o que sustenta a afirmacao de reprodutibilidade (RNC-003): o
+  # experimento roda igual na CI e na maquina local. Sem chave, sem custo.
+  imagem:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do repositorio
+        uses: actions/checkout@v4
+
+      - name: Constroi a imagem reprodutivel
+        run: docker build -t tcc-conversational-analytics:ci .
+
+      - name: Teste rapido dentro do container
+        run: docker run --rm tcc-conversational-analytics:ci

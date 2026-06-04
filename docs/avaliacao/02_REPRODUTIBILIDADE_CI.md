@@ -29,8 +29,36 @@ mesma Bronze, verificado entre Python 3.12 e 3.14.
 ## 3. Ambiente fixado
 
 - Python 3.12, fixado em `.python-version`; a CI usa a mesma versão.
-- Dependências mínimas em `requirements.txt` (`faker`, `duckdb`); a chamada ao
-  LLM usa `urllib` da biblioteca padrão.
+- Dependências em `requirements.txt` com versões travadas (`==`): `faker==40.21.0`
+  e `duckdb==1.5.3`. A trava por `==` é parte do determinismo, não detalhe de
+  empacotamento: a mesma `SEED` só reproduz a mesma Bronze se a versão do Faker
+  e do DuckDB também for a mesma. A chamada ao LLM usa `urllib` da biblioteca
+  padrão, sem dependência externa.
+
+### 3.1. Imagem reprodutível (Docker)
+
+O `Dockerfile` na raiz fecha a última lacuna de reprodutibilidade: o
+determinismo garante "mesma configuração, mesmos dados", mas a reprodução exata
+ainda dependia do ambiente de quem executa (versão de Python, do DuckDB, do
+sistema operacional). A imagem fixa esse ambiente inteiro, de modo que a banca
+ou um avaliador reproduza o experimento com um único comando.
+
+- Base travada por **digest**, não apenas por tag
+  (`python:3.12.12-slim-bookworm@sha256:593bd06...`): garante o mesmo binário ao
+  longo do tempo, mesmo que a tag seja republicada.
+- Roda como usuário sem privilégios (`appuser`), não como root.
+- `.dockerignore` mantém `.venv/`, `data/`, `results/`, caches e segredos fora
+  da imagem.
+- A chave da API **nunca** entra na imagem
+  ([RNC-004](../arquitetura/03_REGRAS_CRITICAS.md#rnc-004-nenhuma-credencial-no-código-ou-no-histórico-do-git));
+  é injetada apenas em runtime por variável de ambiente.
+
+```bash
+docker build -t tcc-conversational-analytics:repro .
+docker run --rm tcc-conversational-analytics:repro              # teste rápido (sem chave, sem custo)
+docker run --rm -e ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY" \
+  tcc-conversational-analytics:repro python run_all.py llm      # modo LLM (quando run_all.py existir)
+```
 
 ## 4. Versionamento por etapa
 
@@ -51,6 +79,11 @@ O workflow `.github/workflows/ci.yml` roda a cada push e PR na `main`:
    acrescentar os demais conforme implementados).
 3. Quando `run_all.py` existir, roda o autoteste com o motor oráculo.
 
+Um segundo job (`imagem`) constrói a imagem Docker e roda o mesmo teste rápido
+dentro do container. É o que prova, automaticamente e a cada push, que o
+experimento roda igual na CI e na máquina local, sustentando a afirmação de
+reprodutibilidade.
+
 A CI usa **apenas** o motor oráculo, que não precisa de chave nem tem custo. O
 modo LLM nunca roda na CI ([RNC-004](../arquitetura/03_REGRAS_CRITICAS.md#rnc-004-nenhuma-credencial-no-código-ou-no-histórico-do-git)).
 
@@ -67,7 +100,8 @@ produziram serão registrados para permitir reprodução exata.
 | Item | Situação |
 |---|---|
 | Determinismo (SEED, SIM_TODAY) | VALIDADO |
-| Ambiente fixado (Python 3.12) | IMPLEMENTADO |
+| Ambiente fixado (Python 3.12, deps travadas em `==`) | IMPLEMENTADO |
+| Imagem reprodutível (Docker, base por digest) | IMPLEMENTADO |
 | Versionamento por etapa (branch + PR squash) | IMPLEMENTADO |
 | CI verde a cada push/PR (motor oráculo) | IMPLEMENTADO |
 
