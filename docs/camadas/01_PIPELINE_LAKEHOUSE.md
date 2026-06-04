@@ -1,6 +1,6 @@
 # LAKE: Camada 1 - Pipeline Lakehouse
 
-**Status**: PARCIAL (Bronze implementada; Silver e Gold projetadas)
+**Status**: IMPLEMENTADO (Bronze, Silver e Gold com teste rápido passando)
 **Prioridade**: ALTA
 **Última atualização**: 2026-06-04
 **Alimenta (template TCC)**: Metodologia · Resultados Preliminares
@@ -46,21 +46,31 @@ janela) ou seguir ativas em `SIM_TODAY` (alta real nula).
 > Números reprodutíveis da Bronze e do snapshot de ocupação estão em
 > [RES-001](../tcc/01_RESULTADOS_PRELIMINARES.md#res-001-camada-bronze-gerada-e-coerente).
 
-## 3. Camada Silver (limpa e anonimizada) - PROJETADA
+## 3. Camada Silver (limpa e anonimizada) - IMPLEMENTADA
 
-Transformação a implementar em `src/pipeline.py`:
+Transformação em `src/pipeline.py:construir_silver`:
 
-- Remover `nome` e `cpf`.
-- Pseudonimizar `id_paciente` por hash (`id_paciente_pseudo`).
-- Derivar `faixa_etaria` a partir de `data_nascimento` e descartar a data
+- Remove `nome`, `cpf` e `data_nascimento` (não sobrevivem à Silver).
+- Pseudonimiza `id_paciente` por `id_paciente_pseudo`, com SHA-256 sobre
+  `PSEUDO_SALT + id`, truncado em 16 hex (`src/pipeline.py:_pseudo`,
+  `src/config.py:56`). O salt determinista preserva a reprodutibilidade
+  ([RNC-003](../arquitetura/03_REGRAS_CRITICAS.md#rnc-003-determinismo-e-reprodutibilidade))
+  e dificulta reverter o hash por força bruta sobre os poucos ids.
+- Deriva `faixa_etaria` a partir da idade contra `SIM_TODAY` (nunca o relógio do
+  sistema) e descarta a data
   ([DA-LAKE-004](../arquitetura/02_DECISOES_ARQUITETURAIS.md#da-lake-004-faixa-etária-derivada-substitui-a-data-de-nascimento)).
-- Invariante de saída: **nenhuma coluna de identificação direta** pode existir
-  na Silver ([RNC-005](../arquitetura/03_REGRAS_CRITICAS.md#rnc-005-pii-nunca-sobrevive-à-silver)).
+- `silver.unidade`, `silver.leito` e `silver.ocupacao_diaria` são espelho da
+  Bronze (não contêm PII), tornando a Silver auto-suficiente como fonte da Gold.
+- Invariante de saída verificada no teste: **nenhuma coluna de identificação
+  direta do paciente** (`nome`, `cpf`, `data_nascimento`) existe em
+  `silver.paciente`
+  ([RNC-005](../arquitetura/03_REGRAS_CRITICAS.md#rnc-005-pii-nunca-sobrevive-à-silver)).
+  O nome legítimo de unidade (`silver.unidade.nome`) não é PII e não conta.
 
 Faixas etárias (limite inferior inclusivo): `0-17, 18-39, 40-59, 60-79, 80+`
-(`src/config.py:50`).
+(`src/config.py:49`).
 
-## 4. Camada Gold (única exposta ao LLM) - PROJETADA
+## 4. Camada Gold (única exposta ao LLM) - IMPLEMENTADA
 
 Quatro tabelas, agregadas e sem dado individual identificável
 ([DA-LAKE-003](../arquitetura/02_DECISOES_ARQUITETURAIS.md#da-lake-003-gold-é-a-única-camada-exposta-ao-llm),
@@ -73,22 +83,37 @@ Quatro tabelas, agregadas e sem dado individual identificável
 | `gold.ocupacao_diaria` | série histórica diária do hospital |
 | `gold.internacoes` | internações com `faixa_etaria`, `tempo_permanencia`, flag `ativa` |
 
-Regras de derivação: `ativa = TRUE` quando `data_alta_real` é nula;
-`tempo_permanencia` em dias apenas para internações encerradas;
-`taxa_ocupacao` em percentual.
+Regras de derivação (`src/pipeline.py:construir_gold`): `ativa = TRUE` quando
+`data_alta_real` é nula; `tempo_permanencia` em dias apenas para internações
+encerradas (nulo se ativa); `taxa_ocupacao` em percentual `[0,100]`. A Gold
+**não** carrega `id_paciente_pseudo` (campo sensível em
+`src/config.py:59`), preservando a minimização de exposição
+([DA-LAKE-003](../arquitetura/02_DECISOES_ARQUITETURAIS.md#da-lake-003-gold-é-a-única-camada-exposta-ao-llm)).
+
+> Números reprodutíveis da Silver/Gold (snapshot por unidade, distribuição de
+> faixa etária, internações ativas) estão em
+> [RES-005](../tcc/01_RESULTADOS_PRELIMINARES.md#res-005-camadas-silver-e-gold-anonimizadas-e-agregadas).
 
 ## 5. Mapeamento para o código
 
 | Item | Local | Status |
 |---|---|---|
-| Volumes e janela | `src/config.py:28-36` | IMPLEMENTADO |
+| Volumes e janela | `src/config.py:26-29` | IMPLEMENTADO |
 | Geração Bronze | `src/data_gen.py:construir` | IMPLEMENTADO |
 | Schema Bronze | `src/data_gen.py:_criar_schema_e_tabelas` | IMPLEMENTADO |
-| Transformação Silver/Gold | `src/pipeline.py` | PROJETADO |
-| Tabelas Gold autorizadas | `src/config.py:42-47` (`GOLD_TABLES`) | IMPLEMENTADO |
+| Salt da pseudonimização | `src/config.py:56` (`PSEUDO_SALT`) | IMPLEMENTADO |
+| Transformação Silver | `src/pipeline.py:construir_silver` | IMPLEMENTADO |
+| Transformação Gold | `src/pipeline.py:construir_gold` | IMPLEMENTADO |
+| Tabelas Gold autorizadas | `src/config.py:41-46` (`GOLD_TABLES`) | IMPLEMENTADO |
 
 ## 6. Teste rápido
 
 `python -m src.data_gen` gera a Bronze e valida invariantes: contagens de
 unidade/leito/paciente exatas, `ocupacao_diaria = leitos × dias`, e internações
 dentro da faixa esperada (1500 a 2900).
+
+`python -m src.pipeline` gera a Bronze, constrói Silver e Gold e valida: nenhuma
+coluna de PII direta em `silver.paciente` (RNC-005); `faixa_etaria` dentro do
+domínio; pseudônimo determinista e sem colisão; `taxa_ocupacao ∈ [0,100]`;
+`ativa ⟺ data_alta_real` nula com `tempo_permanencia` coerente; as quatro
+tabelas Gold presentes; e soma de leitos por unidade igual a `VOL_LEITOS`.

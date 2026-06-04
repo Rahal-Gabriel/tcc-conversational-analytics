@@ -20,12 +20,13 @@ Resultados Preliminares do TCC.
 
 ## 2. Visão geral
 
-O protótipo está na fase de construção do pipeline de dados. A Bronze já é
-gerada de forma determinista e coerente, o mapeamento regulatório está
-documentado, e a infraestrutura de reprodutibilidade está operacional. As
-transformações Silver/Gold, a governança executável e o motor de IA ainda não
-foram implementados, e por isso **ainda não há números de acurácia**, que só
-serão coletados em execução real com o motor LLM
+O protótipo concluiu o pipeline de dados nas três camadas. A Bronze é gerada de
+forma determinista e coerente, a Silver anonimiza a PII e a Gold expõe as
+métricas agregadas ao motor de linguagem; o mapeamento regulatório está
+documentado e a infraestrutura de reprodutibilidade está operacional. A
+governança executável e o motor de IA ainda não foram implementados, e por isso
+**ainda não há números de acurácia**, que só serão coletados em execução real
+com o motor LLM
 ([RNC-002](../arquitetura/03_REGRAS_CRITICAS.md#rnc-002-integridade-dos-resultados-acurácia-só-vem-do-llm-real)).
 
 ## 3. Progresso por objetivo específico (do projeto de pesquisa)
@@ -34,9 +35,9 @@ serão coletados em execução real com o motor LLM
 |---|---|---|---|
 | a | Revisão da literatura (Conversational Analytics, Text-to-SQL, governança de LLMs) | Em andamento | Fora do repositório (projeto de pesquisa) |
 | b | Mapear requisitos regulatórios (LGPD, ANVISA, ANPD) | Concluído | [governanca/01_CONFORMIDADE_REGULATORIA.md](../governanca/01_CONFORMIDADE_REGULATORIA.md) |
-| c | Projetar a arquitetura técnica (ingestão, Lakehouse, motor com guardrails) | Parcial | [arquitetura/01_VISAO_GERAL.md](../arquitetura/01_VISAO_GERAL.md); Bronze implementada |
-| d | Desenvolver o modelo de governança (acesso, rastreabilidade, anonimização, validação) | Projetado | Controles mapeados ([CTRL-*](../camadas/02_GOVERNANCA_ENTRADA.md)); lógica a implementar |
-| e | Implementar e avaliar o protótipo sobre dados sintéticos | Em andamento | Bronze pronta; transformação, motor e avaliação pendentes |
+| c | Projetar a arquitetura técnica (ingestão, Lakehouse, motor com guardrails) | Parcial | [arquitetura/01_VISAO_GERAL.md](../arquitetura/01_VISAO_GERAL.md); Lakehouse completo (Bronze/Silver/Gold) |
+| d | Desenvolver o modelo de governança (acesso, rastreabilidade, anonimização, validação) | Parcial | Anonimização Silver implementada e verificada ([RES-005](#res-005-camadas-silver-e-gold-anonimizadas-e-agregadas)); acesso, validação e auditoria a implementar |
+| e | Implementar e avaliar o protótipo sobre dados sintéticos | Em andamento | Lakehouse pronto; motor e avaliação pendentes |
 
 ## 4. Resultados preliminares disponíveis
 
@@ -68,6 +69,49 @@ direta ao DuckDB em 2026-06-04.
 
 - **Status**: VALIDADO.
 - **Evidência**: `src/data_gen.py`; `data/lakehouse.duckdb`;
+  [camadas/01_PIPELINE_LAKEHOUSE.md](../camadas/01_PIPELINE_LAKEHOUSE.md).
+
+### RES-005: Camadas Silver e Gold anonimizadas e agregadas
+
+A transformação `src/pipeline.py` materializa, de forma determinista sobre a
+Bronze, a Silver anonimizada e as quatro tabelas Gold expostas ao motor de
+linguagem.
+
+Anonimização (Silver), verificada no teste rápido
+([RNC-005](../arquitetura/03_REGRAS_CRITICAS.md#rnc-005-pii-nunca-sobrevive-à-silver)):
+`silver.paciente` não contém `nome`, `cpf` nem `data_nascimento`; `id_paciente`
+vira `id_paciente_pseudo` (SHA-256 com salt, sem colisão nos 600 pacientes); a
+data de nascimento dá lugar a `faixa_etaria`. Distribuição das faixas:
+
+| Faixa etária | Pacientes |
+|---|---|
+| 0-17 | 105 |
+| 18-39 | 142 |
+| 40-59 | 127 |
+| 60-79 | 128 |
+| 80+ | 98 |
+
+Snapshot Gold da ocupação por unidade em `SIM_TODAY` (2026-05-31):
+
+| Unidade | Total | Ocupados | Livres | Bloqueados | Taxa |
+|---|---|---|---|---|---|
+| Cardiologia | 25 | 18 | 6 | 1 | 72,0% |
+| Pediatria | 25 | 17 | 6 | 2 | 68,0% |
+| Clínica Médica | 25 | 21 | 4 | 0 | 84,0% |
+| Cirurgia Geral | 25 | 23 | 2 | 0 | 92,0% |
+| Ortopedia | 25 | 16 | 5 | 4 | 64,0% |
+| Neurologia | 25 | 20 | 5 | 0 | 80,0% |
+| Oncologia | 25 | 17 | 7 | 1 | 68,0% |
+| Pronto-Socorro | 25 | 18 | 7 | 0 | 72,0% |
+| **Hospital** | **200** | **150** | **42** | **8** | **75,0%** |
+
+Coerência verificada: a soma dos 200 leitos por unidade fecha com `VOL_LEITOS`, e
+os 150 leitos ocupados batem com as 150 internações marcadas como `ativa` em
+`gold.internacoes`. Números confirmados por consulta direta ao DuckDB em
+2026-06-04.
+
+- **Status**: VALIDADO.
+- **Evidência**: `src/pipeline.py`; `data/lakehouse.duckdb`;
   [camadas/01_PIPELINE_LAKEHOUSE.md](../camadas/01_PIPELINE_LAKEHOUSE.md).
 
 ### RES-002: Mapeamento regulatório completo
@@ -108,7 +152,6 @@ principal resultado esperado do projeto e já existe em forma navegável.
 
 | Próxima entrega | Módulo de código | Resultado que habilita |
 |---|---|---|
-| Transformação Silver e Gold | `pipeline.py` | Anonimização verificável e métricas Gold consultáveis |
 | Governança executável | `governance.py` | Guardrails, aterramento, filtro de saída e auditoria |
 | Conjunto de avaliação | `questions.py` | Perguntas em PT com SQL de referência |
 | Motor Text-to-SQL e oráculo | `nl2sql.py` | Tradução pergunta para SQL |
@@ -125,7 +168,7 @@ Ver o índice reverso em [02_MAPA_DOC_PARA_TEMPLATE.md](02_MAPA_DOC_PARA_TEMPLAT
 
 - **Metodologia**: determinismo, ambiente versionado e harness de avaliação
   descrevem o material e os métodos de forma reprodutível.
-- **Resultados Preliminares**: RES-001 a RES-004 são os resultados parciais
+- **Resultados Preliminares**: RES-001 a RES-005 são os resultados parciais
   apresentáveis.
 - **Integridade**: a ausência de números de acurácia nesta fase é deliberada e
   documentada.

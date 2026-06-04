@@ -48,6 +48,13 @@ GOLD_TABLES = (
 # Faixas etarias derivadas na Silver (limite inferior inclusivo)
 FAIXAS_ETARIAS = ("0-17", "18-39", "40-59", "60-79", "80+")
 
+# Salt determinista da pseudonimizacao de id_paciente na Silver. Por se tratar
+# de dado 100% sintetico, o salt mora no codigo de proposito: sem ele a
+# reprodutibilidade (RNC-003) se perderia. Em producao com dado real, viria de
+# um cofre de segredos. Com salt, reverter o hash dos poucos ids por forca bruta
+# deixa de ser trivial (RNC-005).
+PSEUDO_SALT = "tcc-leitos-2026"
+
 # Campos sensiveis que jamais podem aparecer na saida ao usuario final
 CAMPOS_SENSIVEIS = ("nome", "cpf", "data_nascimento", "id_paciente_pseudo")
 

@@ -78,10 +78,12 @@ qualquer alteração relevante.
   individual identificável.
 - **Enforcement**: Transformação Bronze→Silver remove PII e deriva
   `faixa_etaria`; filtro de saída barra nomes de campo sensível.
-- **Status**: PROJETADO (Silver a implementar; PII proposital já isolada na
-  Bronze).
-- **Código**: `src/config.py:51` (`CAMPOS_SENSIVEIS`); `src/pipeline.py` (a
-  implementar).
+- **Status**: IMPLEMENTADO na Silver (PII removida, `id_paciente` pseudonimizado
+  por SHA-256 com salt, `faixa_etaria` derivada; teste rápido verifica que
+  `silver.paciente` não contém `nome`/`cpf`/`data_nascimento`). Filtro de saída
+  ao usuário final ainda a implementar em `governance.py`.
+- **Código**: `src/config.py:59` (`CAMPOS_SENSIVEIS`);
+  `src/pipeline.py:construir_silver` e `src/pipeline.py:_pseudo`.
 - **Relacionado**: [DA-LAKE-002](02_DECISOES_ARQUITETURAIS.md#da-lake-002-pii-proposital-na-bronze),
   [REG-LGPD-001](../governanca/01_CONFORMIDADE_REGULATORIA.md),
   [REG-LGPD-002](../governanca/01_CONFORMIDADE_REGULATORIA.md).

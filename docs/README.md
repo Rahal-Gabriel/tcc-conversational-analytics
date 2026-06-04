@@ -31,7 +31,7 @@ A documentação cumpre dois papéis ao mesmo tempo:
 | Requisitos Regulatórios (REG-*) | 11 |
 | Controles de Governança (CTRL-*) | 9 |
 | Critérios de Avaliação (AVAL-*) | 3 |
-| Resultados Preliminares (RES-*) | 4 |
+| Resultados Preliminares (RES-*) | 5 |
 
 > Os totais são mantidos manualmente. Ao adicionar ou remover um identificador,
 > atualize esta tabela e a contagem no módulo de origem.
@@ -138,7 +138,7 @@ Lakehouse), `GOV` (governança de entrada), `NL2SQL` (motor Text-to-SQL),
 | arquitetura/01_VISAO_GERAL | PARCIAL |
 | arquitetura/02_DECISOES_ARQUITETURAIS | PARCIAL |
 | arquitetura/03_REGRAS_CRITICAS | PARCIAL |
-| camadas/01_PIPELINE_LAKEHOUSE | PARCIAL (Bronze pronta; Silver/Gold pendentes) |
+| camadas/01_PIPELINE_LAKEHOUSE | IMPLEMENTADO (Bronze, Silver e Gold) |
 | camadas/02_GOVERNANCA_ENTRADA | PROJETADO |
 | camadas/03_MOTOR_TEXT2SQL | PROJETADO |
 | camadas/04_VALIDACAO_SAIDA | PROJETADO |
