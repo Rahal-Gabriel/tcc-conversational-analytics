@@ -5,7 +5,9 @@ natural sobre dados clinicos, com governanca integrada e aderente a LGPD, as
 normas da ANVISA e as diretrizes da ANPD. O dominio de avaliacao e a **ocupacao
 de leitos hospitalares**, e toda a pesquisa usa dados **100% sinteticos**.
 
-Orientacoes detalhadas de desenvolvimento estao em [GUIA_DESENVOLVIMENTO.md](GUIA_DESENVOLVIMENTO.md).
+Orientacoes detalhadas de desenvolvimento estao em [GUIA_DESENVOLVIMENTO.md](GUIA_DESENVOLVIMENTO.md), e a
+documentacao modular completa da arquitetura, governanca, avaliacao e dos
+resultados preliminares esta em [docs/](docs/README.md).
 
 ## Arquitetura em quatro camadas
 

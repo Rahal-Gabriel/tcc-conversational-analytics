@@ -1,186 +1,157 @@
-# GUIA_DESENVOLVIMENTO.md — Conversational Analytics em saúde (protótipo de TCC)
+# GUIA_DESENVOLVIMENTO.md - Conversational Analytics em saúde (protótipo de TCC)
 
-Este arquivo orienta o desenvolvimento do protótipo. Leia-o no início de cada
-sessão antes de escrever ou alterar código.
+Hub de navegação e instruções para trabalhar neste repositório. Leia-o no início
+de cada sessão. O conteúdo detalhado (arquitetura, camadas, governança,
+avaliação) vive na documentação modular em [docs/](docs/), e este arquivo aponta
+para ela (fonte única de verdade, sem duplicação).
 
-## Objetivo
+> A forma desta documentação foi inspirada na arquitetura de documentação do
+> projeto Command Center (HSL): portal de índice, modularização numerada,
+> identificadores estáveis, ciclo de status e rastreabilidade ao código.
 
-Protótipo funcional de uma arquitetura de referência para consulta em
-linguagem natural sobre dados clínicos, com um modelo de governança integrado
-e aderente à LGPD, às normas da ANVISA e às diretrizes da ANPD. O domínio de
-implementação e avaliação é a **ocupação de leitos hospitalares**. Toda a
-pesquisa usa dados **100% sintéticos**.
+## Propósito
 
-## Princípios inegociáveis
+Protótipo funcional de uma arquitetura de referência para consulta em linguagem
+natural sobre dados clínicos, com governança integrada e aderente à LGPD, às
+normas da ANVISA e às diretrizes da ANPD. O domínio é a **ocupação de leitos
+hospitalares**. Toda a pesquisa usa dados **100% sintéticos**.
 
-- Dados exclusivamente sintéticos. Nenhuma informação real, em nenhuma etapa.
-- Integridade dos resultados: números de acurácia só são válidos quando vêm de
-  uma execução real do harness com o motor LLM. O motor oráculo serve apenas
-  para autoteste da tubulação e nunca deve ser apresentado como desempenho do
-  modelo.
-- Determinismo e reprodutibilidade: uma SEED fixa e uma data de referência
-  (SIM_TODAY) controlam toda a geração de dados e as consultas que mencionam
-  "hoje" ou "agora".
-- Segurança: nenhuma chave de API no código ou no histórico do git. Sempre via
-  variável de ambiente.
+## Princípios inegociáveis (regras críticas)
 
-## Stack
+Antes de qualquer alteração relevante, verifique
+[docs/arquitetura/03_REGRAS_CRITICAS.md](docs/arquitetura/03_REGRAS_CRITICAS.md).
+Em resumo:
 
-- Python 3.12.
-- DuckDB como Lakehouse local, com schemas `bronze`, `silver` e `gold`. A
-  lógica de camadas mapeia para Delta/Databricks, mas o protótipo roda local.
-- Faker (locale pt_BR) para geração sintética.
-- Biblioteca padrão (urllib) para a chamada HTTP à API da Anthropic. Evitar
-  dependências pesadas.
+- `RNC-001` Dados exclusivamente sintéticos, em toda etapa.
+- `RNC-002` Acurácia só vem de execução real do LLM; o oráculo é apenas
+  autoteste e nunca é apresentado como desempenho do modelo.
+- `RNC-003` Determinismo por `SEED` e `SIM_TODAY`.
+- `RNC-004` Nenhuma credencial no código ou no histórico do git.
+- `RNC-005` PII nunca sobrevive à Silver.
 
-## Estrutura de pastas alvo
+## Como usar esta documentação
+
+### Para entender o sistema rapidamente
+1. [docs/README.md](docs/README.md) - portal e índice.
+2. [docs/arquitetura/01_VISAO_GERAL.md](docs/arquitetura/01_VISAO_GERAL.md) - as
+   quatro camadas e o fluxo de dados.
+3. [docs/arquitetura/03_REGRAS_CRITICAS.md](docs/arquitetura/03_REGRAS_CRITICAS.md)
+   - o que nunca pode ser violado.
+
+### Para implementar uma camada ou controle
+1. Leia o módulo da camada em [docs/camadas/](docs/camadas/).
+2. Consulte as decisões relevantes (`DA-*`) em
+   [docs/arquitetura/02_DECISOES_ARQUITETURAIS.md](docs/arquitetura/02_DECISOES_ARQUITETURAIS.md).
+3. Para controles de governança, cruze com
+   [docs/governanca/01_CONFORMIDADE_REGULATORIA.md](docs/governanca/01_CONFORMIDADE_REGULATORIA.md)
+   (`REG-*` ↔ `CTRL-*`).
+4. Atualize o status do módulo e os números do portal ao concluir.
+
+### Para escrever o TCC (Resultados Preliminares)
+1. [docs/tcc/02_MAPA_DOC_PARA_TEMPLATE.md](docs/tcc/02_MAPA_DOC_PARA_TEMPLATE.md)
+   - qual módulo alimenta cada seção do template.
+2. [docs/tcc/01_RESULTADOS_PRELIMINARES.md](docs/tcc/01_RESULTADOS_PRELIMINARES.md)
+   - registro vivo dos resultados verificáveis (`RES-*`).
+
+## Mapa de módulos por área
+
+| Área | Conceito/decisão | Camada(s) | Regulatório | Avaliação |
+|---|---|---|---|---|
+| Pipeline de dados | DA-LAKE-* | [camadas/01](docs/camadas/01_PIPELINE_LAKEHOUSE.md) | REG-LGPD-001/002/003 | - |
+| Governança de entrada | DA-GOV-* | [camadas/02](docs/camadas/02_GOVERNANCA_ENTRADA.md) | REG-LGPD-004/005 | AVAL-002 |
+| Motor Text-to-SQL | DA-NL2SQL-* | [camadas/03](docs/camadas/03_MOTOR_TEXT2SQL.md) | REG-PESQ-001 | AVAL-001 |
+| Validação de saída | DA-VALID-* | [camadas/04](docs/camadas/04_VALIDACAO_SAIDA.md) | REG-LGPD-006/007, REG-ANPD-001 | AVAL-003 |
+| Avaliação | DA-AVAL-* | - | - | [avaliacao/01](docs/avaliacao/01_METODOLOGIA_AVALIACAO.md) |
+| Reprodutibilidade | - | - | REG-PESQ-001 | [avaliacao/02](docs/avaliacao/02_REPRODUTIBILIDADE_CI.md) |
+
+## Workflow recomendado
+
+```
+1. Identificar a camada/módulo afetado pela tarefa
+2. Ler o módulo (decisões, controles, mapeamento para o código)
+3. Verificar as regras críticas (RNC-*) que podem ser impactadas
+4. Implementar seguindo os padrões documentados
+5. Rodar o teste rápido do módulo (python -m src.<modulo>)
+6. Atualizar status do módulo e contagens no portal
+```
+
+## Prioridades de leitura
+
+| Prioridade | Documento | Quando ler |
+|---|---|---|
+| CRÍTICA | arquitetura/03_REGRAS_CRITICAS | SEMPRE, antes de qualquer alteração |
+| CRÍTICA | governanca/01_CONFORMIDADE_REGULATORIA | Ao mexer em governança ou anonimização |
+| ALTA | arquitetura/01_VISAO_GERAL | Ao iniciar trabalho em qualquer camada |
+| ALTA | camadas/[N] | Ao implementar a camada correspondente |
+| ALTA | tcc/02_MAPA_DOC_PARA_TEMPLATE | Ao redigir qualquer seção do TCC |
+| MÉDIA | avaliacao/02_REPRODUTIBILIDADE_CI | Ao mexer em CI, versionamento ou determinismo |
+
+## Estrutura de pastas do código
 
 ```
 tcc-conversational-analytics/
-  GUIA_DESENVOLVIMENTO.md
-  README.md
-  requirements.txt
-  run_all.py            # orquestrador: gera dados, constroi pipeline, avalia
+  GUIA_DESENVOLVIMENTO.md             # este hub de navegação
+  README.md             # apresentação do protótipo
+  docs/                 # documentação modular (ver docs/README.md)
+  run_all.py            # orquestrador: gera dados, constroi pipeline, avalia (a implementar)
   src/
     config.py           # SIM_TODAY, SEED, volumes, perfis, modelo do LLM
-    data_gen.py         # geracao sintetica -> camada Bronze
-    pipeline.py         # Bronze -> Silver -> Gold
-    governance.py       # guardrails de entrada/saida e auditoria
-    nl2sql.py           # motor Text-to-SQL (LLM real) + motor oraculo
-    questions.py        # conjunto de avaliacao (pergunta -> SQL de referencia)
-    evaluate.py         # execution-match, governanca, indicadores
+    data_gen.py         # geracao sintetica -> Bronze
+    pipeline.py         # Bronze -> Silver -> Gold (a implementar)
+    governance.py       # guardrails de entrada/saida e auditoria (a implementar)
+    nl2sql.py           # motor Text-to-SQL (LLM real) + oraculo (a implementar)
+    questions.py        # conjunto de avaliacao (a implementar)
+    evaluate.py         # execution match, governanca, indicadores (a implementar)
   data/                 # banco DuckDB gerado (nao versionar)
   results/              # saidas de avaliacao e log de auditoria (nao versionar)
 ```
-
-## Modelo de dados
-
-### Bronze (dados brutos, com PII proposital)
-
-A PII existe de propósito para que a anonimização na Silver seja real e
-demonstrável.
-
-- `bronze.unidade(id_unidade, nome, especialidade, andar)`
-- `bronze.leito(id_leito, id_unidade, tipo, status)`
-  - tipo: `UTI` | `Semi-intensiva` | `Enfermaria`
-- `bronze.paciente(id_paciente, nome, cpf, data_nascimento, sexo)`
-  - nome, cpf e data_nascimento são PII e não podem sobreviver à Silver.
-- `bronze.internacao(id_internacao, id_paciente, id_leito, data_admissao, data_alta_prevista, data_alta_real)`
-- `bronze.ocupacao_diaria(data, id_leito, situacao, id_internacao)`
-  - situacao: `ocupado` | `livre` | `bloqueado`
-  - gerar uma série diária cobrindo a janela histórica (ex.: 90 dias até SIM_TODAY).
-
-### Silver (limpa e anonimizada)
-
-- Remover `nome` e `cpf`.
-- Pseudonimizar `id_paciente` (hash).
-- Derivar `faixa_etaria` a partir de `data_nascimento` (faixas: 0-17, 18-39,
-  40-59, 60-79, 80+) e descartar a data de nascimento.
-- Ao final, nenhuma coluna de identificação direta pode existir na Silver.
-
-### Gold (única camada exposta ao motor de linguagem)
-
-- `gold.leitos_status(id_leito, id_unidade, unidade, especialidade, tipo, situacao)`
-  - snapshot do estado de cada leito em SIM_TODAY.
-- `gold.ocupacao_unidade(id_unidade, unidade, especialidade, leitos_total, leitos_ocupados, leitos_livres, leitos_bloqueados, taxa_ocupacao)`
-  - taxa_ocupacao em percentual (0 a 100).
-- `gold.ocupacao_diaria(data, leitos_total, leitos_ocupados, leitos_livres, leitos_bloqueados, taxa_ocupacao)`
-  - série histórica diária do hospital.
-- `gold.internacoes(id_internacao, id_unidade, unidade, tipo_leito, faixa_etaria, sexo, data_admissao, data_alta_prevista, data_alta_real, tempo_permanencia, ativa)`
-  - ativa = TRUE quando data_alta_real é nula; tempo_permanencia em dias,
-    apenas para internações encerradas.
-
-## Camadas da arquitetura (o que cada uma deve fazer)
-
-1. **Pipeline de dados (Lakehouse)**: ingestão dos dados sintéticos na Bronze,
-   limpeza e anonimização na Silver, métricas e agregações na Gold.
-2. **Governança de entrada**: autenticação por perfil (tabelas Gold
-   autorizadas por perfil), registro de toda pergunta e verificação de
-   conformidade antes de qualquer execução.
-3. **Motor de IA (Text-to-SQL)**: traduz a pergunta em português para uma SQL
-   somente leitura sobre a Gold, via LLM, restrita por guardrails.
-4. **Validação de saída**: checa aterramento (mitiga alucinação), filtra dados
-   sensíveis e registra a resposta para auditoria.
-
-## Governança (requisitos a implementar)
-
-- **Entrada**: a SQL gerada deve ser uma única instrução somente leitura
-  (apenas SELECT/WITH); bloquear comandos de escrita ou administrativos
-  (insert, update, delete, drop, alter, create, attach, copy, pragma etc.);
-  bloquear múltiplas instruções (presença de `;` no meio); bloquear acesso a
-  Bronze/Silver; permitir apenas as tabelas Gold autorizadas para o perfil.
-- **Aterramento (anti-alucinação)**: toda tabela referenciada na SQL deve
-  existir no schema Gold conhecido; caso contrário, bloquear.
-- **Saída**: se qualquer coluna do resultado tiver nome de campo sensível
-  (nome, cpf, data_nascimento, id_paciente_pseudo), bloquear a resposta.
-- **Auditoria**: registrar em log toda pergunta recebida e toda resposta, com
-  timestamp, usuário, perfil, SQL e o evento (correto, incorreto, bloqueado,
-  erro).
-
-Perfis sugeridos e tabelas autorizadas:
-- `gestor`: todas as tabelas Gold.
-- `enfermagem`: `gold.leitos_status`, `gold.ocupacao_unidade`.
-- `administrativo`: `gold.ocupacao_unidade`, `gold.ocupacao_diaria`.
-
-## Metodologia de avaliação
-
-- Estilo **execution match** do EHRSQL: executar a SQL gerada e a SQL de
-  referência e comparar os conjuntos de resultados (normalizados: floats
-  arredondados, datas em ISO, linhas ordenadas). Acurácia = fração de
-  perguntas com conjuntos idênticos.
-- Dois motores intercambiáveis: **LLM** (real, gera os números do TCC) e
-  **oráculo** (devolve a SQL de referência, só para autoteste do harness).
-- Indicadores adicionais: taxa de aprovação na governança e completude do log
-  de auditoria.
-- A execução deve usar conexão DuckDB em modo somente leitura (defesa em
-  profundidade).
 
 ## Convenções de código
 
 - Comentários e mensagens em português, registro técnico mas acessível.
 - Não usar travessões; preferir construções naturais com vírgula ou parêntese.
-- Centralizar parâmetros em `config.py` (SIM_TODAY, SEED, volumes, perfis,
-  modelo do LLM). Nada de valores mágicos espalhados.
-- Cada módulo deve poder rodar isolado (`python -m` ou bloco `__main__`).
+  Esta convenção vale também para a documentação em `docs/`.
+- Centralizar parâmetros em `config.py`. Nada de valores mágicos espalhados.
+- Cada módulo deve rodar isolado (`python -m` ou bloco `__main__`).
 - Escrever um teste rápido por módulo (contagens, anonimização, casos de
   governança que devem ser bloqueados).
 
+## Convenções de identificadores (documentação)
+
+| Prefixo | Tipo |
+|---|---|
+| `DA-[MOD]-[NUM]` | Decisão Arquitetural |
+| `RNC-[NUM]` | Regra Crítica (inegociável) |
+| `REG-[NORMA]-[NUM]` | Requisito Regulatório |
+| `CTRL-[MOD]-[NUM]` | Controle de Governança |
+| `AVAL-[NUM]` | Critério de Avaliação |
+| `RES-[NUM]` | Resultado Preliminar |
+
+Ciclo de status dos módulos: `PROJETADO` → `PARCIAL` → `IMPLEMENTADO` →
+`VALIDADO`.
+
 ## Configuração do LLM
 
-- `ANTHROPIC_API_KEY`: chave, via ambiente.
-- `ANTHROPIC_MODEL`: modelo (ex.: `claude-sonnet-4-6`), via ambiente.
-- Endpoint: `https://api.anthropic.com/v1/messages`, header `anthropic-version: 2023-06-01`.
-- O prompt do motor deve receber o schema Gold e a data atual, e exigir uma
-  única SQL somente leitura, sem markdown e sem explicação.
+Lida do ambiente, nunca embutida no código (`src/config.py:70-73`):
+
+```bash
+export ANTHROPIC_API_KEY="sua-chave"
+export ANTHROPIC_MODEL="claude-sonnet-4-6"   # opcional, padrão
+```
+
+Detalhes do contrato do prompt em
+[docs/camadas/03_MOTOR_TEXT2SQL.md](docs/camadas/03_MOTOR_TEXT2SQL.md).
 
 ## Definição de pronto (por etapa)
 
-- O módulo roda isolado sem erro.
-- O teste rápido do módulo passa.
-- `run_all.py oracle` completa com autoteste consistente (a tubulação está
-  correta).
+- O módulo roda isolado sem erro e o teste rápido passa.
+- `run_all.py oracle` completa com autoteste consistente (tubulação correta).
 - Os números de pesquisa só são coletados com `run_all.py llm` e chave válida.
+- A documentação do módulo afetado foi atualizada (status, código, contagens).
 
-## Versionamento
+## Versionamento e CI
 
-- Branch principal: `main`, sempre funcional e reprodutível. Não commitar
-  direto nela durante o desenvolvimento das etapas.
-- Cada etapa vive em um branch curto (`feat/...`, `fix/...`, `docs/...`) e
-  entra na `main` por um Pull Request com squash merge (uma etapa, um commit
-  na `main`). O PR é a superfície de revisão do diff.
-- Ao fim de cada etapa, sempre versionar com a sequência `git commit` seguido
-  de `git push` para o repositório remoto (origin). Nenhuma etapa fica só no
-  commit local.
-- Mensagens de commit em português, registro técnico, com prefixo semântico
-  leve (`feat:`, `fix:`, `docs:`, `test:`, `chore:`).
-- Marcar com tag git os marcos reprodutíveis, em especial o commit que gerou
-  os números do TCC (o par código + SEED que produziu os resultados).
-
-## Integração contínua
-
-- O workflow `.github/workflows/ci.yml` roda a cada push e PR na `main`:
-  instala dependências e executa os testes rápidos dos módulos (e, quando
-  existir, o `run_all.py oracle`).
-- A CI usa apenas o motor oráculo, que não precisa de chave nem tem custo. O
-  modo LLM nunca roda na CI. Se algum dia precisar, fica em workflow manual
-  com a chave em GitHub Actions Secret, jamais no repositório.
+Resumo em [docs/avaliacao/02_REPRODUTIBILIDADE_CI.md](docs/avaliacao/02_REPRODUTIBILIDADE_CI.md).
+Branch `main` sempre funcional; cada etapa em branch curto e PR com squash; tag
+git nos marcos reprodutíveis. A CI roda a cada push/PR usando apenas o motor
+oráculo (sem chave, sem custo).
