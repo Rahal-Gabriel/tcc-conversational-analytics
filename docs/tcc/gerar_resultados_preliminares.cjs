@@ -110,12 +110,12 @@ children.push(corpo(
   "de leitos. O protótipo organiza um pipeline de dados em camadas (Bronze, Silver e Gold) sob um motor de tradução de " +
   "perguntas em linguagem natural para SQL, com controles de governança na entrada e na saída e avaliação por execution match. " +
   "Toda a pesquisa usa dados exclusivamente sintéticos e execução determinista. Os resultados preliminares confirmam a " +
-  "anonimização da camada exposta ao modelo e o funcionamento dos controles de governança. Numa avaliação inicial com 18 " +
-  "perguntas (modelo claude-sonnet-4-6, temperatura zero), o execution match estrito foi de 61,1%, enquanto o set match de " +
-  "conteúdo, que ignora forma e bloqueios de governança, foi de 94,4%, indicando que a maior parte das divergências decorre " +
-  "da forma do resultado e do controle de acesso, e não de erro de cálculo do modelo (apenas 1 das 18). Dado o tamanho da " +
-  "amostra, os números são indicativos e reportados com intervalo de confiança; a investigação central não é atingir um " +
-  "limiar fixo de acurácia, mas caracterizar o equilíbrio entre utilidade e governança."));
+  "anonimização da camada exposta ao modelo e o funcionamento dos controles de governança. Numa avaliação com 18 perguntas " +
+  "(modelo claude-sonnet-4-6, temperatura zero, três execuções sem variação), o execution match estrito foi de 61,1%, " +
+  "enquanto o set match de conteúdo, métrica diagnóstica que ignora forma e bloqueios de governança, foi de 94,4%, indicando " +
+  "que a maior parte das divergências decorre da forma do resultado e do controle de acesso, e não de erro de cálculo do " +
+  "modelo (apenas 1 das 18). Dado o tamanho da amostra, os números são indicativos e reportados com intervalo de confiança; a " +
+  "investigação central não é atingir um limiar fixo de acurácia, mas caracterizar o equilíbrio entre utilidade e governança."));
 
 // Palavras-chave
 children.push(corpoRuns([
@@ -220,9 +220,14 @@ children.push(corpo(
   "Além do execution match estrito, adota-se uma métrica secundária diagnóstica: o set match de conteúdo, que verifica se " +
   "todos os valores do resultado de referência aparecem no resultado gerado, ignorando colunas extras, ordem e bloqueios de " +
   "governança. Ela serve apenas para separar, na análise de erros, o conteúdo correto de divergências de forma ou de controle " +
-  "de acesso; o execution match estrito permanece como métrica primária e não é substituído por ela. As proporções, dado o " +
-  "tamanho do conjunto, são acompanhadas de intervalo de confiança de 95% (método de Wilson). A chamada ao modelo usa " +
-  "temperatura zero, e o modelo, a temperatura e o número de execuções são registrados no relatório."));
+  "de acesso. Trata-se de um teste de contenção (recall): por construção, é permissivo, pois uma consulta excessivamente " +
+  "ampla poderia conter os valores de referência e ainda assim estar errada por excesso; portanto, deve ser lido como um teto " +
+  "(limite superior), não como piso. O execution match estrito permanece como métrica primária e não é substituído por ela; " +
+  "essa escolha preserva a comparabilidade com a literatura (Spider, EHRSQL, BIRD), ainda que a pergunta de pesquisa seja " +
+  "melhor respondida pela decomposição entre conteúdo correto e custo da governança. As proporções, dado o tamanho do " +
+  "conjunto, são acompanhadas de intervalo de confiança de 95% (método de Wilson). A chamada ao modelo usa temperatura zero, e " +
+  "a avaliação é repetida em três execuções, com o modelo, a temperatura, o número de execuções e a estabilidade por pergunta " +
+  "registrados no relatório."));
 
 children.push(h2("2.6", "Reprodutibilidade e integridade"));
 children.push(corpo(
@@ -232,8 +237,9 @@ children.push(corpo(
   "integração contínua executa, a cada alteração, apenas o motor oráculo, sem chave de API e sem custo. Há, porém, um limite " +
   "honesto a registrar: o número de acurácia provém de uma chamada a um modelo de linguagem externo, que não é estritamente " +
   "reproduzível como o restante do pipeline e é justamente o único resultado que a integração contínua não reexecuta. Ele é, " +
-  "portanto, uma observação pontual, com modelo (claude-sonnet-4-6), temperatura (zero), número de execuções (uma) e data " +
-  "fixados e registrados. Como princípio de integridade, os números de acurácia provêm somente da execução real do modelo, " +
+  "portanto, reportado como observação empírica, com modelo (claude-sonnet-4-6), temperatura (zero), número de execuções " +
+  "(três) e data fixados e registrados, e acompanhado da estabilidade por pergunta entre as execuções. Como princípio de " +
+  "integridade, os números de acurácia provêm somente da execução real do modelo, " +
   "nunca do oráculo, que serve apenas de autoteste do pipeline."));
 
 // 3. Resultados Preliminares
@@ -304,25 +310,28 @@ children.push(corpo(
   "resultou em 100%, a aprovação na governança em 100% e a completude do log em 100%. Esse resultado é um autoteste do " +
   "pipeline e não representa o desempenho do modelo."));
 children.push(corpo(
-  "A execução com o modelo de linguagem real (claude-sonnet-4-6, temperatura zero, execução única) sobre as dezoito perguntas " +
-  "resultou em 61,1% de execution match estrito (11 de 18) e 94,4% de set match de conteúdo (17 de 18). Uma execução-piloto " +
-  "anterior, sobre um subconjunto de dez perguntas, havia dado 60,0%. O conjunto é pequeno e os valores são, portanto, " +
-  "indicativos; por isso são reportados com intervalo de confiança de 95% pelo método de Wilson, amplo nesta escala: [38,6%; " +
-  "79,7%] para o execution match estrito e [74,2%; 99,0%] para o set match de conteúdo. A ampliação do conjunto está no plano " +
-  "de continuidade, justamente para estreitar esses intervalos. O patamar do execution match estrito é coerente com a " +
-  "literatura, em que mesmo modelos avançados alcançam acurácia limitada em benchmarks realistas, a exemplo dos cerca de 40% " +
-  "relatados para o ChatGPT no BIRD (LI et al., 2023). A Tabela 2 resume os indicadores."));
+  "A execução com o modelo de linguagem real (claude-sonnet-4-6, temperatura zero) foi repetida três vezes sobre as dezoito " +
+  "perguntas. O resultado foi idêntico nas três execuções (desvio nulo): 61,1% de execution match estrito (11 de 18) e 94,4% " +
+  "de set match de conteúdo (17 de 18). A estabilidade por pergunta foi total: cada pergunta acertou ou errou nas três " +
+  "execuções (0/3 ou 3/3), sem casos intermediários; em particular, o único erro de conteúdo (Q12) repetiu-se nas três, sendo " +
+  "portanto sistemático, e não fruto da variância de uma rodada. Ainda assim, o desvio nulo não elimina a incerteza estatística " +
+  "do tamanho da amostra: com 18 perguntas, os intervalos de confiança de 95% (Wilson) são amplos, [38,6%; 79,7%] para o " +
+  "execution match estrito e [74,2%; 99,0%] para o set match de conteúdo. Uma execução-piloto anterior, sobre um subconjunto de " +
+  "dez dessas perguntas, havia dado 60,0%. O patamar do execution match estrito é coerente com a literatura, em que mesmo " +
+  "modelos avançados alcançam acurácia limitada em benchmarks realistas, a exemplo dos cerca de 40% relatados para o ChatGPT no " +
+  "BIRD (LI et al., 2023). A Tabela 2 resume os indicadores."));
 children.push(tabela([4400, 2500, 2171], [
   ["Indicador", "Valor", "IC 95% (Wilson)"],
   ["Execution match estrito (primária)", "61,1% (11/18)", "[38,6%; 79,7%]"],
   ["Set match de conteúdo (secundária, diagnóstica)", "94,4% (17/18)", "[74,2%; 99,0%]"],
-  ["Aprovação na governança", "88,9% (16/18)", "—"],
+  ["Aprovação na governança *", "88,9% (16/18)", "—"],
   ["Completude do log de auditoria", "100% (18/18)", "—"],
 ]));
 children.push(legenda(
-  "Tabela 2. Indicadores de avaliação do modelo real (claude-sonnet-4-6, temperatura zero, execução única) sobre 18 perguntas. " +
-  "Execution match estrito = AVAL-001 (primária); aprovação na governança = AVAL-002; completude do log = AVAL-003; set match " +
-  "de conteúdo = métrica secundária diagnóstica. IC pelo método de Wilson. Fonte: o autor."));
+  "Tabela 2. Indicadores de avaliação do modelo real (claude-sonnet-4-6, temperatura zero, média de três execuções com desvio " +
+  "nulo) sobre 18 perguntas. Execution match estrito = AVAL-001 (primária); aprovação na governança = AVAL-002; completude do " +
+  "log = AVAL-003; set match de conteúdo = métrica secundária diagnóstica. (*) As 2 consultas não aprovadas são recusas " +
+  "corretas por menor privilégio (Q01 e Q11), comportamento esperado, e não falhas. IC pelo método de Wilson. Fonte: o autor."));
 children.push(corpo(
   "A distância entre o execution match estrito (61,1%) e o set match de conteúdo (94,4%) é o resultado mais informativo: os " +
   "33 pontos de diferença não vêm de raciocínio errado, mas da forma do resultado e da governança. A Tabela 3 decompõe os " +
@@ -341,19 +350,53 @@ children.push(tabela([2271, 1000, 5800], [
 children.push(legenda(
   "Tabela 3. Categorização dos dezoito casos da execução com o modelo real. Conteúdo correto em 17 de 18 (94,4%); execution " +
   "match estrito em 11 de 18 (61,1%). Fonte: o autor."));
+children.push(corpo(
+  "A estratificação por tipo de pergunta (Tabela 4) revela que as causas das divergências não se distribuem por igual. As " +
+  "internações por faixa etária tiveram execution match estrito perfeito (4 de 4). As divergências de forma e projeção " +
+  "concentraram-se nas métricas por unidade (3 dos 4 casos), em que o modelo tende a projetar colunas adicionais; já os " +
+  "bloqueios de governança e o único erro de conteúdo recaíram todos sobre o status atual de leitos, em consultas do perfil de " +
+  "enfermagem. Em outras palavras, o teto do execution match estrito é puxado por motivos diferentes em cada tipo, o que " +
+  "orienta o trabalho de continuidade."));
+children.push(tabela([3271, 1400, 1400, 3000], [
+  ["Tipo de pergunta", "Estrito", "Conteúdo", "Natureza das divergências"],
+  ["Status atual (5)", "2/5", "4/5", "2 bloqueios de governança (Q01, Q11) e 1 erro de conteúdo (Q12)."],
+  ["Métrica por unidade (5)", "2/5", "5/5", "3 divergências de forma/projeção (Q04, Q13, Q14)."],
+  ["Série histórica (4)", "3/4", "4/4", "1 divergência de forma (Q15)."],
+  ["Faixa etária (4)", "4/4", "4/4", "Sem divergências."],
+]));
+children.push(legenda(
+  "Tabela 4. Execution match estrito e set match de conteúdo por tipo de pergunta. Fonte: o autor."));
 
 children.push(h2("3.6", "Reprodutibilidade e integridade"));
 children.push(corpo(
   "A reprodutibilidade do pipeline foi confirmada: a mesma configuração reproduz os mesmos dados e números, inclusive entre as " +
   "versões 3.12 e 3.14 do Python. A integração contínua executa o autoteste a cada alteração, sem chave e sem custo, e a " +
   "imagem reprodutível fixa o ambiente por completo. O número de acurácia, por vir de um modelo externo, é a exceção: foi " +
-  "coletado em execução real única, com modelo, temperatura e data registrados, e é reportado como observação pontual com " +
-  "intervalo de confiança (subseção 2.6). A metodologia de medição foi decidida antes da reexecução, e o execution match " +
-  "estrito (primária) é reportado junto da métrica secundária de conteúdo, sem que esta o substitua, preservando a integridade " +
-  "dos resultados."));
+  "coletado em três execuções reais (resultado idêntico nas três, desvio nulo), com modelo, temperatura e data registrados, e " +
+  "é reportado como observação empírica com intervalo de confiança (subseção 2.6). A metodologia de medição foi decidida antes " +
+  "da reexecução, e o execution match estrito (primária) é reportado junto da métrica secundária de conteúdo, sem que esta o " +
+  "substitua, preservando a integridade dos resultados."));
 
-// 4. Consideracoes finais
-children.push(h1(4, "Considerações Finais (parciais)"));
+// 4. Ameacas a validade
+children.push(h1(4, "Ameaças à validade"));
+children.push(corpo(
+  "Os resultados preliminares devem ser lidos à luz de algumas ameaças à validade, registradas aqui de forma explícita. " +
+  "Quanto à validade externa, os dados são inteiramente sintéticos e o estudo cobre um único domínio (ocupação de leitos): os " +
+  "números não devem ser generalizados para dados clínicos reais ou para outros domínios sem nova avaliação. Quanto à validade " +
+  "de conclusão estatística, o conjunto tem apenas 18 perguntas, o que produz intervalos de confiança amplos; as três " +
+  "execuções com desvio nulo reduzem a dúvida sobre a variância de rodada, mas não estreitam esses intervalos, e não cobrem a " +
+  "variação entre diferentes modelos ou versões, já que se avaliou um único modelo de linguagem."));
+children.push(corpo(
+  "A ameaça mais relevante é de validade de construção: o mesmo autor elaborou as perguntas, as consultas de referência (gold) " +
+  "e o próprio sistema. Há, portanto, o risco de o conjunto de avaliação ter sido, ainda que sem intenção, moldado àquilo que o " +
+  "sistema já faz bem, o que tende a inflar as métricas. Mitiga-se isso parcialmente com a transparência do conjunto e da " +
+  "análise de erros, mas a construção de um conjunto por terceiros, ou a partir de demandas reais de gestores, fica como " +
+  "trabalho necessário. Some-se a isso que a métrica secundária de conteúdo é um teste de contenção (recall) e, por ser " +
+  "permissiva por construção, deve ser interpretada como teto, não como piso. Antecipar essas limitações faz parte da leitura " +
+  "honesta dos resultados, e não as anula."));
+
+// 5. Consideracoes finais
+children.push(h1(5, "Considerações Finais (parciais)"));
 children.push(corpo(
   "Os resultados preliminares confirmam a viabilidade técnica da arquitetura integrada: o pipeline de dados é coerente e " +
   "anonimizado, os controles de governança funcionam de ponta a ponta e a avaliação produz números reais e verificáveis. " +

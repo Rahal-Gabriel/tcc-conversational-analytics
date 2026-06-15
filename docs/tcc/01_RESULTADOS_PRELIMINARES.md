@@ -205,8 +205,9 @@ re-executar, para não escolher critério olhando o placar — RNC-002) foi:
 - o conjunto foi ampliado de 10 para 18 perguntas, reduzindo o ruído da amostra
   (com 10 itens, cada questão valia 10 pontos percentuais).
 
-Execução final (18 perguntas, `claude-sonnet-4-6`, temperatura 0, execução única).
-Como a amostra é pequena, os valores são indicativos e vêm com IC95% (Wilson):
+Execução final (18 perguntas, `claude-sonnet-4-6`, temperatura 0, **três
+execuções com desvio nulo**). Como a amostra é pequena, os valores são
+indicativos e vêm com IC95% (Wilson):
 
 | Indicador | Valor | IC95% (Wilson) |
 |---|---|---|
@@ -216,9 +217,12 @@ Como a amostra é pequena, os valores são indicativos e vêm com IC95% (Wilson)
 | Completude do log (AVAL-003) | 100% (18/18) | — |
 
 A correção de arredondamento funcionou (Q08 e Q10 passaram a `correto`). Uma
-execução-piloto anterior, com 10 perguntas, dera 60,0%. **Não se afirma
-"estabilidade"**: com n=18 o intervalo é amplo (cerca de ±21 pontos); a ampliação
-do conjunto está no plano de continuidade, para estreitá-lo.
+execução-piloto anterior, com um subconjunto de 10 dessas perguntas, dera 60,0%.
+As três execuções deram resultado **idêntico** (desvio nulo) e a estabilidade por
+pergunta foi total (cada pergunta 0/3 ou 3/3); em particular, o erro de conteúdo
+de Q12 repetiu-se nas três (0/3), sendo **sistemático**, não variância de rodada.
+Ainda assim, o desvio nulo **não estreita** o IC do tamanho da amostra (n=18
+mantém intervalos amplos); a ampliação do conjunto fica na continuidade.
 
 A distância entre o estrito (61,1%) e o de conteúdo (94,4%) é o achado central: os
 33 pontos de diferença vêm de **forma e governança, não de raciocínio**. Conteúdo
@@ -239,8 +243,15 @@ match. É um custo deliberado (menor privilégio) e mensurável, e responde com 
 Não se buscou elevar o número com novos ajustes (evitar overfitting sobre estas 18
 perguntas). Q12 (value linking) e a ampliação do conjunto ficam na continuidade.
 
+Por tipo de pergunta: faixa etária 4/4 (estrito); a forma/projeção concentra-se
+em métrica por unidade (3 de 4 casos) e a governança/value-linking em status
+atual. As ameaças à validade (dados sintéticos, n=18, autor único de
+perguntas+gold+sistema, domínio e modelo únicos, set match como teto) estão
+registradas no documento.
+
 - **Status**: VALIDADO (números reais: estrito 61,1% e conteúdo 94,4% em 18
-  perguntas, com IC). Nenhum número reportado sem execução real (RNC-002).
+  perguntas, 3 execuções com desvio nulo, com IC). Nenhum número reportado sem
+  execução real (RNC-002).
 - **Evidência**: `results/avaliacao_llm.json`; `results/auditoria.log`;
   [avaliacao/01_METODOLOGIA_AVALIACAO.md](../avaliacao/01_METODOLOGIA_AVALIACAO.md).
 
