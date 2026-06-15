@@ -205,41 +205,42 @@ re-executar, para não escolher critério olhando o placar — RNC-002) foi:
 - o conjunto foi ampliado de 10 para 18 perguntas, reduzindo o ruído da amostra
   (com 10 itens, cada questão valia 10 pontos percentuais).
 
-Resultados (execution match), reportados lado a lado por transparência:
+Execução final (18 perguntas, `claude-sonnet-4-6`, temperatura 0, execução única).
+Como a amostra é pequena, os valores são indicativos e vêm com IC95% (Wilson):
 
-| Execução | Conjunto | Harness/prompt | AVAL-001 | AVAL-002 | AVAL-003 |
-|---|---|---|---|---|---|
-| Bruta (1ª) | 10 perguntas | original | 60,0% | 90,0% | 100,0% |
-| Refinada | 18 perguntas | tolerância 2 casas, projeção mínima, refs sem `ROUND` | **61,1%** | 88,9% | 100,0% |
+| Indicador | Valor | IC95% (Wilson) |
+|---|---|---|
+| Execution match estrito (**primária**) | 61,1% (11/18) | [38,6%; 79,7%] |
+| Set match de conteúdo (**secundária, diagnóstica**) | 94,4% (17/18) | [74,2%; 99,0%] |
+| Aprovação na governança (AVAL-002) | 88,9% (16/18) | — |
+| Completude do log (AVAL-003) | 100% (18/18) | — |
 
-A correção de arredondamento funcionou (Q08 e Q10 passaram a `correto`). O número
-ter permanecido próximo de 60% com um conjunto quase dobrado **confirma que o
-primeiro valor não foi acaso**: a acurácia estrita por execution match do modelo
-neste domínio fica em torno de 61%.
+A correção de arredondamento funcionou (Q08 e Q10 passaram a `correto`). Uma
+execução-piloto anterior, com 10 perguntas, dera 60,0%. **Não se afirma
+"estabilidade"**: com n=18 o intervalo é amplo (cerca de ±21 pontos); a ampliação
+do conjunto está no plano de continuidade, para estreitá-lo.
 
-A análise dos 7 resultados não-`correto` da execução refinada (18 perguntas)
-mostra que a maior parte **não é erro de cálculo**:
+A distância entre o estrito (61,1%) e o de conteúdo (94,4%) é o achado central: os
+33 pontos de diferença vêm de **forma e governança, não de raciocínio**. Conteúdo
+correto em 17 de 18.
 
 | Categoria | Perguntas | n | Natureza |
 |---|---|---|---|
-| Bloqueado pela governança | Q01, Q11 | 2 | Resposta numérica correta, mas via `gold.ocupacao_diaria`, fora do escopo do perfil `enfermagem`; barrada por CTRL-GOV-005. Comportamento correto do sistema. |
-| Forma/projeção | Q04, Q13, Q14, Q15 | 4 | Valores certos, mas com colunas extras ou shape diferente (ex.: Q15 devolve `data` + valor em vez do escalar). Estritez de projeção do execution match (padrão Spider/EHRSQL); o pedido de "projeção mínima" no prompt não foi suficiente. |
-| Erro de cálculo (value linking) | Q12 | 1 | O modelo filtrou `tipo = 'enfermaria'` (minúscula), mas o valor real é `'Enfermaria'`; o resultado veio vazio. O modelo não conhecia o valor categórico exato. |
+| Correta (estrito) | — | 11 | Conjunto idêntico ao da referência. |
+| Conteúdo certo, forma/projeção | Q04, Q13, Q14, Q15 | 4 | Valores certos, colunas extras ou shape diferente. Estritez de projeção do execution match. |
+| Conteúdo certo, bloqueio de governança | Q01, Q11 | 2 | Valor correto, mas via tabela fora do escopo do perfil; barrado por CTRL-GOV-005. |
+| Erro de conteúdo | Q12 | 1 | Filtragem de `tipo='enfermaria'` (caixa errada) → vazio. **Lacuna de desenho nossa** (ausência de value linking no prompt), não falha de raciocínio. |
 
-Ou seja, das 18 perguntas, **apenas 1 (Q12) é erro de cálculo genuíno**; 2 são a
-governança atuando como projetado e 4 são a conhecida sensibilidade do execution
-match à forma do resultado. O execution match estrito (61,1%) é mantido como
-métrica primária, sem inflar com métricas alternativas; a categorização acima é a
-análise de erros que acompanha o número.
+**Trade-off de governança quantificado**: as 2 perguntas bloqueadas (Q01/Q11)
+tinham conteúdo correto, logo o controle de acesso custou ≈ 11 pontos de execution
+match. É um custo deliberado (menor privilégio) e mensurável, e responde com dados
+à pergunta "a governança compromete a utilidade?".
 
-Não se buscou elevar o número com novos ajustes: continuar iterando sobre estas
-18 perguntas levaria a overfitting. Q01/Q11 permanecem como **achado de
-governança** (defesa em profundidade barrando consultas fora do privilégio do
-perfil) e Q12 como **trabalho futuro** (value linking: expor ao motor os valores
-categóricos do schema, ou comparar texto sem distinção de caixa).
+Não se buscou elevar o número com novos ajustes (evitar overfitting sobre estas 18
+perguntas). Q12 (value linking) e a ampliação do conjunto ficam na continuidade.
 
-- **Status**: VALIDADO (números reais e verificáveis: bruto 60,0% em 10 perguntas,
-  refinado 61,1% em 18). Nenhum número foi reportado sem execução real (RNC-002).
+- **Status**: VALIDADO (números reais: estrito 61,1% e conteúdo 94,4% em 18
+  perguntas, com IC). Nenhum número reportado sem execução real (RNC-002).
 - **Evidência**: `results/avaliacao_llm.json`; `results/auditoria.log`;
   [avaliacao/01_METODOLOGIA_AVALIACAO.md](../avaliacao/01_METODOLOGIA_AVALIACAO.md).
 
