@@ -2,7 +2,7 @@
 
 **Status**: referência
 **Prioridade**: ALTA
-**Última atualização**: 2026-06-04
+**Última atualização**: 2026-06-15
 
 ---
 
@@ -53,9 +53,12 @@ Subtópicos na mesma ordem da Metodologia, com os resultados parciais.
 | Resultado | Fonte |
 |---|---|
 | Camada Bronze coerente (com números) | [RES-001](01_RESULTADOS_PRELIMINARES.md#res-001-camada-bronze-gerada-e-coerente) |
+| Camadas Silver e Gold anonimizadas e agregadas | [RES-005](01_RESULTADOS_PRELIMINARES.md#res-005-camadas-silver-e-gold-anonimizadas-e-agregadas) |
 | Mapeamento regulatório | [RES-002](01_RESULTADOS_PRELIMINARES.md#res-002-mapeamento-regulatório-completo) |
 | Reprodutibilidade e integridade | [RES-003](01_RESULTADOS_PRELIMINARES.md#res-003-reprodutibilidade-e-integridade) |
 | Arquitetura de referência documentada | [RES-004](01_RESULTADOS_PRELIMINARES.md#res-004-arquitetura-de-referência-documentada) |
+| Tubulação de avaliação verde no oráculo | [RES-006](01_RESULTADOS_PRELIMINARES.md#res-006-tubulação-de-avaliação-verde-com-o-motor-oráculo) |
+| Primeiros números reais do LLM e análise de erros | [RES-007](01_RESULTADOS_PRELIMINARES.md#res-007-primeira-execução-real-do-motor-llm-e-refinamento-da-medição) |
 
 ### Conclusão / Considerações Finais (opcional nesta etapa)
 
@@ -81,10 +84,10 @@ modelo de dados das camadas ([camadas/01](../camadas/01_PIPELINE_LAKEHOUSE.md)).
 | arquitetura/03_REGRAS_CRITICAS | | ● | ● | |
 | camadas/01_PIPELINE_LAKEHOUSE | | ● | ● | ● |
 | camadas/02_GOVERNANCA_ENTRADA | | ● | ● | |
-| camadas/03_MOTOR_TEXT2SQL | | ● | | |
+| camadas/03_MOTOR_TEXT2SQL | | ● | ● | |
 | camadas/04_VALIDACAO_SAIDA | | ● | ● | |
 | governanca/01_CONFORMIDADE_REGULATORIA | ● | ● | ● | ● |
-| avaliacao/01_METODOLOGIA_AVALIACAO | | ● | | |
+| avaliacao/01_METODOLOGIA_AVALIACAO | | ● | ● | |
 | avaliacao/02_REPRODUTIBILIDADE_CI | | ● | ● | |
 | tcc/01_RESULTADOS_PRELIMINARES | | | ● | |
 

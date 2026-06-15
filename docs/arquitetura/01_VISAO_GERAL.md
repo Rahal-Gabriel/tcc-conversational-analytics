@@ -1,8 +1,8 @@
 # ARQ-001: Arquitetura - Visão Geral
 
-**Status**: PARCIAL
+**Status**: IMPLEMENTADO
 **Prioridade**: CRÍTICA
-**Última atualização**: 2026-06-04
+**Última atualização**: 2026-06-15
 **Alimenta (template TCC)**: Introdução · Metodologia · Resultados Preliminares
 
 ---
@@ -89,12 +89,12 @@ endereça os requisitos da LGPD, das normas da ANVISA e das diretrizes da ANPD
 |---|---|---|
 | Parâmetros centrais (SIM_TODAY, SEED, volumes, perfis, LLM) | `src/config.py` | IMPLEMENTADO |
 | Geração sintética → Bronze | `src/data_gen.py` | IMPLEMENTADO |
-| Bronze → Silver → Gold | `src/pipeline.py` | PROJETADO |
-| Guardrails e auditoria | `src/governance.py` | PROJETADO |
-| Motor Text-to-SQL + oráculo | `src/nl2sql.py` | PROJETADO |
-| Conjunto de avaliação | `src/questions.py` | PROJETADO |
-| Harness de avaliação | `src/evaluate.py` | PROJETADO |
-| Orquestrador ponta a ponta | `run_all.py` | PROJETADO |
+| Bronze → Silver → Gold | `src/pipeline.py` | IMPLEMENTADO |
+| Guardrails e auditoria | `src/governance.py` | IMPLEMENTADO |
+| Motor Text-to-SQL + oráculo | `src/nl2sql.py` | IMPLEMENTADO |
+| Conjunto de avaliação | `src/questions.py` | IMPLEMENTADO |
+| Harness de avaliação | `src/evaluate.py` | IMPLEMENTADO |
+| Orquestrador ponta a ponta | `run_all.py` | IMPLEMENTADO |
 
 > A correspondência entre o protótipo local (DuckDB) e um ambiente produtivo
 > (Delta Lake / Databricks) é uma decisão deliberada, registrada em

@@ -25,7 +25,7 @@ A documentação cumpre dois papéis ao mesmo tempo:
 
 | Métrica | Total |
 |---|---|
-| Arquivos de documentação | 12 |
+| Arquivos de documentação | 13 |
 | Decisões Arquiteturais (DA-*) | 15 |
 | Regras Críticas (RNC-*) | 5 |
 | Requisitos Regulatórios (REG-*) | 11 |
@@ -57,7 +57,8 @@ docs/
 │   └── 02_REPRODUTIBILIDADE_CI.md      # Determinismo, versionamento, CI
 └── tcc/
     ├── 01_RESULTADOS_PRELIMINARES.md   # Registro vivo de resultados (RES-*)
-    └── 02_MAPA_DOC_PARA_TEMPLATE.md    # Ponte doc → seção do template do TCC
+    ├── 02_MAPA_DOC_PARA_TEMPLATE.md    # Ponte doc → seção do template do TCC
+    └── 03_RASCUNHO_RESULTADOS_PRELIMINARES.md  # Rascunho da seção para o template
 ```
 
 A navegação por tarefa (como usar a doc, mapa cruzado de módulos, prioridades
@@ -105,6 +106,7 @@ de leitura) fica no [GUIA_DESENVOLVIMENTO.md](../GUIA_DESENVOLVIMENTO.md) na rai
 |---|---|---|---|
 | 01 | [tcc/01_RESULTADOS_PRELIMINARES.md](tcc/01_RESULTADOS_PRELIMINARES.md) | RES | Registro vivo dos resultados parciais verificáveis |
 | 02 | [tcc/02_MAPA_DOC_PARA_TEMPLATE.md](tcc/02_MAPA_DOC_PARA_TEMPLATE.md) | - | Ponte de cada módulo/ID para a seção do template |
+| 03 | [tcc/03_RASCUNHO_RESULTADOS_PRELIMINARES.md](tcc/03_RASCUNHO_RESULTADOS_PRELIMINARES.md) | - | Rascunho da seção Resultados Preliminares para o template |
 
 ## Convenções de identificadores
 
@@ -135,7 +137,7 @@ Lakehouse), `GOV` (governança de entrada), `NL2SQL` (motor Text-to-SQL),
 
 | Módulo | Status |
 |---|---|
-| arquitetura/01_VISAO_GERAL | PARCIAL |
+| arquitetura/01_VISAO_GERAL | IMPLEMENTADO |
 | arquitetura/02_DECISOES_ARQUITETURAIS | PARCIAL |
 | arquitetura/03_REGRAS_CRITICAS | PARCIAL |
 | camadas/01_PIPELINE_LAKEHOUSE | IMPLEMENTADO (Bronze, Silver e Gold) |
