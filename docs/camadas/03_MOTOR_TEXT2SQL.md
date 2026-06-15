@@ -45,6 +45,7 @@ Configuração da chamada (`src/config.py:77-80`):
 | Endpoint | `https://api.anthropic.com/v1/messages` |
 | Header de versão | `anthropic-version: 2023-06-01` |
 | Modelo | `ANTHROPIC_MODEL` (padrão `claude-sonnet-4-6`), via ambiente |
+| Temperatura | `0` (fixa, para reduzir variabilidade entre execuções) |
 | Chave | `ANTHROPIC_API_KEY`, via ambiente (nunca no código, [RNC-004](../arquitetura/03_REGRAS_CRITICAS.md#rnc-004-nenhuma-credencial-no-código-ou-no-histórico-do-git)) |
 | Cliente HTTP | `urllib` da biblioteca padrão ([DA-ARQ-003](../arquitetura/02_DECISOES_ARQUITETURAIS.md#da-arq-003-chamada-http-ao-llm-via-biblioteca-padrão)) |
 

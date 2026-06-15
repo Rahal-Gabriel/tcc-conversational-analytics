@@ -131,6 +131,10 @@ class MotorLLM:
         corpo = {
             "model": config.ANTHROPIC_MODEL,
             "max_tokens": 1024,
+            # Temperatura zero: reduz a variabilidade entre execucoes e melhora a
+            # reprodutibilidade do numero reportado (ainda assim, a chamada a um LLM
+            # externo nao e deterministica como o restante do pipeline).
+            "temperature": 0,
             "system": _PROMPT_SISTEMA,
             "messages": [{"role": "user", "content": prompt_usuario}],
         }

@@ -75,6 +75,29 @@ def executar(con, sql):
     return colunas, cur.fetchall()
 
 
+def _valores(linhas):
+    """Conjunto de todos os valores de celula (normalizados) de um resultado."""
+    return {_normalizar_celula(c) for linha in linhas for c in linha}
+
+
+def conteudo_coberto(con, sql_gerada, sql_ref):
+    """Metrica secundaria diagnostica: set match de conteudo, ignorando projecao.
+
+    Verdadeiro quando todos os valores do resultado de referencia aparecem no
+    resultado gerado, independentemente de colunas extras, ordem ou forma. Serve
+    para distinguir "conteudo correto" de divergencia de projecao ou de bloqueio
+    de governanca; e diagnostica, nunca a metrica primaria (RNC-002). A SQL gerada
+    e executada na conexao somente leitura mesmo que a governanca a tenha barrado,
+    pois o objetivo aqui e medir se o conteudo estaria certo.
+    """
+    try:
+        _, linhas_g = executar(con, sql_gerada)
+        _, linhas_r = executar(con, sql_ref)
+    except Exception:
+        return False
+    return _valores(linhas_r).issubset(_valores(linhas_g))
+
+
 def avaliar(motor_nome):
     """Roda a avaliacao com o motor pedido e devolve metricas e detalhes.
 
@@ -85,7 +108,7 @@ def avaliar(motor_nome):
     con = governance.conectar_somente_leitura()
 
     total = len(questions.CONJUNTO)
-    corretas = geradas = aprovadas_gov = registros_completos = 0
+    corretas = geradas = aprovadas_gov = registros_completos = conteudo_corretos = 0
     detalhes = []
 
     try:
@@ -96,6 +119,7 @@ def avaliar(motor_nome):
             evento = None
             aprovado_gov = False
             match = False
+            conteudo_ok = False
             motivo = None
 
             try:
@@ -116,11 +140,16 @@ def avaliar(motor_nome):
                         _, linhas_ref = executar(con, p.sql_ref)
                         match = normalizar(linhas) == normalizar(linhas_ref)
                         evento = "correto" if match else "incorreto"
+
+                # Metrica secundaria diagnostica (independe de governanca e de forma).
+                conteudo_ok = conteudo_coberto(con, sql, p.sql_ref)
             except Exception as exc:  # SQL invalida, erro de banco, falha de API
                 evento, motivo = "erro", f"{type(exc).__name__}: {exc}"
 
             if match:
                 corretas += 1
+            if conteudo_ok:
+                conteudo_corretos += 1
 
             governance.registrar_resposta(
                 USUARIO_AVAL, p.perfil, p.texto, sql or "", evento
@@ -137,6 +166,7 @@ def avaliar(motor_nome):
                     "evento": evento,
                     "aprovado_governanca": aprovado_gov,
                     "match": match,
+                    "conteudo_ok": conteudo_ok,
                     "motivo": motivo,
                 }
             )
@@ -149,10 +179,18 @@ def avaliar(motor_nome):
         "AVAL-001_acuracia": round(corretas / total, 4) if total else 0.0,
         "AVAL-002_aprovacao_governanca": round(aprovadas_gov / geradas, 4) if geradas else 0.0,
         "AVAL-003_completude_log": round(registros_completos / total, 4) if total else 0.0,
+        # Metrica secundaria diagnostica (set match de conteudo): nunca substitui a
+        # primaria; mede se o conteudo estaria certo, ignorando forma e governanca.
+        "match_conteudo_relaxado": round(conteudo_corretos / total, 4) if total else 0.0,
         "corretas": corretas,
+        "conteudo_corretos": conteudo_corretos,
         "geradas": geradas,
         "aprovadas_governanca": aprovadas_gov,
         "registros_completos": registros_completos,
+        # Procedencia do numero (para reprodutibilidade): so o motor LLM e relevante.
+        "modelo": config.ANTHROPIC_MODEL if motor_nome == "llm" else "oraculo",
+        "temperatura": 0,
+        "execucoes": 1,
     }
     return {"metricas": metricas, "detalhes": detalhes}
 
@@ -171,9 +209,10 @@ def imprimir_resumo(resultado):
     """Imprime um resumo legivel das metricas e dos eventos por pergunta."""
     m = resultado["metricas"]
     print(f"avaliacao ({m['motor']}): {m['total']} perguntas")
-    print(f"  AVAL-001 acuracia (execution match): {m['AVAL-001_acuracia'] * 100:.1f}%")
-    print(f"  AVAL-002 aprovacao na governanca:    {m['AVAL-002_aprovacao_governanca'] * 100:.1f}%")
-    print(f"  AVAL-003 completude do log:          {m['AVAL-003_completude_log'] * 100:.1f}%")
+    print(f"  AVAL-001 acuracia (execution match estrito): {m['AVAL-001_acuracia'] * 100:.1f}%")
+    print(f"  AVAL-002 aprovacao na governanca:            {m['AVAL-002_aprovacao_governanca'] * 100:.1f}%")
+    print(f"  AVAL-003 completude do log:                  {m['AVAL-003_completude_log'] * 100:.1f}%")
+    print(f"  [secundaria] set match de conteudo:          {m['match_conteudo_relaxado'] * 100:.1f}%")
     for d in resultado["detalhes"]:
         extra = f"  ({d['motivo']})" if d["motivo"] else ""
         print(f"    {d['id']} [{d['tipo']}] -> {d['evento']}{extra}")
@@ -192,9 +231,13 @@ def _autoteste():
     caminho = salvar_relatorio(resultado)
 
     acuracia = resultado["metricas"]["AVAL-001_acuracia"]
+    conteudo = resultado["metricas"]["match_conteudo_relaxado"]
     assert acuracia == 1.0, (
         f"oraculo deveria dar 100% de execution match, deu {acuracia * 100:.1f}% "
         "(erro na tubulacao, nao no modelo)"
+    )
+    assert conteudo == 1.0, (
+        f"oraculo deveria dar 100% no set match de conteudo, deu {conteudo * 100:.1f}%"
     )
     print(f"evaluate: autoteste OK  (relatorio em {caminho})")
 

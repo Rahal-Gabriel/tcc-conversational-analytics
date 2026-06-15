@@ -19,9 +19,10 @@ implementação do harness e uma execução real com o motor LLM
 
 | ID | Indicador | Como se mede |
 |---|---|---|
-| `AVAL-001` | Acurácia por execution match | Fração de perguntas cujo conjunto de resultados bate com a referência |
+| `AVAL-001` | Acurácia por execution match (estrito) | Fração de perguntas cujo conjunto de resultados bate exatamente com a referência. **Métrica primária.** |
 | `AVAL-002` | Taxa de aprovação na governança | Fração de SQL geradas que passam pelos guardrails sem bloqueio indevido |
 | `AVAL-003` | Completude do log de auditoria | Fração de interações com registro completo (pergunta, resposta, SQL, evento) |
+| (secundária) | Set match de conteúdo (relaxado, diagnóstico) | Fração de perguntas em que todos os valores da referência aparecem no resultado gerado, ignorando colunas extras, ordem e bloqueio de governança. **Diagnóstica, nunca substitui a primária.** |
 
 ### AVAL-001: Acurácia por execution match
 
@@ -37,6 +38,26 @@ implementação do harness e uma execução real com o motor LLM
 - **Referência**: estilo do benchmark EHRSQL 2024.
 - **Status**: IMPLEMENTADO (comparação por execution match em `src/evaluate.py:avaliar`).
 - **Relacionado**: [DA-AVAL-001](../arquitetura/02_DECISOES_ARQUITETURAIS.md#da-aval-001-execution-match-no-estilo-ehrsql).
+
+### Métrica secundária: set match de conteúdo (diagnóstica)
+
+- **Descrição**: verifica se todos os valores do resultado de referência aparecem
+  no resultado gerado, ignorando colunas extras, ordem e forma; a SQL gerada é
+  executada mesmo quando a governança a barrou. Serve para separar "conteúdo
+  correto" de divergência de projeção ou de bloqueio por escopo de perfil.
+- **Papel**: estritamente **diagnóstica**. O execution match estrito (AVAL-001)
+  permanece como métrica primária reportada; a secundária acompanha a análise de
+  erros e nunca a substitui ([RNC-002](../arquitetura/03_REGRAS_CRITICAS.md#rnc-002-integridade-dos-resultados-acurácia-só-vem-do-llm-real)).
+- **Código**: `src/evaluate.py:conteudo_coberto`.
+
+### Procedência e reprodutibilidade do número do LLM
+
+A acurácia reportada vem de execução real do motor LLM, com **`temperature=0`**
+(`src/nl2sql.py`), modelo registrado no relatório (`config.ANTHROPIC_MODEL`) e
+número de execuções anotado. Diferentemente do pipeline e dos dados (deterministas
+e reprodutíveis), a chamada ao LLM externo não é estritamente reproduzível; o
+número é, portanto, uma observação pontual, com modelo, temperatura e data
+fixados e registrados. A CI executa apenas o oráculo, sem chave.
 
 ### AVAL-002 e AVAL-003
 
@@ -75,6 +96,7 @@ Defesa em profundidade: a execução usa conexão DuckDB somente leitura
 |---|---|---|
 | Conjunto pergunta → SQL de referência | `src/questions.py` | IMPLEMENTADO (18 perguntas) |
 | Normalização dos resultados (tolerância 2 casas) | `src/evaluate.py:normalizar`, `CASAS_DECIMAIS` | IMPLEMENTADO |
+| Set match de conteúdo (secundária, diagnóstica) | `src/evaluate.py:conteudo_coberto` | IMPLEMENTADO |
 | Execution match e indicadores AVAL-001/002/003 | `src/evaluate.py:avaliar` | IMPLEMENTADO |
 | Orquestração (`oracle` / `llm`) | `run_all.py` | IMPLEMENTADO |
 
