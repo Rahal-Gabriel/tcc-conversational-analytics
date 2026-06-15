@@ -1,6 +1,7 @@
 const fs = require("fs");
+const path = require("path");
 const {
-  Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
+  Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, ImageRun,
   AlignmentType, HeadingLevel, BorderStyle, WidthType, ShadingType, PageBreak,
 } = require("docx");
 
@@ -102,7 +103,7 @@ children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after:
 
 // Resumo (opcional)
 children.push(new Paragraph({ heading: HeadingLevel.HEADING_1, spacing: { before: 200, after: 120 },
-  children: [new TextRun("Resumo (opcional nesta etapa)")] }));
+  children: [new TextRun("Resumo")] }));
 children.push(corpo(
   "Este trabalho propõe e implementa uma arquitetura de referência para Conversational Analytics em ambiente hospitalar, " +
   "com governança integrada e aderente à LGPD, às normas da ANVISA e às diretrizes da ANPD, aplicada ao domínio de ocupação " +
@@ -122,9 +123,10 @@ children.push(corpoRuns([
 // 1. Introducao
 children.push(h1(1, "Introdução"));
 children.push(corpo(
-  "A tradução de perguntas em linguagem natural para consultas SQL (Text-to-SQL) é objeto de pesquisa consolidado, com " +
-  "benchmarks de referência como o Spider (YU et al., 2018) e, no domínio clínico, o EHRSQL (LEE et al., 2022), e tem sido " +
-  "profundamente transformada pelos modelos de linguagem de grande porte (SHI et al., 2024). A adoção desses modelos para " +
+  "As interfaces em linguagem natural para bancos de dados são um campo de pesquisa maduro (AFFOLTER; STOCKINGER; BERNSTEIN, " +
+  "2019). Em particular, a tradução de perguntas em linguagem natural para consultas SQL (Text-to-SQL) é objeto de estudo " +
+  "consolidado, com benchmarks de referência como o Spider (YU et al., 2018) e, no domínio clínico, o EHRSQL (LEE et al., " +
+  "2022), e tem sido profundamente transformada pelos modelos de linguagem de grande porte (SHI et al., 2024). A adoção desses modelos para " +
   "consulta a dados clínicos em linguagem natural promete ampliar o acesso de gestores e equipes assistenciais à informação, " +
   "mas esbarra em um obstáculo central: a governança dos dados e do próprio modelo costuma ser tratada de forma fragmentada, " +
   "separada da arquitetura de dados. Em saúde, essa fragmentação é crítica, pois envolve dados pessoais sensíveis e um marco " +
@@ -169,7 +171,8 @@ children.push(corpo(
 
 children.push(h2("2.3", "Modelo de governança"));
 children.push(corpo(
-  "A governança foi concebida como defesa em profundidade. Na entrada, seis guardrails verificam que a consulta candidata é " +
+  "A governança foi concebida como defesa em profundidade, alinhada às boas práticas de gestão de risco de sistemas de " +
+  "inteligência artificial (NIST, 2023). Na entrada, seis guardrails verificam que a consulta candidata é " +
   "uma única instrução somente leitura, sem comandos de escrita ou administrativos, restrita às tabelas Gold autorizadas ao " +
   "perfil do usuário, e a execução ocorre sobre uma conexão de banco somente leitura. Na saída, a validação confere o " +
   "aterramento da consulta contra o schema Gold conhecido, bloqueia qualquer coluna de resultado cujo nome corresponda a um " +
@@ -216,7 +219,8 @@ children.push(corpo(
   "ativas igualaram exatamente os 150 leitos ocupados no dia de referência. A transformação para as camadas Silver e Gold " +
   "confirmou a anonimização: a tabela de pacientes da Silver não contém nome, CPF nem data de nascimento; o identificador do " +
   "paciente foi substituído por um pseudônimo derivado de hash com salt, sem colisão entre os seiscentos pacientes; e a data " +
-  "de nascimento deu lugar à faixa etária. A Tabela 1 resume o snapshot de ocupação por unidade."));
+  "de nascimento deu lugar à faixa etária, em linha com os princípios de anonimização e generalização de atributos " +
+  "identificadores (SWEENEY, 2002). A Tabela 1 resume o snapshot de ocupação por unidade."));
 children.push(tabela([2351, 1240, 1240, 1240, 1500, 1500], [
   ["Unidade", "Total", "Ocup.", "Livres", "Bloq.", "Taxa (%)"],
   ["Cardiologia", "25", "18", "6", "1", "72,0"],
@@ -261,8 +265,9 @@ children.push(corpo(
   "A primeira execução com o modelo de linguagem real forneceu os primeiros números de acurácia. Sobre o conjunto inicial de " +
   "dez perguntas, o execution match estrito foi de 60,0%. Após a correção de uma inconsistência interna do harness de medição " +
   "(o arredondamento embutido na consulta de referência) e a ampliação do conjunto para dezoito perguntas, o execution match " +
-  "foi de 61,1%. A estabilidade do valor com o conjunto quase dobrado indica que a medida não foi fortuita. A Tabela 2 reporta " +
-  "as duas execuções lado a lado."));
+  "foi de 61,1%. A estabilidade do valor com o conjunto quase dobrado indica que a medida não foi fortuita. Esse patamar é " +
+  "coerente com a literatura, na qual mesmo modelos avançados alcançam acurácia limitada em benchmarks realistas, a exemplo " +
+  "dos cerca de 40% relatados para o ChatGPT no BIRD (LI et al., 2023). A Tabela 2 reporta as duas execuções lado a lado."));
 children.push(tabela([2271, 1700, 1700, 1700, 1700], [
   ["Execução", "Conjunto", "AVAL-001", "AVAL-002", "AVAL-003"],
   ["Bruta (1ª)", "10 perguntas", "60,0%", "90,0%", "100,0%"],
@@ -317,12 +322,15 @@ function ref(text) {
   });
 }
 const REFS = [
+  "AFFOLTER, K.; STOCKINGER, K.; BERNSTEIN, A. A comparative survey of recent natural language interfaces for databases. The VLDB Journal, v. 28, n. 5, p. 793-819, 2019. DOI: 10.1007/s00778-019-00567-8.",
   "AGÊNCIA NACIONAL DE VIGILÂNCIA SANITÁRIA (ANVISA). Resolução da Diretoria Colegiada – RDC nº 657, de 24 de março de 2022. Dispõe sobre a regularização de software como dispositivo médico (Software as a Medical Device – SaMD). Brasília, DF: Anvisa, 2022.",
   "AUTORIDADE NACIONAL DE PROTEÇÃO DE DADOS (ANPD). Radar tecnológico: inteligência artificial generativa. Brasília, DF: ANPD, 2024.",
   "BRASIL. Lei nº 13.709, de 14 de agosto de 2018. Lei Geral de Proteção de Dados Pessoais (LGPD). Brasília, DF: Presidência da República, 2018.",
   "LEE, G.; HWANG, H.; BAE, S.; KWON, Y.; SHIN, W.; YANG, S.; SEO, M.; KIM, J.-Y.; CHOI, E. EHRSQL: a practical text-to-SQL benchmark for electronic health records. In: Advances in Neural Information Processing Systems (NeurIPS) – Datasets and Benchmarks Track, 2022. arXiv:2301.07695.",
   "LI, J.; HUI, B.; QU, G. et al. Can LLM already serve as a database interface? A big bench for large-scale database grounded text-to-SQLs (BIRD). In: Advances in Neural Information Processing Systems (NeurIPS) – Datasets and Benchmarks Track, 2023. arXiv:2305.03111.",
+  "NATIONAL INSTITUTE OF STANDARDS AND TECHNOLOGY (NIST). Artificial Intelligence Risk Management Framework (AI RMF 1.0). NIST AI 100-1. Gaithersburg, MD: NIST, 2023.",
   "SHI, L.; TANG, Z.; ZHANG, N.; ZHANG, X.; YANG, Z. A survey on employing large language models for text-to-SQL tasks. ACM Computing Surveys, 2024. arXiv:2407.15186.",
+  "SWEENEY, L. k-anonymity: a model for protecting privacy. International Journal of Uncertainty, Fuzziness and Knowledge-Based Systems, v. 10, n. 5, p. 557-570, 2002. DOI: 10.1142/S0218488502001648.",
   "YU, T.; ZHANG, R.; YANG, K.; YASUNAGA, M.; WANG, D.; LI, Z.; MA, J.; LI, I.; YAO, Q.; ROMAN, S.; ZHANG, Z.; RADEV, D. Spider: a large-scale human-labeled dataset for complex and cross-domain semantic parsing and text-to-SQL task. In: Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing (EMNLP), 2018. arXiv:1809.08887.",
 ];
 REFS.forEach((r) => children.push(ref(r)));
@@ -333,9 +341,19 @@ children.push(new Paragraph({ spacing: { before: 120 }, children: [new TextRun({
   italics: true, size: 18, color: "777777",
 })] }));
 
-// Apendice
-children.push(new Paragraph({ heading: HeadingLevel.HEADING_1, spacing: { before: 240, after: 160 },
-  children: [new TextRun("Apêndice A — Camadas da arquitetura")] }));
+// Apendice A — arquitetura (diagrama + quadro)
+children.push(new Paragraph({ pageBreakBefore: true, heading: HeadingLevel.HEADING_1, spacing: { before: 120, after: 160 },
+  children: [new TextRun("Apêndice A — Arquitetura de referência em quatro camadas")] }));
+const imgPath = path.join(__dirname, "assets", "arquitetura_camadas.png");
+const imgW = 440, imgH = Math.round(imgW * (845 / 1041));
+children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 },
+  children: [new ImageRun({
+    type: "png", data: fs.readFileSync(imgPath),
+    transformation: { width: imgW, height: imgH },
+    altText: { title: "Arquitetura em quatro camadas", name: "arquitetura_camadas",
+      description: "Fluxo de uma pergunta pelas quatro camadas da arquitetura" },
+  })] }));
+children.push(legenda("Figura A.1. Fluxo de uma pergunta pelas quatro camadas. Fonte: o autor."));
 children.push(tabela([2051, 4920, 2100], [
   ["Camada", "Responsabilidade", "Documentação"],
   ["1. Pipeline Lakehouse", "Ingestão (Bronze), limpeza e anonimização (Silver), métricas (Gold)", "camadas/01"],
@@ -344,6 +362,25 @@ children.push(tabela([2051, 4920, 2100], [
   ["4. Validação de saída", "Aterramento, filtro de campo sensível e auditoria da resposta", "camadas/04"],
 ]));
 children.push(legenda("Quadro A.1. Síntese das quatro camadas. Fonte: o autor."));
+
+// Apendice B — requisitos regulatorios x controles
+children.push(new Paragraph({ pageBreakBefore: true, heading: HeadingLevel.HEADING_1, spacing: { before: 120, after: 160 },
+  children: [new TextRun("Apêndice B — Requisitos regulatórios e controles")] }));
+children.push(tabela([1740, 5131, 2200], [
+  ["Requisito", "Controle na arquitetura", "Camada"],
+  ["REG-LGPD-001", "Anonimização na Silver: remoção de nome, CPF e data de nascimento; derivação de faixa etária", "Silver"],
+  ["REG-LGPD-002", "Pseudonimização de id_paciente por hash; nenhuma identificação direta sobrevive à Silver", "Silver"],
+  ["REG-LGPD-003", "Apenas a Gold, agregada, é exposta ao motor; Bronze e Silver inacessíveis (CTRL-GOV-004)", "Gold"],
+  ["REG-LGPD-004", "Perfis autorizam apenas tabelas Gold específicas (CTRL-GOV-005)", "Entrada"],
+  ["REG-LGPD-005", "Guardrails CTRL-GOV-001 a 003 e 006: SQL única somente leitura, sem escrita/admin, conexão read-only", "Entrada"],
+  ["REG-LGPD-006", "Filtro de saída CTRL-VALID-002: bloqueia coluna com nome de campo sensível", "Saída"],
+  ["REG-LGPD-007", "Auditoria CTRL-AUD-001: registro de toda pergunta e resposta", "Auditoria"],
+  ["REG-ANPD-001", "Aterramento CTRL-VALID-001: toda tabela citada deve existir no schema Gold conhecido", "Saída"],
+  ["REG-ANPD-002", "Escopo restrito por perfil, execução somente leitura e registro integral", "Entrada e Auditoria"],
+  ["REG-ANVISA-001", "Guardrails versionados, auditoria e reprodutibilidade do software", "Transversal"],
+  ["REG-PESQ-001", "Determinismo (SEED, SIM_TODAY); separação motor LLM (números) vs oráculo (autoteste)", "Transversal"],
+]));
+children.push(legenda("Quadro B.1. Mapeamento de requisitos regulatórios para controles e camadas. Fonte: o autor."));
 
 // nota de rodape do rascunho
 children.push(new Paragraph({ spacing: { before: 240 }, children: [new TextRun({
