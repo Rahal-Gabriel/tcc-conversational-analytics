@@ -50,6 +50,16 @@ implementação do harness e uma execução real com o motor LLM
   erros e nunca a substitui ([RNC-002](../arquitetura/03_REGRAS_CRITICAS.md#rnc-002-integridade-dos-resultados-acurácia-só-vem-do-llm-real)).
 - **Código**: `src/evaluate.py:conteudo_coberto`.
 
+### Múltiplas execuções e estabilidade por pergunta
+
+Como a temperatura zero não garante determinismo na API de um LLM (batching,
+roteamento, hardware), a avaliação pode rodar **k execuções** (`run_all.py llm
+--repeticoes k`, k≥3 recomendado). O relatório agrega **média, desvio e faixa**
+do execution match estrito e do set match de conteúdo, e a **estabilidade por
+pergunta** (em quantas das k execuções cada pergunta acertou), o que distingue
+erro sistemático do modelo de variância de uma rodada. Implementado em
+`src/evaluate.py:avaliar_repetido`.
+
 ### Procedência e reprodutibilidade do número do LLM
 
 A acurácia reportada vem de execução real do motor LLM, com **`temperature=0`**
@@ -97,6 +107,7 @@ Defesa em profundidade: a execução usa conexão DuckDB somente leitura
 | Conjunto pergunta → SQL de referência | `src/questions.py` | IMPLEMENTADO (18 perguntas) |
 | Normalização dos resultados (tolerância 2 casas) | `src/evaluate.py:normalizar`, `CASAS_DECIMAIS` | IMPLEMENTADO |
 | Set match de conteúdo (secundária, diagnóstica) | `src/evaluate.py:conteudo_coberto` | IMPLEMENTADO |
+| Múltiplas execuções e estabilidade por pergunta | `src/evaluate.py:avaliar_repetido`, `run_all.py --repeticoes` | IMPLEMENTADO |
 | Execution match e indicadores AVAL-001/002/003 | `src/evaluate.py:avaliar` | IMPLEMENTADO |
 | Orquestração (`oracle` / `llm`) | `run_all.py` | IMPLEMENTADO |
 

@@ -195,9 +195,88 @@ def avaliar(motor_nome):
     return {"metricas": metricas, "detalhes": detalhes}
 
 
+def _agregar(valores):
+    """Estatisticas de uma lista de proporcoes ao longo das execucoes."""
+    import statistics
+
+    n = len(valores)
+    media = sum(valores) / n if n else 0.0
+    desvio = statistics.stdev(valores) if n > 1 else 0.0
+    return {
+        "media": round(media, 4),
+        "desvio": round(desvio, 4),
+        "min": round(min(valores), 4) if valores else 0.0,
+        "max": round(max(valores), 4) if valores else 0.0,
+    }
+
+
+def avaliar_repetido(motor_nome, repeticoes):
+    """Roda a avaliacao k vezes e agrega media, desvio e estabilidade por pergunta.
+
+    Com k>1 e possivel distinguir erro sistematico do modelo da variancia de uma
+    rodada (mesmo a temperatura zero, a API nao e estritamente deterministica).
+    Para cada pergunta, conta em quantas das k execucoes ela acertou (estrito e
+    conteudo).
+    """
+    execucoes = [avaliar(motor_nome) for _ in range(repeticoes)]
+    estrito = [e["metricas"]["AVAL-001_acuracia"] for e in execucoes]
+    conteudo = [e["metricas"]["match_conteudo_relaxado"] for e in execucoes]
+    governanca = [e["metricas"]["AVAL-002_aprovacao_governanca"] for e in execucoes]
+
+    # Estabilidade por pergunta (a ordem das perguntas e estavel entre execucoes).
+    base = execucoes[0]["detalhes"]
+    estabilidade = []
+    for i, d in enumerate(base):
+        estrito_hits = sum(1 for e in execucoes if e["detalhes"][i]["match"])
+        conteudo_hits = sum(1 for e in execucoes if e["detalhes"][i]["conteudo_ok"])
+        estabilidade.append({
+            "id": d["id"],
+            "tipo": d["tipo"],
+            "estrito": f"{estrito_hits}/{repeticoes}",
+            "conteudo": f"{conteudo_hits}/{repeticoes}",
+        })
+
+    agregado = {
+        "motor": motor_nome,
+        "repeticoes": repeticoes,
+        "total": execucoes[0]["metricas"]["total"],
+        "modelo": execucoes[0]["metricas"]["modelo"],
+        "temperatura": execucoes[0]["metricas"]["temperatura"],
+        "AVAL-001_estrito": _agregar(estrito),
+        "match_conteudo_relaxado": _agregar(conteudo),
+        "AVAL-002_governanca": _agregar(governanca),
+    }
+    return {
+        "agregado": agregado,
+        "estabilidade": estabilidade,
+        "execucoes": [e["metricas"] for e in execucoes],
+    }
+
+
+def imprimir_resumo_repetido(resultado):
+    """Imprime o resumo agregado de k execucoes e a estabilidade por pergunta."""
+    a = resultado["agregado"]
+    k = a["repeticoes"]
+    print(f"avaliacao ({a['motor']}, {k} execucoes, modelo {a['modelo']}, temp {a['temperatura']}): "
+          f"{a['total']} perguntas")
+    e, c, g = a["AVAL-001_estrito"], a["match_conteudo_relaxado"], a["AVAL-002_governanca"]
+    print(f"  execution match estrito:  media {e['media']*100:.1f}% "
+          f"(dp {e['desvio']*100:.1f}; faixa {e['min']*100:.1f}-{e['max']*100:.1f})")
+    print(f"  set match de conteudo:    media {c['media']*100:.1f}% "
+          f"(dp {c['desvio']*100:.1f}; faixa {c['min']*100:.1f}-{c['max']*100:.1f})")
+    print(f"  aprovacao na governanca:  media {g['media']*100:.1f}%")
+    print("  estabilidade por pergunta (estrito | conteudo):")
+    for s in resultado["estabilidade"]:
+        print(f"    {s['id']:4} [{s['tipo']}] estrito {s['estrito']}  conteudo {s['conteudo']}")
+
+
 def salvar_relatorio(resultado):
-    """Grava o relatorio da avaliacao em results/ e devolve o caminho."""
-    motor = resultado["metricas"]["motor"]
+    """Grava o relatorio da avaliacao em results/ e devolve o caminho.
+
+    Aceita o formato de execucao unica (`metricas`) e o agregado de k execucoes
+    (`agregado`).
+    """
+    motor = (resultado.get("metricas") or resultado.get("agregado"))["motor"]
     config.RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     caminho = config.RESULTS_DIR / f"avaliacao_{motor}.json"
     with open(caminho, "w", encoding="utf-8") as f:

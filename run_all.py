@@ -49,8 +49,13 @@ def rodar_oracle():
     return 0
 
 
-def rodar_llm():
-    """Execucao real com o motor LLM. Gera os numeros do TCC; nao faz assercao."""
+def rodar_llm(repeticoes=1):
+    """Execucao real com o motor LLM. Gera os numeros do TCC; nao faz assercao.
+
+    Com `repeticoes > 1`, roda a avaliacao k vezes e reporta media, desvio e a
+    estabilidade por pergunta, para separar erro sistematico de variancia de uma
+    rodada (mesmo a temperatura zero, a API nao e estritamente deterministica).
+    """
     if not config.ANTHROPIC_API_KEY:
         print(
             "FALHA: ANTHROPIC_API_KEY ausente no ambiente. O modo llm exige chave "
@@ -59,8 +64,12 @@ def rodar_llm():
         )
         return 1
     garantir_dados()
-    resultado = evaluate.avaliar("llm")
-    evaluate.imprimir_resumo(resultado)
+    if repeticoes > 1:
+        resultado = evaluate.avaliar_repetido("llm", repeticoes)
+        evaluate.imprimir_resumo_repetido(resultado)
+    else:
+        resultado = evaluate.avaliar("llm")
+        evaluate.imprimir_resumo(resultado)
     caminho = evaluate.salvar_relatorio(resultado)
     print(f"relatorio: {caminho}")
     print(
@@ -77,8 +86,16 @@ def main(argv=None):
         choices=("oracle", "llm"),
         help="oracle: autoteste da tubulacao (CI); llm: execucao real (numeros do TCC).",
     )
+    parser.add_argument(
+        "--repeticoes",
+        type=int,
+        default=1,
+        help="numero de execucoes do modo llm (>=3 recomendado para media e desvio).",
+    )
     args = parser.parse_args(argv)
-    return rodar_oracle() if args.modo == "oracle" else rodar_llm()
+    if args.modo == "oracle":
+        return rodar_oracle()
+    return rodar_llm(repeticoes=max(1, args.repeticoes))
 
 
 if __name__ == "__main__":
