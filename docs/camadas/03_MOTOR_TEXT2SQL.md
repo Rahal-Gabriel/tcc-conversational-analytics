@@ -33,7 +33,10 @@ Conforme [DA-NL2SQL-002](../arquitetura/02_DECISOES_ARQUITETURAIS.md#da-nl2sql-0
 - **Entrada do prompt**: o schema da camada Gold e a data de referência
   (`SIM_TODAY`), para ancorar consultas que mencionam "hoje" ou "agora".
 - **Saída exigida**: uma única SQL somente leitura, sem markdown e sem
-  explicação.
+  explicação, projetando **apenas as colunas necessárias** e **sem arredondar**
+  valores agregados (a tolerância numérica vive na avaliação,
+  `src/evaluate.py:CASAS_DECIMAIS`). São esclarecimentos de especificação, não
+  ajuste de resposta.
 
 Configuração da chamada (`src/config.py:77-80`):
 
@@ -61,7 +64,7 @@ Configuração da chamada (`src/config.py:77-80`):
 | Interface comum dos motores | `src/nl2sql.py:obter_motor` | IMPLEMENTADO |
 | Descrição do schema Gold para o prompt | `src/nl2sql.py:descrever_schema_gold` | IMPLEMENTADO |
 | Parâmetros do LLM | `src/config.py:75-80` | IMPLEMENTADO |
-| Conjunto pergunta → SQL de referência | `src/questions.py` | IMPLEMENTADO (10 perguntas) |
+| Conjunto pergunta → SQL de referência | `src/questions.py` | IMPLEMENTADO (18 perguntas) |
 
 ## 6. Teste rápido
 

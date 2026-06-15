@@ -42,11 +42,17 @@ def descrever_schema_gold(con):
 
 
 # Instrucao de sistema: define o papel e o contrato de saida (DA-NL2SQL-002).
+# As duas ultimas frases sao esclarecimentos de especificacao, nao ajuste de
+# resposta: projetar so o necessario alinha a saida ao que a pergunta pede (o
+# execution match compara o conjunto de colunas), e nao arredondar deixa a
+# tolerancia numerica a cargo do harness (evaluate.CASAS_DECIMAIS).
 _PROMPT_SISTEMA = (
     "Voce traduz perguntas em portugues para uma unica consulta SQL somente "
     "leitura sobre um banco DuckDB. Responda apenas com a SQL, sem markdown e sem "
     "explicacao. Use somente as tabelas e colunas do schema fornecido. A consulta "
-    "deve ser um unico SELECT (ou WITH ... SELECT), sem ponto e virgula ao final."
+    "deve ser um unico SELECT (ou WITH ... SELECT), sem ponto e virgula ao final. "
+    "Projete apenas as colunas necessarias para responder a pergunta, sem colunas "
+    "extras. Nao arredonde valores agregados; devolva o valor calculado."
 )
 
 

@@ -25,9 +25,11 @@ Silver anonimizada, Gold agregada), a governança de entrada e de saída, o moto
 Text-to-SQL nas duas implementações (oráculo e LLM) e o harness de avaliação. A
 tubulação completa (geração → governança → execução → avaliação) roda de ponta a
 ponta com o motor oráculo e fecha em 100% de execution match, o que comprova que
-o harness está correto. Esse 100% é **autoteste da tubulação**, não desempenho do
-modelo: **ainda não há números de acurácia do LLM**, que só serão coletados em
-execução real com o motor LLM e chave válida
+o harness está correto (autoteste, não desempenho do modelo). Os **primeiros
+números reais do LLM** já foram coletados: 61,1% de execution match estrito em 18
+perguntas ([RES-007](#res-007-primeira-execução-real-do-motor-llm-e-refinamento-da-medição)),
+com a maior parte das divergências sendo forma de resultado e governança, não erro
+de cálculo
 ([RNC-002](../arquitetura/03_REGRAS_CRITICAS.md#rnc-002-integridade-dos-resultados-acurácia-só-vem-do-llm-real)).
 
 ## 3. Progresso por objetivo específico (do projeto de pesquisa)
@@ -151,7 +153,7 @@ principal resultado esperado do projeto e já existe em forma navegável.
 
 ### RES-006: Tubulação de avaliação verde com o motor oráculo
 
-O fluxo completo está implementado e roda de ponta a ponta: para cada uma das 10
+O fluxo completo está implementado e roda de ponta a ponta: para cada uma das 18
 perguntas do conjunto de avaliação, a SQL passa pelos guardrails de entrada, é
 executada em conexão somente leitura, passa pela validação de saída e tem o
 resultado comparado por execution match com a SQL de referência; toda interação
@@ -176,16 +178,87 @@ A CI executa este mesmo autoteste a cada push e PR, sem chave e sem custo.
   `run_all.py`, `src/governance.py`; `results/avaliacao_oracle.json`;
   [avaliacao/01_METODOLOGIA_AVALIACAO.md](../avaliacao/01_METODOLOGIA_AVALIACAO.md).
 
+### RES-007: Primeira execução real do motor LLM e refinamento da medição
+
+A primeira execução com o motor LLM real (`claude-sonnet-4-6`) sobre o conjunto
+inicial de 10 perguntas deu **60,0% de execution match**. A análise caso a caso
+mostrou que, dos quatro resultados não-`correto`, nenhum era erro de cálculo do
+modelo:
+
+| Pergunta | Evento | Natureza |
+|---|---|---|
+| Q01 | bloqueado | Resposta numérica correta (150 leitos), mas via `gold.ocupacao_diaria`, **fora do escopo** do perfil `enfermagem`; barrada por CTRL-GOV-005. É a governança funcionando. |
+| Q04 | incorreto | Valores corretos, porém com **colunas extras** (`id_unidade`, `especialidade`). Estritez de projeção do execution match (padrão Spider/EHRSQL). |
+| Q08 | incorreto | Mesma média; divergência só de **arredondamento** (referência `75,7` com `ROUND`, modelo `75,714…`). |
+| Q10 | incorreto | Idem Q08 (referência `7,2`, modelo `7,184…`). |
+
+Q08 e Q10 expuseram uma **inconsistência interna do harness**: a SQL de
+referência pré-arredondava enquanto a normalização arredondava em outra precisão,
+punindo o modelo por ser mais preciso. A correção (decidida **antes** de
+re-executar, para não escolher critério olhando o placar — RNC-002) foi:
+
+- a normalização passou a ser a única fonte de arredondamento, com tolerância de
+  2 casas (`src/evaluate.py:CASAS_DECIMAIS`), e as SQL de referência deixaram de
+  pré-arredondar;
+- o contrato do prompt passou a pedir projeção mínima e a não arredondar
+  agregados (esclarecimento de especificação, não ajuste de resposta);
+- o conjunto foi ampliado de 10 para 18 perguntas, reduzindo o ruído da amostra
+  (com 10 itens, cada questão valia 10 pontos percentuais).
+
+Resultados (execution match), reportados lado a lado por transparência:
+
+| Execução | Conjunto | Harness/prompt | AVAL-001 | AVAL-002 | AVAL-003 |
+|---|---|---|---|---|---|
+| Bruta (1ª) | 10 perguntas | original | 60,0% | 90,0% | 100,0% |
+| Refinada | 18 perguntas | tolerância 2 casas, projeção mínima, refs sem `ROUND` | **61,1%** | 88,9% | 100,0% |
+
+A correção de arredondamento funcionou (Q08 e Q10 passaram a `correto`). O número
+ter permanecido próximo de 60% com um conjunto quase dobrado **confirma que o
+primeiro valor não foi acaso**: a acurácia estrita por execution match do modelo
+neste domínio fica em torno de 61%.
+
+A análise dos 7 resultados não-`correto` da execução refinada (18 perguntas)
+mostra que a maior parte **não é erro de cálculo**:
+
+| Categoria | Perguntas | n | Natureza |
+|---|---|---|---|
+| Bloqueado pela governança | Q01, Q11 | 2 | Resposta numérica correta, mas via `gold.ocupacao_diaria`, fora do escopo do perfil `enfermagem`; barrada por CTRL-GOV-005. Comportamento correto do sistema. |
+| Forma/projeção | Q04, Q13, Q14, Q15 | 4 | Valores certos, mas com colunas extras ou shape diferente (ex.: Q15 devolve `data` + valor em vez do escalar). Estritez de projeção do execution match (padrão Spider/EHRSQL); o pedido de "projeção mínima" no prompt não foi suficiente. |
+| Erro de cálculo (value linking) | Q12 | 1 | O modelo filtrou `tipo = 'enfermaria'` (minúscula), mas o valor real é `'Enfermaria'`; o resultado veio vazio. O modelo não conhecia o valor categórico exato. |
+
+Ou seja, das 18 perguntas, **apenas 1 (Q12) é erro de cálculo genuíno**; 2 são a
+governança atuando como projetado e 4 são a conhecida sensibilidade do execution
+match à forma do resultado. O execution match estrito (61,1%) é mantido como
+métrica primária, sem inflar com métricas alternativas; a categorização acima é a
+análise de erros que acompanha o número.
+
+Não se buscou elevar o número com novos ajustes: continuar iterando sobre estas
+18 perguntas levaria a overfitting. Q01/Q11 permanecem como **achado de
+governança** (defesa em profundidade barrando consultas fora do privilégio do
+perfil) e Q12 como **trabalho futuro** (value linking: expor ao motor os valores
+categóricos do schema, ou comparar texto sem distinção de caixa).
+
+- **Status**: VALIDADO (números reais e verificáveis: bruto 60,0% em 10 perguntas,
+  refinado 61,1% em 18). Nenhum número foi reportado sem execução real (RNC-002).
+- **Evidência**: `results/avaliacao_llm.json`; `results/auditoria.log`;
+  [avaliacao/01_METODOLOGIA_AVALIACAO.md](../avaliacao/01_METODOLOGIA_AVALIACAO.md).
+
 ## 5. O que ainda falta
 
-| Próxima entrega | Módulo de código | Resultado que habilita |
-|---|---|---|
-| Execução real com o motor LLM | `run_all.py llm` (chave válida) | Números de acurácia do modelo (teste da hipótese > 80%) |
+Os primeiros números reais já foram coletados (RES-007: 61,1% de execution match
+estrito em 18 perguntas). A hipótese de acurácia superior a 80% **ainda não se
+confirma** sob execution match estrito; a análise de erros indica que o teto é
+puxado pela forma do resultado e pela governança, não por erro de cálculo. As
+próximas entregas atacam essas frentes:
 
-Toda a tubulação já está pronta e verificada com o oráculo. Falta apenas rodar
-`python run_all.py llm` com `ANTHROPIC_API_KEY` válida para coletar os números de
-acurácia do modelo; só então a hipótese de acurácia superior a 80% poderá ser
-testada. Até lá, nenhum número de acurácia do LLM é reportado (RNC-002).
+| Próxima entrega | Onde | Resultado que habilita |
+|---|---|---|
+| Value linking (valores categóricos no prompt ou comparação sem caixa) | `nl2sql.py` / schema | Corrigir erros como Q12 (`'enfermaria'` vs `'Enfermaria'`) |
+| Discussão da métrica forma-sensível | `evaluate.py` / `tcc` | Separar erro de cálculo de divergência de projeção na análise |
+| Ampliação e estratificação do conjunto | `questions.py` | Reduzir ruído e medir por tipo de pergunta e por perfil |
+
+Cada novo ajuste será medido e reportado de forma transparente (bruto × refinado),
+sem iterar sobre o mesmo conjunto a ponto de overfittar (RNC-002).
 
 ## 6. Como este registro alimenta o template do TCC
 
@@ -193,8 +266,9 @@ Ver o índice reverso em [02_MAPA_DOC_PARA_TEMPLATE.md](02_MAPA_DOC_PARA_TEMPLAT
 
 - **Metodologia**: determinismo, ambiente versionado e harness de avaliação
   descrevem o material e os métodos de forma reprodutível.
-- **Resultados Preliminares**: RES-001 a RES-006 são os resultados parciais
+- **Resultados Preliminares**: RES-001 a RES-007 são os resultados parciais
   apresentáveis.
-- **Integridade**: a ausência de números de acurácia do modelo nesta fase é
-  deliberada e documentada; o 100% do oráculo (RES-006) é autoteste da tubulação,
-  não desempenho do LLM.
+- **Integridade**: os números do modelo (RES-007: 60,0% e 61,1%) vêm de execução
+  real, com a metodologia decidida antes de re-rodar e os valores bruto e refinado
+  reportados lado a lado; o 100% do oráculo (RES-006) é autoteste da tubulação, não
+  desempenho do LLM.

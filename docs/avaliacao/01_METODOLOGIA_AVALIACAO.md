@@ -30,8 +30,10 @@ implementação do harness e uma execução real com o motor LLM
   idênticos.
 - **Normalização** antes de comparar
   ([DA-AVAL-002](../arquitetura/02_DECISOES_ARQUITETURAIS.md#da-aval-002-normalização-dos-resultados-antes-de-comparar)):
-  floats arredondados, datas em ISO, linhas ordenadas
-  (`src/evaluate.py:normalizar`).
+  floats arredondados a 2 casas (`src/evaluate.py:CASAS_DECIMAIS`), datas em ISO,
+  linhas ordenadas (`src/evaluate.py:normalizar`). A normalização é a **única**
+  fonte de arredondamento: as SQL de referência não pré-arredondam, para não punir
+  uma resposta numericamente mais precisa que a referência.
 - **Referência**: estilo do benchmark EHRSQL 2024.
 - **Status**: IMPLEMENTADO (comparação por execution match em `src/evaluate.py:avaliar`).
 - **Relacionado**: [DA-AVAL-001](../arquitetura/02_DECISOES_ARQUITETURAIS.md#da-aval-001-execution-match-no-estilo-ehrsql).
@@ -45,11 +47,17 @@ regulatória nos Resultados.
 ## 3. Conjunto de avaliação
 
 Implementado em `src/questions.py`: cada item é um par (pergunta em português,
-SQL de referência sobre a Gold), com perfil e tipo. O conjunto inicial tem **10
+SQL de referência sobre a Gold), com perfil e tipo. O conjunto tem **18
 perguntas** cobrindo os quatro tipos operacionais do domínio de ocupação de
-leitos: status atual (3), métrica por unidade (3), série histórica (2) e
-internações por faixa etária (2). Toda SQL de referência é determinista (ancorada
-em `SIM_TODAY`) e passa pelos guardrails de entrada no escopo do próprio perfil.
+leitos: status atual (5), métrica por unidade (5), série histórica (4) e
+internações por faixa etária (4). Toda SQL de referência é determinista (ancorada
+em `SIM_TODAY`), não pré-arredonda valores agregados e passa pelos guardrails de
+entrada no escopo do próprio perfil.
+
+O contrato do prompt ([DA-NL2SQL-002](../camadas/03_MOTOR_TEXT2SQL.md)) pede ao
+motor que projete apenas as colunas necessárias e não arredonde agregados; são
+esclarecimentos de especificação que alinham a saída ao que a pergunta pede,
+sem ajustar a resposta em si.
 
 ## 4. Os dois motores na avaliação
 
@@ -65,8 +73,8 @@ Defesa em profundidade: a execução usa conexão DuckDB somente leitura
 
 | Item | Local | Status |
 |---|---|---|
-| Conjunto pergunta → SQL de referência | `src/questions.py` | IMPLEMENTADO (10 perguntas) |
-| Normalização dos resultados | `src/evaluate.py:normalizar` | IMPLEMENTADO |
+| Conjunto pergunta → SQL de referência | `src/questions.py` | IMPLEMENTADO (18 perguntas) |
+| Normalização dos resultados (tolerância 2 casas) | `src/evaluate.py:normalizar`, `CASAS_DECIMAIS` | IMPLEMENTADO |
 | Execution match e indicadores AVAL-001/002/003 | `src/evaluate.py:avaliar` | IMPLEMENTADO |
 | Orquestração (`oracle` / `llm`) | `run_all.py` | IMPLEMENTADO |
 

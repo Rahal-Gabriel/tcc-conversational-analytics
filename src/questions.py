@@ -93,7 +93,7 @@ CONJUNTO = (
         "Qual foi a taxa de ocupacao media diaria nos ultimos 7 dias ate hoje?",
         "administrativo",
         "serie_historica",
-        "SELECT ROUND(AVG(taxa_ocupacao), 1) AS media FROM gold.ocupacao_diaria "
+        "SELECT AVG(taxa_ocupacao) AS media FROM gold.ocupacao_diaria "
         f"WHERE data BETWEEN DATE '{_HOJE}' - INTERVAL 6 DAY AND DATE '{_HOJE}'",
     ),
     # --- Internacoes por faixa etaria ---
@@ -110,8 +110,71 @@ CONJUNTO = (
         "Qual o tempo medio de permanencia das internacoes ja encerradas?",
         "gestor",
         "faixa_etaria",
-        "SELECT ROUND(AVG(tempo_permanencia), 1) AS media FROM gold.internacoes "
-        "WHERE NOT ativa",
+        "SELECT AVG(tempo_permanencia) AS media FROM gold.internacoes WHERE NOT ativa",
+    ),
+    # --- Ampliacao do conjunto (Q11 a Q18) ---
+    # Status atual
+    Pergunta(
+        "Q11",
+        "Quantos leitos estao bloqueados hoje?",
+        "enfermagem",
+        "status_atual",
+        "SELECT COUNT(*) AS bloqueados FROM gold.leitos_status WHERE situacao = 'bloqueado'",
+    ),
+    Pergunta(
+        "Q12",
+        "Quantos leitos de enfermaria existem no hospital hoje?",
+        "enfermagem",
+        "status_atual",
+        "SELECT COUNT(*) AS total FROM gold.leitos_status WHERE tipo = 'Enfermaria'",
+    ),
+    # Metrica por unidade
+    Pergunta(
+        "Q13",
+        "Quantos leitos livres ha em cada unidade hoje?",
+        "gestor",
+        "metrica_unidade",
+        "SELECT unidade, livres FROM gold.ocupacao_unidade ORDER BY unidade",
+    ),
+    Pergunta(
+        "Q14",
+        "Quais unidades estao com taxa de ocupacao acima de 80% hoje?",
+        "administrativo",
+        "metrica_unidade",
+        "SELECT unidade, taxa_ocupacao FROM gold.ocupacao_unidade "
+        "WHERE taxa_ocupacao > 80 ORDER BY unidade",
+    ),
+    # Serie historica
+    Pergunta(
+        "Q15",
+        "Qual foi a maior taxa de ocupacao diaria registrada no historico?",
+        "administrativo",
+        "serie_historica",
+        "SELECT MAX(taxa_ocupacao) AS maior FROM gold.ocupacao_diaria",
+    ),
+    Pergunta(
+        "Q16",
+        "Em quantos dias a taxa de ocupacao diaria passou de 85%?",
+        "administrativo",
+        "serie_historica",
+        "SELECT COUNT(*) AS dias FROM gold.ocupacao_diaria WHERE taxa_ocupacao > 85",
+    ),
+    # Internacoes por faixa etaria
+    Pergunta(
+        "Q17",
+        "Quantas internacoes ja encerradas ha por faixa etaria?",
+        "gestor",
+        "faixa_etaria",
+        "SELECT faixa_etaria, COUNT(*) AS total FROM gold.internacoes "
+        "WHERE NOT ativa GROUP BY faixa_etaria ORDER BY faixa_etaria",
+    ),
+    Pergunta(
+        "Q18",
+        "Qual o tempo medio de permanencia por tipo de leito nas internacoes encerradas?",
+        "gestor",
+        "faixa_etaria",
+        "SELECT tipo, AVG(tempo_permanencia) AS media FROM gold.internacoes "
+        "WHERE NOT ativa GROUP BY tipo ORDER BY tipo",
     ),
 )
 

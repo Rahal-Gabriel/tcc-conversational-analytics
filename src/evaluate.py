@@ -31,19 +31,27 @@ from src import config, governance, nl2sql, questions
 USUARIO_AVAL = "avaliacao"
 
 
+# Casas decimais da tolerancia de comparacao numerica (DA-AVAL-002). E a unica
+# fonte de arredondamento do harness: as SQL de referencia nao pre-arredondam
+# (caso contrario, uma media exata do modelo seria punida por ser mais precisa
+# que a referencia). Duas casas absorvem diferencas irrelevantes de precisao
+# sem mascarar respostas de fato distintas.
+CASAS_DECIMAIS = 2
+
+
 def _normalizar_celula(valor):
     """Normaliza um valor de celula para comparacao estavel (DA-AVAL-002).
 
-    Floats e decimais sao arredondados; datas viram texto ISO; o resto fica como
-    esta. O arredondamento absorve diferencas irrelevantes de precisao entre a
-    SQL gerada e a de referencia.
+    Floats e decimais sao arredondados a CASAS_DECIMAIS; datas viram texto ISO; o
+    resto fica como esta. O arredondamento absorve diferencas irrelevantes de
+    precisao entre a SQL gerada e a de referencia.
     """
     if isinstance(valor, bool):
         return valor
     if isinstance(valor, Decimal):
-        return round(float(valor), 4)
+        return round(float(valor), CASAS_DECIMAIS)
     if isinstance(valor, float):
-        return round(valor, 4)
+        return round(valor, CASAS_DECIMAIS)
     if isinstance(valor, (datetime.date, datetime.datetime)):
         return valor.isoformat()
     return valor
