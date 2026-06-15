@@ -109,7 +109,7 @@ children.push(corpo(
   "com governança integrada e aderente à LGPD, às normas da ANVISA e às diretrizes da ANPD, aplicada ao domínio de ocupação " +
   "de leitos. O protótipo organiza um pipeline de dados em camadas (Bronze, Silver e Gold) sob um motor de tradução de " +
   "perguntas em linguagem natural para SQL, com controles de governança na entrada e na saída e avaliação por execution match. " +
-  "Toda a pesquisa usa dados exclusivamente sintéticos e execução determinista. Os resultados preliminares confirmam a " +
+  "Toda a pesquisa usa dados exclusivamente sintéticos, com pipeline de dados determinista. Os resultados preliminares confirmam a " +
   "anonimização da camada exposta ao modelo e o funcionamento dos controles de governança. Numa avaliação com 18 perguntas " +
   "(modelo claude-sonnet-4-6, temperatura zero, três execuções sem variação), o execution match estrito foi de 61,1%, " +
   "enquanto o set match de conteúdo, métrica diagnóstica que ignora forma e bloqueios de governança, foi de 94,4%, indicando " +
@@ -139,8 +139,9 @@ children.push(corpo(
   "acesso indevido a recursos (OWASP, 2023), tratados na prática por meio de guardrails programáveis (REBEDEA et al., 2023) e, " +
   "no setor de saúde, sob diretrizes éticas e de governança dedicadas (WHO, 2024)."));
 children.push(corpo(
-  "Este trabalho parte da hipótese de que é possível integrar a governança à arquitetura de dados, de ponta a ponta, sem " +
-  "comprometer a utilidade da consulta em linguagem natural. Propõe-se uma arquitetura de referência em quatro camadas, na " +
+  "Este trabalho parte da hipótese de que é possível integrar a governança à arquitetura de dados, de ponta a ponta, " +
+  "preservando a utilidade da consulta em linguagem natural dentro do escopo autorizado a cada perfil, a um custo mensurável e " +
+  "justificável pelo princípio do menor privilégio. Propõe-se uma arquitetura de referência em quatro camadas, na " +
   "qual a anonimização, o controle de acesso por perfil, a validação da consulta e a auditoria atravessam todo o fluxo, da " +
   "pergunta do usuário à resposta entregue. O domínio escolhido para implementação e avaliação é a ocupação de leitos " +
   "hospitalares, e toda a pesquisa utiliza dados exclusivamente sintéticos, o que elimina na origem o risco de exposição de " +
@@ -340,6 +341,12 @@ children.push(corpo(
   "valores categóricos do schema, e ele filtrou um valor com a caixa incorreta (\"enfermaria\" em vez de \"Enfermaria\"), " +
   "obtendo conjunto vazio. Esse ponto (value linking) já está no plano de continuidade. Manteve-se o execution match estrito " +
   "como métrica primária; o set match de conteúdo é diagnóstico e acompanha a análise, sem substituí-la."));
+children.push(corpo(
+  "Vale uma leitura do ponto de vista do usuário final. Um gestor recebe um número, não a SQL; para ele, as divergências de " +
+  "forma e projeção (colunas adicionais) tendem a não reduzir a utilidade percebida, ainda mais porque o filtro de saída já " +
+  "barra colunas sensíveis. Sob essa ótica, a utilidade operativa da resposta aproxima-se dos 94,4% do conteúdo correto, e os " +
+  "61,1% do execution match estrito penalizam artefatos de forma que não enganam o usuário. Isso não rebaixa a métrica " +
+  "primária, mantida por comparabilidade, mas reforça a tese de utilidade preservada dentro do escopo autorizado."));
 children.push(tabela([2271, 1000, 5800], [
   ["Categoria", "Itens", "Natureza"],
   ["Correta (execution match estrito)", "11", "Conjunto de resultados idêntico ao da referência."],
@@ -400,8 +407,9 @@ children.push(h1(5, "Considerações Finais (parciais)"));
 children.push(corpo(
   "Os resultados preliminares confirmam a viabilidade técnica da arquitetura integrada: o pipeline de dados é coerente e " +
   "anonimizado, os controles de governança funcionam de ponta a ponta e a avaliação produz números reais e verificáveis. " +
-  "Quanto à pergunta de pesquisa, os dados sugerem que a governança integrada preserva a utilidade da consulta a um custo " +
-  "mensurável e modesto: o conteúdo das respostas esteve correto em 17 de 18 casos (94,4%), enquanto o execution match " +
+  "Quanto à pergunta de pesquisa, os dados sugerem que a governança integrada preserva a utilidade da consulta dentro do " +
+  "escopo autorizado, a um custo mensurável e justificável pelo menor privilégio: o conteúdo das respostas esteve correto em " +
+  "17 de 18 casos (94,4%), enquanto o execution match " +
   "estrito (61,1%) é puxado para baixo pela forma do resultado e pelo controle de acesso, não pelo raciocínio do modelo; o " +
   "custo direto da governança foi de cerca de 11 pontos (2 respostas corretas, mas fora do escopo do perfil). Esses números, " +
   "porém, vêm de uma amostra pequena, com intervalos de confiança amplos, e devem ser lidos como indicativos. Como " +
