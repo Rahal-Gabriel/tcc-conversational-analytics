@@ -85,21 +85,20 @@ const children = [];
 // Titulo
 children.push(new Paragraph({
   alignment: AlignmentType.CENTER,
-  spacing: { after: 120 },
+  spacing: { after: 240 },
   children: [new TextRun({
-    text: "Arquitetura de referência com governança integrada para consulta em linguagem natural sobre ocupação de leitos",
+    text: "Governança integrada habilita consulta em linguagem natural sobre ocupação de leitos hospitalares",
     bold: true, size: 30,
   })],
 }));
-children.push(new Paragraph({
-  alignment: AlignmentType.CENTER, spacing: { after: 240 },
-  children: [new TextRun({ text: "[SUGESTÃO de título, 15 palavras; ajuste se desejar]", italics: true, size: 18 })],
-}));
 
 // Autores / orientador
-children.push(corpoRuns([ph("[preencher: Nome do(s) autor(es)]")]));
-children.push(corpoRuns([ph("[preencher: Nome do(a) orientador(a)]")]));
-children.push(corpoRuns([txt("MBA em Engenharia de Software — USP/Esalq. "), ph("[preencher: ano/turma]")]));
+children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 80 },
+  children: [new TextRun({ text: "Gabriel Arcenio Rahal Marostica", size: 24 })] }));
+children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 80 },
+  children: [new TextRun({ text: "Orientador: José Bernardo Neto", size: 24 })] }));
+children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 240 },
+  children: [new TextRun({ text: "MBA em Engenharia de Software — USP/Esalq, 2026", size: 24 })] }));
 
 // Resumo (opcional)
 children.push(new Paragraph({ heading: HeadingLevel.HEADING_1, spacing: { before: 200, after: 120 },
@@ -123,11 +122,14 @@ children.push(corpoRuns([
 // 1. Introducao
 children.push(h1(1, "Introdução"));
 children.push(corpo(
-  "A adoção de modelos de linguagem para consulta a dados clínicos em linguagem natural promete ampliar o acesso de " +
-  "gestores e equipes assistenciais à informação, mas esbarra em um obstáculo central: a governança dos dados e do próprio " +
-  "modelo costuma ser tratada de forma fragmentada, separada da arquitetura de dados. Em saúde, essa fragmentação é crítica, " +
-  "pois envolve dados pessoais sensíveis e um marco regulatório exigente, composto pela Lei Geral de Proteção de Dados, pelas " +
-  "normas da ANVISA aplicáveis a software como dispositivo médico e pelas diretrizes da Autoridade Nacional de Proteção de Dados."));
+  "A tradução de perguntas em linguagem natural para consultas SQL (Text-to-SQL) é objeto de pesquisa consolidado, com " +
+  "benchmarks de referência como o Spider (YU et al., 2018) e, no domínio clínico, o EHRSQL (LEE et al., 2022), e tem sido " +
+  "profundamente transformada pelos modelos de linguagem de grande porte (SHI et al., 2024). A adoção desses modelos para " +
+  "consulta a dados clínicos em linguagem natural promete ampliar o acesso de gestores e equipes assistenciais à informação, " +
+  "mas esbarra em um obstáculo central: a governança dos dados e do próprio modelo costuma ser tratada de forma fragmentada, " +
+  "separada da arquitetura de dados. Em saúde, essa fragmentação é crítica, pois envolve dados pessoais sensíveis e um marco " +
+  "regulatório exigente, composto pela Lei Geral de Proteção de Dados (BRASIL, 2018), pelas normas da ANVISA aplicáveis a " +
+  "software como dispositivo médico (ANVISA, 2022) e pelas diretrizes da Autoridade Nacional de Proteção de Dados (ANPD, 2024)."));
 children.push(corpo(
   "Este trabalho parte da hipótese de que é possível integrar a governança à arquitetura de dados, de ponta a ponta, sem " +
   "comprometer a utilidade da consulta em linguagem natural. Propõe-se uma arquitetura de referência em quatro camadas, na " +
@@ -135,12 +137,14 @@ children.push(corpo(
   "pergunta do usuário à resposta entregue. O domínio escolhido para implementação e avaliação é a ocupação de leitos " +
   "hospitalares, e toda a pesquisa utiliza dados exclusivamente sintéticos, o que elimina na origem o risco de exposição de " +
   "dados reais e permite que a arquitetura seja replicada por outras instituições."));
-children.push(corpoRuns([
-  txt("O objetivo geral é demonstrar, por meio de um protótipo funcional, a viabilidade dessa arquitetura integrada e avaliar " +
-      "a acurácia do motor de tradução de perguntas em SQL sobre dados sintéticos, sob a hipótese de acurácia superior a 80%. "),
-  ph("[preencher: complementar com objetivos específicos e referências da revisão de literatura do projeto de pesquisa]"),
-  txt("."),
-]));
+children.push(corpo(
+  "O objetivo geral é demonstrar, por meio de um protótipo funcional, a viabilidade dessa arquitetura integrada e avaliar a " +
+  "acurácia do motor de tradução de perguntas em SQL sobre dados sintéticos, sob a hipótese de acurácia superior a 80%. Como " +
+  "objetivos específicos, o trabalho se propõe a: (a) revisar a literatura sobre Conversational Analytics, Text-to-SQL e " +
+  "governança de modelos de linguagem; (b) mapear os requisitos regulatórios aplicáveis (LGPD, ANVISA e ANPD); (c) projetar a " +
+  "arquitetura técnica, da ingestão ao Lakehouse e ao motor com guardrails; (d) desenvolver o modelo de governança, " +
+  "contemplando controle de acesso, rastreabilidade, anonimização e validação; e (e) implementar e avaliar o protótipo sobre " +
+  "dados sintéticos."));
 
 // 2. Metodologia
 children.push(h1(2, "Metodologia"));
@@ -180,7 +184,8 @@ children.push(corpo(
 
 children.push(h2("2.5", "Método de avaliação"));
 children.push(corpo(
-  "A avaliação adota a métrica de execution match, no estilo do benchmark EHRSQL: a consulta gerada pelo modelo e a consulta " +
+  "A avaliação adota a métrica de execution match, consolidada em benchmarks de Text-to-SQL como o Spider (YU et al., 2018), o " +
+  "EHRSQL (LEE et al., 2022) e o BIRD (LI et al., 2023): a consulta gerada pelo modelo e a consulta " +
   "de referência são executadas e seus conjuntos de resultados são comparados após normalização (arredondamento numérico com " +
   "tolerância de duas casas, datas em formato ISO e linhas ordenadas). Além da acurácia, são medidos dois indicadores de " +
   "governança: a taxa de aprovação das consultas pelos guardrails e a completude do log de auditoria. O conjunto de avaliação " +
@@ -303,12 +308,35 @@ children.push(corpo(
 // Referencias
 children.push(new Paragraph({ heading: HeadingLevel.HEADING_1, spacing: { before: 240, after: 160 },
   children: [new TextRun("Referências")] }));
-children.push(corpoRuns([ph("[preencher: referências do projeto de pesquisa, formatadas pelas normas USP/Esalq. Não inseridas automaticamente para não fabricar citações.]")]));
+function ref(text) {
+  return new Paragraph({
+    alignment: AlignmentType.LEFT,
+    spacing: { line: 360, after: 120 },
+    indent: { left: 480, hanging: 480 },
+    children: [new TextRun(text)],
+  });
+}
+const REFS = [
+  "AGÊNCIA NACIONAL DE VIGILÂNCIA SANITÁRIA (ANVISA). Resolução da Diretoria Colegiada – RDC nº 657, de 24 de março de 2022. Dispõe sobre a regularização de software como dispositivo médico (Software as a Medical Device – SaMD). Brasília, DF: Anvisa, 2022.",
+  "AUTORIDADE NACIONAL DE PROTEÇÃO DE DADOS (ANPD). Radar tecnológico: inteligência artificial generativa. Brasília, DF: ANPD, 2024.",
+  "BRASIL. Lei nº 13.709, de 14 de agosto de 2018. Lei Geral de Proteção de Dados Pessoais (LGPD). Brasília, DF: Presidência da República, 2018.",
+  "LEE, G.; HWANG, H.; BAE, S.; KWON, Y.; SHIN, W.; YANG, S.; SEO, M.; KIM, J.-Y.; CHOI, E. EHRSQL: a practical text-to-SQL benchmark for electronic health records. In: Advances in Neural Information Processing Systems (NeurIPS) – Datasets and Benchmarks Track, 2022. arXiv:2301.07695.",
+  "LI, J.; HUI, B.; QU, G. et al. Can LLM already serve as a database interface? A big bench for large-scale database grounded text-to-SQLs (BIRD). In: Advances in Neural Information Processing Systems (NeurIPS) – Datasets and Benchmarks Track, 2023. arXiv:2305.03111.",
+  "SHI, L.; TANG, Z.; ZHANG, N.; ZHANG, X.; YANG, Z. A survey on employing large language models for text-to-SQL tasks. ACM Computing Surveys, 2024. arXiv:2407.15186.",
+  "YU, T.; ZHANG, R.; YANG, K.; YASUNAGA, M.; WANG, D.; LI, Z.; MA, J.; LI, I.; YAO, Q.; ROMAN, S.; ZHANG, Z.; RADEV, D. Spider: a large-scale human-labeled dataset for complex and cross-domain semantic parsing and text-to-SQL task. In: Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing (EMNLP), 2018. arXiv:1809.08887.",
+];
+REFS.forEach((r) => children.push(ref(r)));
+children.push(new Paragraph({ spacing: { before: 120 }, children: [new TextRun({
+  text: "Nota (remover antes do depósito): referências reais, verificadas, propostas para os temas do trabalho. Confirme que " +
+        "foram efetivamente consultadas, ajuste à formatação ABNT da USP/Esalq (data de acesso, DOI/URL) e acrescente as demais " +
+        "obras da sua revisão de literatura.",
+  italics: true, size: 18, color: "777777",
+})] }));
 
 // Apendice
 children.push(new Paragraph({ heading: HeadingLevel.HEADING_1, spacing: { before: 240, after: 160 },
   children: [new TextRun("Apêndice A — Camadas da arquitetura")] }));
-children.push(tabela([1471, 5200, 2400], [
+children.push(tabela([2051, 4920, 2100], [
   ["Camada", "Responsabilidade", "Documentação"],
   ["1. Pipeline Lakehouse", "Ingestão (Bronze), limpeza e anonimização (Silver), métricas (Gold)", "camadas/01"],
   ["2. Governança de entrada", "Perfil, registro da pergunta e conformidade antes de executar", "camadas/02"],
@@ -319,8 +347,9 @@ children.push(legenda("Quadro A.1. Síntese das quatro camadas. Fonte: o autor."
 
 // nota de rodape do rascunho
 children.push(new Paragraph({ spacing: { before: 240 }, children: [new TextRun({
-  text: "Nota: documento de apoio gerado a partir da documentação do protótipo (RES-001 a RES-007). Remover esta nota e os " +
-        "marcadores [preencher] / [SUGESTÃO] antes do depósito. Teto de 30 páginas; redação no pretérito impessoal.",
+  text: "Nota (remover antes do depósito): documento de apoio gerado a partir da documentação do protótipo (RES-001 a RES-007). " +
+        "Capa, objetivos e referências já preenchidos; confira a formatação ABNT da USP/Esalq e acrescente as demais obras da " +
+        "revisão de literatura. Teto de 30 páginas; redação no pretérito impessoal.",
   italics: true, size: 18, color: "777777",
 })] }));
 
