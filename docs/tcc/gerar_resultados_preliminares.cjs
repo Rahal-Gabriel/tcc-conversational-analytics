@@ -322,24 +322,18 @@ function ref(text) {
   });
 }
 const REFS = [
-  "AFFOLTER, K.; STOCKINGER, K.; BERNSTEIN, A. A comparative survey of recent natural language interfaces for databases. The VLDB Journal, v. 28, n. 5, p. 793-819, 2019. DOI: 10.1007/s00778-019-00567-8.",
-  "AGÊNCIA NACIONAL DE VIGILÂNCIA SANITÁRIA (ANVISA). Resolução da Diretoria Colegiada – RDC nº 657, de 24 de março de 2022. Dispõe sobre a regularização de software como dispositivo médico (Software as a Medical Device – SaMD). Brasília, DF: Anvisa, 2022.",
-  "AUTORIDADE NACIONAL DE PROTEÇÃO DE DADOS (ANPD). Radar tecnológico: inteligência artificial generativa. Brasília, DF: ANPD, 2024.",
-  "BRASIL. Lei nº 13.709, de 14 de agosto de 2018. Lei Geral de Proteção de Dados Pessoais (LGPD). Brasília, DF: Presidência da República, 2018.",
-  "LEE, G.; HWANG, H.; BAE, S.; KWON, Y.; SHIN, W.; YANG, S.; SEO, M.; KIM, J.-Y.; CHOI, E. EHRSQL: a practical text-to-SQL benchmark for electronic health records. In: Advances in Neural Information Processing Systems (NeurIPS) – Datasets and Benchmarks Track, 2022. arXiv:2301.07695.",
-  "LI, J.; HUI, B.; QU, G. et al. Can LLM already serve as a database interface? A big bench for large-scale database grounded text-to-SQLs (BIRD). In: Advances in Neural Information Processing Systems (NeurIPS) – Datasets and Benchmarks Track, 2023. arXiv:2305.03111.",
-  "NATIONAL INSTITUTE OF STANDARDS AND TECHNOLOGY (NIST). Artificial Intelligence Risk Management Framework (AI RMF 1.0). NIST AI 100-1. Gaithersburg, MD: NIST, 2023.",
-  "SHI, L.; TANG, Z.; ZHANG, N.; ZHANG, X.; YANG, Z. A survey on employing large language models for text-to-SQL tasks. ACM Computing Surveys, 2024. arXiv:2407.15186.",
-  "SWEENEY, L. k-anonymity: a model for protecting privacy. International Journal of Uncertainty, Fuzziness and Knowledge-Based Systems, v. 10, n. 5, p. 557-570, 2002. DOI: 10.1142/S0218488502001648.",
-  "YU, T.; ZHANG, R.; YANG, K.; YASUNAGA, M.; WANG, D.; LI, Z.; MA, J.; LI, I.; YAO, Q.; ROMAN, S.; ZHANG, Z.; RADEV, D. Spider: a large-scale human-labeled dataset for complex and cross-domain semantic parsing and text-to-SQL task. In: Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing (EMNLP), 2018. arXiv:1809.08887.",
+  "AFFOLTER, K.; STOCKINGER, K.; BERNSTEIN, A. A comparative survey of recent natural language interfaces for databases. The VLDB Journal, v. 28, n. 5, p. 793-819, 2019. DOI: 10.1007/s00778-019-00567-8. Disponível em: https://doi.org/10.1007/s00778-019-00567-8. Acesso em: 10 jun. 2026.",
+  "AGÊNCIA NACIONAL DE VIGILÂNCIA SANITÁRIA (ANVISA). Resolução da Diretoria Colegiada – RDC nº 657, de 24 de março de 2022. Dispõe sobre a regularização de software como dispositivo médico (Software as a Medical Device – SaMD). Brasília, DF: Anvisa, 2022. Disponível em: https://anvisalegis.datalegis.net/action/ActionDatalegis.php?acao=abrirTextoAto&tipo=RDC&numeroAto=00000657&seqAto=000&valorAno=2022&orgao=RDC/DC/ANVISA/MS. Acesso em: 10 jun. 2026.",
+  "AUTORIDADE NACIONAL DE PROTEÇÃO DE DADOS (ANPD). Radar tecnológico: inteligência artificial generativa. Brasília, DF: ANPD, 2024. Disponível em: https://www.gov.br/anpd/pt-br/documentos-e-publicacoes/documentos-de-publicacoes/radar_tecnologico_ia_generativa_anpd.pdf. Acesso em: 10 jun. 2026.",
+  "BRASIL. Lei nº 13.709, de 14 de agosto de 2018. Lei Geral de Proteção de Dados Pessoais (LGPD). Brasília, DF: Presidência da República, 2018. Disponível em: https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm. Acesso em: 10 jun. 2026.",
+  "LEE, G.; HWANG, H.; BAE, S.; KWON, Y.; SHIN, W.; YANG, S.; SEO, M.; KIM, J.-Y.; CHOI, E. EHRSQL: a practical text-to-SQL benchmark for electronic health records. In: Advances in Neural Information Processing Systems (NeurIPS) – Datasets and Benchmarks Track, 2022. Disponível em: https://arxiv.org/abs/2301.07695. Acesso em: 10 jun. 2026.",
+  "LI, J.; HUI, B.; QU, G. et al. Can LLM already serve as a database interface? A big bench for large-scale database grounded text-to-SQLs (BIRD). In: Advances in Neural Information Processing Systems (NeurIPS) – Datasets and Benchmarks Track, 2023. Disponível em: https://arxiv.org/abs/2305.03111. Acesso em: 10 jun. 2026.",
+  "NATIONAL INSTITUTE OF STANDARDS AND TECHNOLOGY (NIST). Artificial Intelligence Risk Management Framework (AI RMF 1.0). NIST AI 100-1. Gaithersburg, MD: NIST, 2023. Disponível em: https://nvlpubs.nist.gov/nistpubs/ai/nist.ai.100-1.pdf. Acesso em: 10 jun. 2026.",
+  "SHI, L.; TANG, Z.; ZHANG, N.; ZHANG, X.; YANG, Z. A survey on employing large language models for text-to-SQL tasks. ACM Computing Surveys, 2024. Disponível em: https://arxiv.org/abs/2407.15186. Acesso em: 10 jun. 2026.",
+  "SWEENEY, L. k-anonymity: a model for protecting privacy. International Journal of Uncertainty, Fuzziness and Knowledge-Based Systems, v. 10, n. 5, p. 557-570, 2002. DOI: 10.1142/S0218488502001648. Disponível em: https://doi.org/10.1142/S0218488502001648. Acesso em: 10 jun. 2026.",
+  "YU, T.; ZHANG, R.; YANG, K.; YASUNAGA, M.; WANG, D.; LI, Z.; MA, J.; LI, I.; YAO, Q.; ROMAN, S.; ZHANG, Z.; RADEV, D. Spider: a large-scale human-labeled dataset for complex and cross-domain semantic parsing and text-to-SQL task. In: Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing (EMNLP), 2018. Disponível em: https://arxiv.org/abs/1809.08887. Acesso em: 10 jun. 2026.",
 ];
 REFS.forEach((r) => children.push(ref(r)));
-children.push(new Paragraph({ spacing: { before: 120 }, children: [new TextRun({
-  text: "Nota (remover antes do depósito): referências reais, verificadas, propostas para os temas do trabalho. Confirme que " +
-        "foram efetivamente consultadas, ajuste à formatação ABNT da USP/Esalq (data de acesso, DOI/URL) e acrescente as demais " +
-        "obras da sua revisão de literatura.",
-  italics: true, size: 18, color: "777777",
-})] }));
 
 // Apendice A — arquitetura (diagrama + quadro)
 children.push(new Paragraph({ pageBreakBefore: true, heading: HeadingLevel.HEADING_1, spacing: { before: 120, after: 160 },
@@ -381,14 +375,6 @@ children.push(tabela([1740, 5131, 2200], [
   ["REG-PESQ-001", "Determinismo (SEED, SIM_TODAY); separação motor LLM (números) vs oráculo (autoteste)", "Transversal"],
 ]));
 children.push(legenda("Quadro B.1. Mapeamento de requisitos regulatórios para controles e camadas. Fonte: o autor."));
-
-// nota de rodape do rascunho
-children.push(new Paragraph({ spacing: { before: 240 }, children: [new TextRun({
-  text: "Nota (remover antes do depósito): documento de apoio gerado a partir da documentação do protótipo (RES-001 a RES-007). " +
-        "Capa, objetivos e referências já preenchidos; confira a formatação ABNT da USP/Esalq e acrescente as demais obras da " +
-        "revisão de literatura. Teto de 30 páginas; redação no pretérito impessoal.",
-  italics: true, size: 18, color: "777777",
-})] }));
 
 const doc = new Document({
   styles: {
