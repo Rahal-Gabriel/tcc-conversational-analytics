@@ -1,10 +1,15 @@
-"""Camada 2: governanca de entrada. Guardrails da SQL candidata e auditoria.
+"""Governanca de entrada (Camada 2) e de saida (Camada 4): guardrails e auditoria.
 
 Antes de qualquer consulta tocar o banco, a SQL gerada pelo motor passa por uma
 verificacao em camadas (CTRL-GOV-001 a 005), e a pergunta do usuario e
 registrada na trilha de auditoria. A barreira final, a conexao DuckDB somente
 leitura (CTRL-GOV-006), entra como defesa em profundidade e mora aqui como
 helper, para ser usada na execucao.
+
+Depois da execucao, a validacao de saida (Camada 4) e a ultima barreira:
+aterramento contra o schema Gold conhecido (CTRL-VALID-001), filtro de campo
+sensivel no resultado (CTRL-VALID-002) e o registro da resposta na trilha de
+auditoria (CTRL-AUD-001).
 
 A analise textual e conservadora: comentarios e literais de texto sao removidos
 antes da inspecao, para que uma palavra proibida escondida num comentario ou
@@ -158,6 +163,67 @@ def registrar_pergunta(usuario, perfil, pergunta, momento=None, caminho=None):
     return registro
 
 
+# Eventos possiveis no registro de uma resposta (Camada 4, CTRL-AUD-001).
+EVENTOS = ("correto", "incorreto", "bloqueado", "erro")
+
+
+def validar_saida(sql, colunas_resultado):
+    """Aplica a validacao de saida (Camada 4) a uma consulta ja executada.
+
+    Retorna um ResultadoGovernanca. Duas barreiras, nesta ordem:
+
+    - CTRL-VALID-001 (aterramento): toda tabela `gold.X` citada na SQL precisa
+      existir no schema Gold conhecido (config.GOLD_TABLES). Uma tabela inventada
+      pelo modelo bloqueia a resposta, mitigando alucinacao.
+    - CTRL-VALID-002 (filtro de campo sensivel): se qualquer coluna do resultado
+      tiver nome de campo sensivel (config.CAMPOS_SENSIVEIS), a resposta e barrada
+      (RNC-005), mesmo que algo tenha escapado das camadas anteriores.
+    """
+    limpa = _limpar(sql)
+    for tabela in _RE_TABELA_GOLD.findall(limpa):
+        nome = f"gold.{tabela.lower()}"
+        if nome not in config.GOLD_TABLES:
+            return ResultadoGovernanca(
+                False, "CTRL-VALID-001", f"tabela Gold inexistente na saida: {nome}"
+            )
+
+    sensiveis = set(config.CAMPOS_SENSIVEIS)
+    for coluna in colunas_resultado:
+        if str(coluna).lower() in sensiveis:
+            return ResultadoGovernanca(
+                False, "CTRL-VALID-002", f"campo sensivel na saida: {coluna}"
+            )
+
+    return ResultadoGovernanca(True, None, None)
+
+
+def registrar_resposta(usuario, perfil, pergunta, sql, evento, momento=None, caminho=None):
+    """Anexa o registro de saida de uma interacao a trilha de auditoria.
+
+    Grava uma linha JSON com horario, usuario, perfil, pergunta, SQL e o evento
+    (CTRL-AUD-001). O horario padrao ancora em SIM_TODAY (RNC-003). Retorna o
+    dicionario registrado.
+    """
+    assert evento in EVENTOS, f"evento de auditoria desconhecido: {evento!r}"
+    if momento is None:
+        momento = config.SIM_TODAY.isoformat()
+    if caminho is None:
+        caminho = config.AUDIT_LOG_PATH
+
+    registro = {
+        "momento": momento,
+        "evento": evento,
+        "usuario": usuario,
+        "perfil": perfil,
+        "pergunta": pergunta,
+        "sql": sql,
+    }
+    caminho.parent.mkdir(parents=True, exist_ok=True)
+    with open(caminho, "a", encoding="utf-8") as f:
+        f.write(json.dumps(registro, ensure_ascii=False) + "\n")
+    return registro
+
+
 def _autoteste():
     """Valida os guardrails com casos que devem passar e que devem ser barrados."""
     # Casos validos: leitura, escopo autorizado, e protecoes que nao podem gerar
@@ -197,8 +263,28 @@ def _autoteste():
     reg = registrar_pergunta("ana", "gestor", "qual a ocupacao hoje?")
     assert reg["evento"] == "entrada" and reg["momento"] == config.SIM_TODAY.isoformat()
 
+    # Camada 4: validacao de saida.
+    # CTRL-VALID-001 (aterramento): SQL citando tabela Gold inexistente bloqueia.
+    r = validar_saida("SELECT * FROM gold.inexistente", ["x"])
+    assert not r.aprovado and r.controle == "CTRL-VALID-001", "aterramento deveria barrar"
+    # Saida legitima, sem coluna sensivel: aprovada.
+    r = validar_saida(
+        "SELECT unidade, taxa_ocupacao FROM gold.ocupacao_unidade",
+        ["unidade", "taxa_ocupacao"],
+    )
+    assert r.aprovado, f"deveria aprovar a saida: {r.controle}: {r.motivo}"
+    # CTRL-VALID-002 (filtro sensivel): coluna sensivel no resultado bloqueia.
+    r = validar_saida("SELECT * FROM gold.internacoes", ["faixa_etaria", "cpf"])
+    assert not r.aprovado and r.controle == "CTRL-VALID-002", "filtro sensivel deveria barrar"
+
+    # CTRL-AUD-001: o registro da resposta e gravavel, com evento valido.
+    reg2 = registrar_resposta("ana", "gestor", "qual a ocupacao hoje?", "SELECT 1", "correto")
+    assert reg2["evento"] == "correto" and reg2["sql"] == "SELECT 1"
+    assert reg2["momento"] == config.SIM_TODAY.isoformat()
+
     print("governance: autoteste OK")
     print(f"  {len(validos)} casos validos aprovados, {len(bloqueados)} casos bloqueados")
+    print("  validacao de saida: aterramento e filtro sensivel barram; saida limpa passa")
     print(f"  trilha de auditoria: {config.AUDIT_LOG_PATH}")
 
 

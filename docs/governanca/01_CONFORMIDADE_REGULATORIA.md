@@ -46,7 +46,8 @@ Bronze, para tornar a anonimização demonstrável, e nunca sobrevive à Silver
 A coluna **Situação** reflete o estado do protótipo: `config` significa que os
 parâmetros já estão centralizados em `src/config.py`; `projetado` significa que
 o controle está definido no design e a lógica será implementada no módulo
-indicado.
+indicado; `implementado` significa que o controle tem código com teste rápido
+passando.
 
 | ID | Requisito regulatório | Origem | Controle na arquitetura | Camada / módulo | Situação |
 |---|---|---|---|---|---|
@@ -55,9 +56,9 @@ indicado.
 | `REG-LGPD-003` | Minimização na exposição (só o necessário) | LGPD art. 6º (necessidade, adequação) | Apenas a Gold, agregada, é exposta ao motor; Bronze e Silver inacessíveis | Gold / `config.GOLD_TABLES`, CTRL-GOV-004 | config |
 | `REG-LGPD-004` | Controle de acesso por finalidade e perfil | LGPD art. 6º (finalidade); ANVISA RDC | Perfis `gestor`, `enfermagem`, `administrativo` autorizam só tabelas Gold específicas | Entrada / `config.PERFIS`, CTRL-GOV-005 | config |
 | `REG-LGPD-005` | Segurança e prevenção de comando indevido | LGPD art. 46; art. 6º (segurança, prevenção) | Guardrails CTRL-GOV-001 a 003 e 006: SQL única somente leitura, bloqueio de escrita/admin, bloqueio de múltiplas instruções, conexão read-only | Entrada / `governance.py` | projetado |
-| `REG-LGPD-006` | Prevenção de vazamento de sensível na resposta | LGPD art. 11; ANPD (uso secundário) | Filtro de saída CTRL-VALID-002: bloqueia coluna com nome de campo sensível | Saída / `config.CAMPOS_SENSIVEIS`, `governance.py` | config |
-| `REG-LGPD-007` | Rastreabilidade e prestação de contas | LGPD art. 6º (responsabilização); ANVISA RDC | Auditoria CTRL-AUD-001: registro de toda pergunta e resposta com timestamp, usuário, perfil, SQL e evento | Auditoria / `governance.py` | projetado |
-| `REG-ANPD-001` | Mitigação de alucinação da IA generativa | ANPD, Radar de IA Generativa | Aterramento CTRL-VALID-001: toda tabela citada deve existir no schema Gold conhecido | Saída / `governance.py` | projetado |
+| `REG-LGPD-006` | Prevenção de vazamento de sensível na resposta | LGPD art. 11; ANPD (uso secundário) | Filtro de saída CTRL-VALID-002: bloqueia coluna com nome de campo sensível | Saída / `config.CAMPOS_SENSIVEIS`, `governance.validar_saida` | implementado |
+| `REG-LGPD-007` | Rastreabilidade e prestação de contas | LGPD art. 6º (responsabilização); ANVISA RDC | Auditoria CTRL-AUD-001: registro de toda pergunta e resposta com timestamp, usuário, perfil, SQL e evento | Auditoria / `governance.registrar_pergunta`, `governance.registrar_resposta` | implementado |
+| `REG-ANPD-001` | Mitigação de alucinação da IA generativa | ANPD, Radar de IA Generativa | Aterramento CTRL-VALID-001: toda tabela citada deve existir no schema Gold conhecido | Saída / `governance.validar_saida` | implementado |
 | `REG-ANPD-002` | Prevenção de uso secundário não autorizado | ANPD, Radar de IA Generativa | Escopo restrito por perfil, execução somente leitura e registro integral limitam o uso ao fim declarado | Entrada e Auditoria / `governance.py` | projetado |
 | `REG-ANVISA-001` | Controle, segurança e rastreabilidade do SaMD | ANVISA RDC 657/751/830 | Conjunto de guardrails versionados, auditoria e reprodutibilidade do software | Transversal / `governance.py`, CI | projetado |
 | `REG-PESQ-001` | Reprodutibilidade e integridade do experimento | Boas práticas de pesquisa; suporte à responsabilização | Determinismo por `SEED` e `SIM_TODAY`; dados sintéticos; separação motor LLM (números) vs oráculo (autoteste) | Transversal / `config.py`, `nl2sql.py`, CI | config |

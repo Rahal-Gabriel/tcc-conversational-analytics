@@ -31,7 +31,7 @@ A documentação cumpre dois papéis ao mesmo tempo:
 | Requisitos Regulatórios (REG-*) | 11 |
 | Controles de Governança (CTRL-*) | 9 |
 | Critérios de Avaliação (AVAL-*) | 3 |
-| Resultados Preliminares (RES-*) | 5 |
+| Resultados Preliminares (RES-*) | 6 |
 
 > Os totais são mantidos manualmente. Ao adicionar ou remover um identificador,
 > atualize esta tabela e a contagem no módulo de origem.
@@ -131,7 +131,7 @@ Lakehouse), `GOV` (governança de entrada), `NL2SQL` (motor Text-to-SQL),
 | `IMPLEMENTADO` | Código pronto e com teste rápido passando |
 | `VALIDADO` | Resultado verificado por execução real (números reprodutíveis) |
 
-## Estado atual (2026-06-04)
+## Estado atual (2026-06-15)
 
 | Módulo | Status |
 |---|---|
@@ -140,10 +140,10 @@ Lakehouse), `GOV` (governança de entrada), `NL2SQL` (motor Text-to-SQL),
 | arquitetura/03_REGRAS_CRITICAS | PARCIAL |
 | camadas/01_PIPELINE_LAKEHOUSE | IMPLEMENTADO (Bronze, Silver e Gold) |
 | camadas/02_GOVERNANCA_ENTRADA | IMPLEMENTADO |
-| camadas/03_MOTOR_TEXT2SQL | PROJETADO |
-| camadas/04_VALIDACAO_SAIDA | PROJETADO |
+| camadas/03_MOTOR_TEXT2SQL | IMPLEMENTADO (oráculo e LLM; números do LLM pendentes de execução real) |
+| camadas/04_VALIDACAO_SAIDA | IMPLEMENTADO |
 | governanca/01_CONFORMIDADE_REGULATORIA | PARCIAL |
-| avaliacao/01_METODOLOGIA_AVALIACAO | PROJETADO |
+| avaliacao/01_METODOLOGIA_AVALIACAO | IMPLEMENTADO (tubulação verde no oráculo; acurácia do LLM pendente) |
 | avaliacao/02_REPRODUTIBILIDADE_CI | IMPLEMENTADO |
 | tcc/01_RESULTADOS_PRELIMINARES | documento vivo |
 | tcc/02_MAPA_DOC_PARA_TEMPLATE | referência |

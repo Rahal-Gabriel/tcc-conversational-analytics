@@ -1,8 +1,8 @@
 # VALID: Camada 4 - Validação de Saída
 
-**Status**: PROJETADO
+**Status**: IMPLEMENTADO
 **Prioridade**: CRÍTICA
-**Última atualização**: 2026-06-04
+**Última atualização**: 2026-06-15
 **Alimenta (template TCC)**: Metodologia · Resultados Preliminares
 
 ---
@@ -30,7 +30,7 @@ A serem implementados em `src/governance.py`.
   LLM bloqueia a consulta.
 - **Motivação**: Mitigar alucinação, risco destacado pela ANPD no Radar de IA
   Generativa.
-- **Status**: PROJETADO.
+- **Status**: IMPLEMENTADO (`src/governance.py:validar_saida`).
 - **Relacionado**: [DA-VALID-001](../arquitetura/02_DECISOES_ARQUITETURAIS.md#da-valid-001-aterramento-contra-o-schema-gold-conhecido).
 
 ### CTRL-VALID-002: Filtro de campo sensível
@@ -40,8 +40,8 @@ A serem implementados em `src/governance.py`.
   bloqueada.
 - **Motivação**: Última barreira contra vazamento de dado sensível, mesmo que
   algo tenha escapado das camadas anteriores.
-- **Status**: PROJETADO.
-- **Código**: `src/config.py:51` (`CAMPOS_SENSIVEIS`).
+- **Status**: IMPLEMENTADO (`src/governance.py:validar_saida`).
+- **Código**: `src/config.py:59` (`CAMPOS_SENSIVEIS`).
 - **Relacionado**: [DA-VALID-002](../arquitetura/02_DECISOES_ARQUITETURAIS.md#da-valid-002-filtro-de-saída-por-nome-de-campo-sensível),
   [RNC-005](../arquitetura/03_REGRAS_CRITICAS.md#rnc-005-pii-nunca-sobrevive-à-silver).
 
@@ -53,12 +53,12 @@ A serem implementados em `src/governance.py`.
 - **Motivação**: Rastreabilidade e prestação de contas, exigidas tanto pela
   LGPD (responsabilização) quanto pelas normas da ANVISA (rastreabilidade do
   software de saúde).
-- **Status**: PARCIAL. O registro de entrada (pergunta) já está implementado em
-  `src/governance.py:registrar_pergunta`; falta o registro da resposta, que
-  entra junto com a validação de saída desta camada.
+- **Status**: IMPLEMENTADO. Registro de entrada em
+  `src/governance.py:registrar_pergunta` e registro de resposta em
+  `src/governance.py:registrar_resposta`, com o evento da interação.
 - **Código**: `src/config.py:37` (`AUDIT_LOG_PATH`);
-  `src/governance.py:registrar_pergunta` (entrada); registro de resposta a
-  implementar.
+  `src/governance.py:registrar_pergunta` (entrada);
+  `src/governance.py:registrar_resposta` (resposta e evento).
 - **Relacionado**: [REG-LGPD-007](../governanca/01_CONFORMIDADE_REGULATORIA.md),
   [REG-ANVISA-001](../governanca/01_CONFORMIDADE_REGULATORIA.md).
 
@@ -81,10 +81,14 @@ A completude do log é um dos indicadores de avaliação
 | Campos sensíveis | `src/config.py:59` (`CAMPOS_SENSIVEIS`) | IMPLEMENTADO |
 | Caminho do log de auditoria | `src/config.py:37` (`AUDIT_LOG_PATH`) | IMPLEMENTADO |
 | Registro de auditoria da entrada | `src/governance.py:registrar_pergunta` | IMPLEMENTADO |
-| Aterramento, filtro de saída e registro da resposta | `src/governance.py` | PROJETADO |
+| Aterramento e filtro de saída | `src/governance.py:validar_saida` | IMPLEMENTADO |
+| Registro da resposta e evento | `src/governance.py:registrar_resposta` | IMPLEMENTADO |
 
-## 5. Teste rápido (a implementar)
+## 5. Teste rápido
 
-Casos que **devem** bloquear: SQL que cita uma tabela Gold inexistente
-(aterramento) e resultado cuja projeção inclui uma coluna sensível (filtro de
-saída). Cada caso vira um teste no bloco `__main__` de `governance.py`.
+`python -m src.governance`: além dos casos de entrada, cobre os casos que
+**devem** bloquear na saída — SQL que cita uma tabela Gold inexistente
+(aterramento, CTRL-VALID-001) e resultado cuja projeção inclui uma coluna
+sensível (filtro de saída, CTRL-VALID-002) — e confirma que `registrar_resposta`
+grava a interação com o evento. O fluxo completo (entrada → execução → saída →
+auditoria) é exercitado de ponta a ponta em `python run_all.py oracle`.

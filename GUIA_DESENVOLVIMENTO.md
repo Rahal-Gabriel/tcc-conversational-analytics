@@ -93,15 +93,15 @@ tcc-conversational-analytics/
   GUIA_DESENVOLVIMENTO.md             # este hub de navegação
   README.md             # apresentação do protótipo
   docs/                 # documentação modular (ver docs/README.md)
-  run_all.py            # orquestrador: gera dados, constroi pipeline, avalia (a implementar)
+  run_all.py            # orquestrador: gera dados, constroi pipeline, avalia (oracle/llm)
   src/
     config.py           # SIM_TODAY, SEED, volumes, perfis, modelo do LLM
     data_gen.py         # geracao sintetica -> Bronze
-    pipeline.py         # Bronze -> Silver -> Gold (a implementar)
-    governance.py       # guardrails de entrada/saida e auditoria (a implementar)
-    nl2sql.py           # motor Text-to-SQL (LLM real) + oraculo (a implementar)
-    questions.py        # conjunto de avaliacao (a implementar)
-    evaluate.py         # execution match, governanca, indicadores (a implementar)
+    pipeline.py         # Bronze -> Silver -> Gold
+    governance.py       # guardrails de entrada/saida e auditoria
+    nl2sql.py           # motor Text-to-SQL (LLM real) + oraculo
+    questions.py        # conjunto de avaliacao (pergunta PT + SQL de referencia)
+    evaluate.py         # execution match, governanca, indicadores
   data/                 # banco DuckDB gerado (nao versionar)
   results/              # saidas de avaliacao e log de auditoria (nao versionar)
 ```
@@ -132,7 +132,7 @@ Ciclo de status dos módulos: `PROJETADO` → `PARCIAL` → `IMPLEMENTADO` →
 
 ## Configuração do LLM
 
-Lida do ambiente, nunca embutida no código (`src/config.py:70-73`):
+Lida do ambiente, nunca embutida no código (`src/config.py:77-80`):
 
 ```bash
 export ANTHROPIC_API_KEY="sua-chave"

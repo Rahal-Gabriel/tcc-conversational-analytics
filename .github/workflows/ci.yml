@@ -34,11 +34,15 @@ jobs:
       - name: Testes rapidos dos modulos
         run: |
           python -m src.config
+          python -m src.questions
+          python -m src.governance
+          python -m src.nl2sql
 
-      # Autoteste da tubulacao completa com o motor oraculo. Descomente quando
-      # run_all.py estiver implementado.
-      # - name: Autoteste do pipeline (oraculo)
-      #   run: python run_all.py oracle
+      # Autoteste da tubulacao completa com o motor oraculo: geracao -> governanca
+      # -> execucao -> avaliacao. Exige 100% de execution match (RNC-002). O modo
+      # LLM nunca roda aqui: exige chave e tem custo.
+      - name: Autoteste do pipeline (oraculo)
+        run: python run_all.py oracle
 
   # Prova que a imagem reprodutivel constroi e roda o mesmo teste rapido que o
   # job acima. E o que sustenta a afirmacao de reprodutibilidade (RNC-003): o

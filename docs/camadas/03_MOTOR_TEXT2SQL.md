@@ -1,8 +1,8 @@
 # NL2SQL: Camada 3 - Motor Text-to-SQL
 
-**Status**: PROJETADO
+**Status**: IMPLEMENTADO (os números do motor LLM dependem de execução real com chave, RNC-002)
 **Prioridade**: ALTA
-**Última atualização**: 2026-06-04
+**Última atualização**: 2026-06-15
 **Alimenta (template TCC)**: Metodologia · Resultados Preliminares
 
 ---
@@ -35,7 +35,7 @@ Conforme [DA-NL2SQL-002](../arquitetura/02_DECISOES_ARQUITETURAIS.md#da-nl2sql-0
 - **Saída exigida**: uma única SQL somente leitura, sem markdown e sem
   explicação.
 
-Configuração da chamada (`src/config.py:70-73`):
+Configuração da chamada (`src/config.py:77-80`):
 
 | Parâmetro | Valor |
 |---|---|
@@ -57,12 +57,17 @@ Configuração da chamada (`src/config.py:70-73`):
 
 | Item | Local | Status |
 |---|---|---|
-| Motor LLM e motor oráculo | `src/nl2sql.py` | PROJETADO |
-| Parâmetros do LLM | `src/config.py:70-73` | IMPLEMENTADO |
-| Conjunto pergunta → SQL de referência | `src/questions.py` | PROJETADO |
+| Motor LLM e motor oráculo | `src/nl2sql.py` | IMPLEMENTADO |
+| Interface comum dos motores | `src/nl2sql.py:obter_motor` | IMPLEMENTADO |
+| Descrição do schema Gold para o prompt | `src/nl2sql.py:descrever_schema_gold` | IMPLEMENTADO |
+| Parâmetros do LLM | `src/config.py:75-80` | IMPLEMENTADO |
+| Conjunto pergunta → SQL de referência | `src/questions.py` | IMPLEMENTADO (10 perguntas) |
 
-## 6. Teste rápido (a implementar)
+## 6. Teste rápido
 
-Com o motor oráculo, toda pergunta do conjunto de avaliação deve produzir a
-própria SQL de referência, e o execution match deve resultar em 100% (autoteste
-da tubulação). Qualquer divergência indica erro no harness, não no modelo.
+`python -m src.nl2sql`: com o motor oráculo, toda pergunta do conjunto de
+avaliação produz a própria SQL de referência (autoteste da tubulação). O motor
+LLM só é exercitado quando há `ANTHROPIC_API_KEY` no ambiente; sem chave, é
+pulado (a CI nunca o executa). O execution match de 100% do oráculo é verificado
+de ponta a ponta em `python run_all.py oracle`. Qualquer divergência indica erro
+no harness, não no modelo (RNC-002).

@@ -1,8 +1,8 @@
 # AVAL: Metodologia de Avaliação
 
-**Status**: PROJETADO
+**Status**: IMPLEMENTADO (tubulação verde no oráculo; acurácia do LLM pendente de execução real)
 **Prioridade**: ALTA
-**Última atualização**: 2026-06-04
+**Última atualização**: 2026-06-15
 **Alimenta (template TCC)**: Metodologia · Resultados Preliminares
 
 ---
@@ -30,9 +30,10 @@ implementação do harness e uma execução real com o motor LLM
   idênticos.
 - **Normalização** antes de comparar
   ([DA-AVAL-002](../arquitetura/02_DECISOES_ARQUITETURAIS.md#da-aval-002-normalização-dos-resultados-antes-de-comparar)):
-  floats arredondados, datas em ISO, linhas ordenadas.
+  floats arredondados, datas em ISO, linhas ordenadas
+  (`src/evaluate.py:normalizar`).
 - **Referência**: estilo do benchmark EHRSQL 2024.
-- **Status**: PROJETADO.
+- **Status**: IMPLEMENTADO (comparação por execution match em `src/evaluate.py:avaliar`).
 - **Relacionado**: [DA-AVAL-001](../arquitetura/02_DECISOES_ARQUITETURAIS.md#da-aval-001-execution-match-no-estilo-ehrsql).
 
 ### AVAL-002 e AVAL-003
@@ -43,10 +44,12 @@ regulatória nos Resultados.
 
 ## 3. Conjunto de avaliação
 
-A implementar em `src/questions.py`: cada item é um par (pergunta em português,
-SQL de referência sobre a Gold). O conjunto cobre os tipos de pergunta
-operacional do domínio de ocupação de leitos (status atual, métricas por
-unidade, série histórica, internações por faixa etária).
+Implementado em `src/questions.py`: cada item é um par (pergunta em português,
+SQL de referência sobre a Gold), com perfil e tipo. O conjunto inicial tem **10
+perguntas** cobrindo os quatro tipos operacionais do domínio de ocupação de
+leitos: status atual (3), métrica por unidade (3), série histórica (2) e
+internações por faixa etária (2). Toda SQL de referência é determinista (ancorada
+em `SIM_TODAY`) e passa pelos guardrails de entrada no escopo do próprio perfil.
 
 ## 4. Os dois motores na avaliação
 
@@ -62,9 +65,10 @@ Defesa em profundidade: a execução usa conexão DuckDB somente leitura
 
 | Item | Local | Status |
 |---|---|---|
-| Conjunto pergunta → SQL de referência | `src/questions.py` | PROJETADO |
-| Execution match e indicadores | `src/evaluate.py` | PROJETADO |
-| Orquestração (`oracle` / `llm`) | `run_all.py` | PROJETADO |
+| Conjunto pergunta → SQL de referência | `src/questions.py` | IMPLEMENTADO (10 perguntas) |
+| Normalização dos resultados | `src/evaluate.py:normalizar` | IMPLEMENTADO |
+| Execution match e indicadores AVAL-001/002/003 | `src/evaluate.py:avaliar` | IMPLEMENTADO |
+| Orquestração (`oracle` / `llm`) | `run_all.py` | IMPLEMENTADO |
 
 ## 6. Definição de pronto da avaliação
 
