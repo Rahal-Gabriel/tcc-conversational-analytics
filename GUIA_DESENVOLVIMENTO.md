@@ -47,11 +47,17 @@ Em resumo:
    (`REG-*` ↔ `CTRL-*`).
 4. Atualize o status do módulo e os números do portal ao concluir.
 
-### Para escrever o TCC (Resultados Preliminares)
+### Para escrever o TCC (Resultados Preliminares e versão final)
 1. [docs/tcc/02_MAPA_DOC_PARA_TEMPLATE.md](docs/tcc/02_MAPA_DOC_PARA_TEMPLATE.md)
    - qual módulo alimenta cada seção do template.
 2. [docs/tcc/01_RESULTADOS_PRELIMINARES.md](docs/tcc/01_RESULTADOS_PRELIMINARES.md)
    - registro vivo dos resultados verificáveis (`RES-*`).
+3. [docs/referencias/README.md](docs/referencias/README.md) - base de literatura
+   em fichas por tema; toda citação do TCC deve sair daqui, e a lista formatada
+   está em [docs/referencias/08_REFERENCIAS_FORMATADAS.md](docs/referencias/08_REFERENCIAS_FORMATADAS.md).
+4. [docs/referencias/07_MAPA_LITERATURA_PARA_CAMINHOS.md](docs/referencias/07_MAPA_LITERATURA_PARA_CAMINHOS.md)
+   - antes de desenhar qualquer experimento novo, ler o que a literatura já
+   sabe sobre ele. Templates e manual oficiais ficam em `docs-tcc/`.
 
 ## Mapa de módulos por área
 

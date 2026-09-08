@@ -25,7 +25,7 @@ A documentação cumpre dois papéis ao mesmo tempo:
 
 | Métrica | Total |
 |---|---|
-| Arquivos de documentação | 13 |
+| Arquivos de documentação | 22 |
 | Decisões Arquiteturais (DA-*) | 15 |
 | Regras Críticas (RNC-*) | 5 |
 | Requisitos Regulatórios (REG-*) | 11 |
@@ -55,10 +55,15 @@ docs/
 ├── avaliacao/
 │   ├── 01_METODOLOGIA_AVALIACAO.md     # Execution match, EHRSQL, indicadores
 │   └── 02_REPRODUTIBILIDADE_CI.md      # Determinismo, versionamento, CI
-└── tcc/
-    ├── 01_RESULTADOS_PRELIMINARES.md   # Registro vivo de resultados (RES-*)
-    ├── 02_MAPA_DOC_PARA_TEMPLATE.md    # Ponte doc → seção do template do TCC
-    └── 03_RASCUNHO_RESULTADOS_PRELIMINARES.md  # Rascunho da seção para o template
+├── tcc/
+│   ├── 01_RESULTADOS_PRELIMINARES.md   # Registro vivo de resultados (RES-*)
+│   ├── 02_MAPA_DOC_PARA_TEMPLATE.md    # Ponte doc → seção do template do TCC
+│   └── 03_RASCUNHO_RESULTADOS_PRELIMINARES.md  # Rascunho da seção para o template
+└── referencias/                        # Base de literatura para a conclusão (fichas por tema)
+    ├── README.md                       # Protocolo da busca, legenda de verificação, síntese
+    ├── 01..06_*.md                     # Fichas: Text-to-SQL clínico, métricas, governança, regulação, método, português
+    ├── 07_MAPA_LITERATURA_PARA_CAMINHOS.md  # O que a literatura diz sobre cada caminho da conclusão
+    └── 08_REFERENCIAS_FORMATADAS.md    # Lista no padrão USP/Esalq
 ```
 
 A navegação por tarefa (como usar a doc, mapa cruzado de módulos, prioridades
@@ -108,6 +113,20 @@ de leitura) fica no [GUIA_DESENVOLVIMENTO.md](../GUIA_DESENVOLVIMENTO.md) na rai
 | 02 | [tcc/02_MAPA_DOC_PARA_TEMPLATE.md](tcc/02_MAPA_DOC_PARA_TEMPLATE.md) | - | Ponte de cada módulo/ID para a seção do template |
 | 03 | [tcc/03_RASCUNHO_RESULTADOS_PRELIMINARES.md](tcc/03_RASCUNHO_RESULTADOS_PRELIMINARES.md) | - | Rascunho da seção Resultados Preliminares para o template |
 
+## Módulos - Referências (base de literatura)
+
+| # | Arquivo | Descrição |
+|---|---|---|
+| - | [referencias/README.md](referencias/README.md) | Protocolo da busca (2026-09-08), legenda de verificação e síntese |
+| 01 | [referencias/01_TEXT2SQL_CLINICO.md](referencias/01_TEXT2SQL_CLINICO.md) | Sistemas e benchmarks de Text-to-SQL em saúde, com tabela comparativa |
+| 02 | [referencias/02_METRICAS_E_AVALIACAO.md](referencias/02_METRICAS_E_AVALIACAO.md) | Execution match, test suite, Soft F1, Reliability Score, não determinismo, IC de Wilson |
+| 03 | [referencias/03_GOVERNANCA_E_SEGURANCA.md](referencias/03_GOVERNANCA_E_SEGURANCA.md) | RBAC em Text-to-SQL, P2SQL, guardrails, governança de agentes |
+| 04 | [referencias/04_REGULACAO_BRASIL.md](referencias/04_REGULACAO_BRASIL.md) | LGPD, ANPD, ANVISA e literatura jurídica nacional |
+| 05 | [referencias/05_METODO_E_DADOS_SINTETICOS.md](referencias/05_METODO_E_DADOS_SINTETICOS.md) | Estudo de caso, arquitetura de referência, Synthea, lakehouse |
+| 06 | [referencias/06_PORTUGUES_E_BRASIL.md](referencias/06_PORTUGUES_E_BRASIL.md) | Text-to-SQL em português e produção brasileira |
+| 07 | [referencias/07_MAPA_LITERATURA_PARA_CAMINHOS.md](referencias/07_MAPA_LITERATURA_PARA_CAMINHOS.md) | O que a literatura diz sobre cada caminho da conclusão do TCC |
+| 08 | [referencias/08_REFERENCIAS_FORMATADAS.md](referencias/08_REFERENCIAS_FORMATADAS.md) | Lista de referências no padrão USP/Esalq |
+
 ## Convenções de identificadores
 
 | Prefixo | Tipo | Exemplo |
@@ -133,7 +152,7 @@ Lakehouse), `GOV` (governança de entrada), `NL2SQL` (motor Text-to-SQL),
 | `IMPLEMENTADO` | Código pronto e com teste rápido passando |
 | `VALIDADO` | Resultado verificado por execução real (números reprodutíveis) |
 
-## Estado atual (2026-06-15)
+## Estado atual (2026-09-08)
 
 | Módulo | Status |
 |---|---|
@@ -149,3 +168,4 @@ Lakehouse), `GOV` (governança de entrada), `NL2SQL` (motor Text-to-SQL),
 | avaliacao/02_REPRODUTIBILIDADE_CI | IMPLEMENTADO |
 | tcc/01_RESULTADOS_PRELIMINARES | documento vivo |
 | tcc/02_MAPA_DOC_PARA_TEMPLATE | referência |
+| referencias/* | base consolidada (revisão de 2026-09-08; itens ◐/⚠ a conferir antes do depósito) |
