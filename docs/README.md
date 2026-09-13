@@ -25,13 +25,13 @@ A documentação cumpre dois papéis ao mesmo tempo:
 
 | Métrica | Total |
 |---|---|
-| Arquivos de documentação | 22 |
-| Decisões Arquiteturais (DA-*) | 15 |
+| Arquivos de documentação | 24 |
+| Decisões Arquiteturais (DA-*) | 16 |
 | Regras Críticas (RNC-*) | 5 |
 | Requisitos Regulatórios (REG-*) | 11 |
-| Controles de Governança (CTRL-*) | 9 |
+| Controles de Governança (CTRL-*) | 10 |
 | Critérios de Avaliação (AVAL-*) | 3 |
-| Resultados Preliminares (RES-*) | 7 |
+| Resultados Preliminares (RES-*) | 8 |
 
 > Os totais são mantidos manualmente. Ao adicionar ou remover um identificador,
 > atualize esta tabela e a contagem no módulo de origem.
@@ -59,7 +59,8 @@ docs/
 │   ├── 01_RESULTADOS_PRELIMINARES.md   # Registro vivo de resultados (RES-*)
 │   ├── 02_MAPA_DOC_PARA_TEMPLATE.md    # Ponte doc → seção do template do TCC
 │   ├── 03_RASCUNHO_RESULTADOS_PRELIMINARES.md  # Rascunho da seção para o template
-│   └── banca/                          # Rodadas da banca simulada (/banca)
+│   ├── banca/                          # Rodadas da banca simulada (/banca)
+│   └── etapas/                         # Registro de cada etapa da fase de conclusão (insumo da redação)
 └── referencias/                        # Base de literatura para a conclusão (fichas por tema)
     ├── README.md                       # Protocolo da busca, legenda de verificação, síntese
     ├── 01..06_*.md                     # Fichas: Text-to-SQL clínico, métricas, governança, regulação, método, português
@@ -114,6 +115,7 @@ de leitura) fica no [GUIA_DESENVOLVIMENTO.md](../GUIA_DESENVOLVIMENTO.md) na rai
 | 02 | [tcc/02_MAPA_DOC_PARA_TEMPLATE.md](tcc/02_MAPA_DOC_PARA_TEMPLATE.md) | - | Ponte de cada módulo/ID para a seção do template |
 | 03 | [tcc/03_RASCUNHO_RESULTADOS_PRELIMINARES.md](tcc/03_RASCUNHO_RESULTADOS_PRELIMINARES.md) | - | Rascunho da seção Resultados Preliminares para o template |
 | - | [tcc/banca/README.md](tcc/banca/README.md) | - | Rodadas da banca simulada: perguntas, lacunas e riscos por etapa |
+| - | [tcc/etapas/README.md](tcc/etapas/README.md) | - | Registro de cada etapa da fase de conclusão: o que mudou, evidências e texto para a Discussão |
 
 ## Módulos - Referências (base de literatura)
 
@@ -154,14 +156,14 @@ Lakehouse), `GOV` (governança de entrada), `NL2SQL` (motor Text-to-SQL),
 | `IMPLEMENTADO` | Código pronto e com teste rápido passando |
 | `VALIDADO` | Resultado verificado por execução real (números reprodutíveis) |
 
-## Estado atual (2026-09-08)
+## Estado atual (2026-09-13)
 
 | Módulo | Status |
 |---|---|
 | arquitetura/01_VISAO_GERAL | IMPLEMENTADO |
 | arquitetura/02_DECISOES_ARQUITETURAIS | PARCIAL |
 | arquitetura/03_REGRAS_CRITICAS | PARCIAL |
-| camadas/01_PIPELINE_LAKEHOUSE | IMPLEMENTADO (Bronze, Silver e Gold) |
+| camadas/01_PIPELINE_LAKEHOUSE | IMPLEMENTADO (Bronze, Silver, Gold e Gold isolada) |
 | camadas/02_GOVERNANCA_ENTRADA | IMPLEMENTADO |
 | camadas/03_MOTOR_TEXT2SQL | IMPLEMENTADO (oráculo e LLM; números do LLM pendentes de execução real) |
 | camadas/04_VALIDACAO_SAIDA | IMPLEMENTADO |

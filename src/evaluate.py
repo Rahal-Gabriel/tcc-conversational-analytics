@@ -301,7 +301,7 @@ def _autoteste():
     """Garante os dados e roda a avaliacao com o oraculo: deve dar 100%."""
     from src import data_gen, pipeline
 
-    if not config.DB_PATH.exists():
+    if not (config.DB_PATH.exists() and config.GOLD_DB_PATH.exists()):
         data_gen.construir()
         pipeline.construir()
 

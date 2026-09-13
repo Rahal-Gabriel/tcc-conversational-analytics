@@ -1,10 +1,16 @@
 """Transformacao do lakehouse: Bronze -> Silver -> Gold, em DuckDB.
 
-A Silver limpa e anonimiza (RNC-005): remove a PII direta (nome, cpf,
+A Silver limpa e pseudonimiza (RNC-005): remove a PII direta (nome, cpf,
 data_nascimento), pseudonimiza id_paciente por hash com salt e deriva a
-faixa etaria. A Gold expoe apenas metricas agregadas e e a unica camada visivel
-ao motor de linguagem (DA-LAKE-003). Tudo e determinista: a idade e calculada
-contra SIM_TODAY, nunca contra o relogio do sistema (RNC-003).
+faixa etaria. A Gold expoe apenas metricas e e a unica camada visivel ao motor
+de linguagem (DA-LAKE-003). Tudo e determinista: a idade e calculada contra
+SIM_TODAY, nunca contra o relogio do sistema (RNC-003).
+
+Isolamento fisico (DA-LAKE-005): alem de viver no lakehouse, a Gold e exportada
+para um arquivo DuckDB proprio (config.GOLD_DB_PATH) que contem so as quatro
+tabelas. O motor e o avaliador conectam-se apenas a esse arquivo, de modo que
+Bronze e Silver nao existem para eles, independentemente do texto da SQL. A
+verificacao textual dos guardrails passa a ser uma barreira a mais, nao a unica.
 
 Depende da Bronze (rode src.data_gen antes, ou use o autoteste daqui que ja a
 gera).
@@ -160,12 +166,34 @@ def construir_gold(con):
     )
 
 
+def exportar_gold(con):
+    """Copia as tabelas Gold para o arquivo isolado (DA-LAKE-005).
+
+    Recria o arquivo do zero a cada execucao (idempotente e determinista). O
+    schema dentro do arquivo tambem se chama `gold`, para que a SQL do motor
+    (`gold.tabela`) seja identica nas duas bases.
+    """
+    config.GOLD_DB_PATH.unlink(missing_ok=True)
+    con.execute(f"ATTACH '{config.GOLD_DB_PATH}' AS gold_isolada")
+    try:
+        con.execute("CREATE SCHEMA IF NOT EXISTS gold_isolada.gold")
+        for tabela in config.GOLD_TABLES:
+            nome = tabela.split(".", 1)[1]
+            con.execute(
+                f"CREATE OR REPLACE TABLE gold_isolada.gold.{nome} AS "
+                f"SELECT * FROM gold.{nome}"
+            )
+    finally:
+        con.execute("DETACH gold_isolada")
+
+
 def construir():
-    """Constroi Silver e Gold sobre a Bronze existente. Retorna contagens."""
+    """Constroi Silver e Gold sobre a Bronze e exporta a Gold isolada."""
     con = duckdb.connect(str(config.DB_PATH))
     try:
         construir_silver(con)
         construir_gold(con)
+        exportar_gold(con)
         contagens = {}
         for schema, tabela in (
             ("silver", "paciente"),
@@ -275,7 +303,57 @@ def _autoteste():
     finally:
         con.close()
 
+    # DA-LAKE-005 / CTRL-GOV-007: o arquivo isolado tem as quatro tabelas Gold,
+    # identicas as do lakehouse, e nada alem delas. Bronze e Silver nao existem
+    # nele, mesmo para consultas que contornem a analise textual.
+    iso = duckdb.connect(str(config.GOLD_DB_PATH), read_only=True)
+    try:
+        schemas = {
+            s for (s,) in iso.execute(
+                "SELECT DISTINCT table_schema FROM information_schema.tables"
+            ).fetchall()
+        }
+        assert schemas == {"gold"}, f"schemas inesperados na Gold isolada: {schemas}"
+        tabelas = {
+            f"gold.{t}" for (t,) in iso.execute(
+                "SELECT table_name FROM information_schema.tables WHERE table_schema = 'gold'"
+            ).fetchall()
+        }
+        assert tabelas == set(config.GOLD_TABLES), f"tabelas na Gold isolada: {tabelas}"
+        for tabela, n in contagens.items():
+            if tabela.startswith("gold."):
+                m = iso.execute(f"SELECT COUNT(*) FROM {tabela}").fetchone()[0]
+                assert m == n, f"{tabela}: {m} linhas na isolada, {n} no lakehouse"
+        colunas = {
+            c for (c,) in iso.execute(
+                "SELECT column_name FROM information_schema.columns"
+            ).fetchall()
+        }
+        sensiveis = set(config.CAMPOS_SENSIVEIS) & colunas
+        assert not sensiveis, f"campo sensivel na Gold isolada: {sensiveis}"
+        # As tres consultas que contornavam a analise textual antes do isolamento
+        # (banca, rodada 01, P-09) agora falham no proprio banco.
+        for sql in (
+            "SELECT nome, cpf FROM query_table('bronze.paciente') LIMIT 1",
+            "SELECT * FROM silver.paciente LIMIT 1",
+            "SELECT * FROM bronze.paciente LIMIT 1",
+        ):
+            try:
+                iso.execute(sql)
+                raise AssertionError(f"a Gold isolada respondeu a: {sql}")
+            except duckdb.Error:
+                pass
+        # O catalogo da Gold isolada so revela a propria Gold.
+        internas = iso.execute(
+            "SELECT COUNT(*) FROM duckdb_tables() WHERE schema_name IN ('bronze', 'silver')"
+        ).fetchone()[0]
+        assert internas == 0, "catalogo da Gold isolada revela camadas internas"
+    finally:
+        iso.close()
+
     print("pipeline: autoteste OK")
+    print(f"  Gold isolada em {config.GOLD_DB_PATH}: so schema gold, sem campo sensivel; "
+          "bronze/silver inacessiveis")
 
 
 if __name__ == "__main__":

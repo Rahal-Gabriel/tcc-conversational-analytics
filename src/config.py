@@ -34,6 +34,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
 RESULTS_DIR = BASE_DIR / "results"
 DB_PATH = DATA_DIR / "lakehouse.duckdb"
+# Arquivo separado que contem APENAS a camada Gold (DA-LAKE-005). E a unica
+# base a que o motor e o avaliador se conectam: Bronze e Silver nao existem
+# fisicamente para quem consulta por aqui, seja qual for a SQL (RNC-005).
+GOLD_DB_PATH = DATA_DIR / "gold_isolada.duckdb"
 AUDIT_LOG_PATH = RESULTS_DIR / "auditoria.log"
 
 # Modelo de dados Gold (unica camada exposta ao motor de linguagem)

@@ -1,8 +1,8 @@
 # LAKE: Camada 1 - Pipeline Lakehouse
 
-**Status**: IMPLEMENTADO (Bronze, Silver e Gold com teste rápido passando)
+**Status**: IMPLEMENTADO (Bronze, Silver, Gold e Gold isolada com teste rápido passando)
 **Prioridade**: ALTA
-**Última atualização**: 2026-06-04
+**Última atualização**: 2026-09-13
 **Alimenta (template TCC)**: Metodologia · Resultados Preliminares
 
 ---
@@ -94,6 +94,26 @@ encerradas (nulo se ativa); `taxa_ocupacao` em percentual `[0,100]`. A Gold
 > faixa etária, internações ativas) estão em
 > [RES-005](../tcc/01_RESULTADOS_PRELIMINARES.md#res-005-camadas-silver-e-gold-anonimizadas-e-agregadas).
 
+### 4.1. Gold isolada (arquivo próprio) - IMPLEMENTADA
+
+Conforme [DA-LAKE-005](../arquitetura/02_DECISOES_ARQUITETURAIS.md#da-lake-005-isolamento-físico-da-gold-em-arquivo-próprio),
+`src/pipeline.py:exportar_gold` copia as quatro tabelas Gold para
+`data/gold_isolada.duckdb` (`config.GOLD_DB_PATH`), recriado do zero a cada
+execução. O schema dentro do arquivo também se chama `gold`, para que a SQL do
+motor (`gold.tabela`) seja idêntica nas duas bases. O nome do arquivo é
+`gold_isolada`, e não `gold`, porque o DuckDB usa o nome do arquivo como nome
+do catálogo, e catálogo e schema homônimos tornam `gold.tabela` ambíguo.
+
+| Base | Conteúdo | Quem conecta |
+|---|---|---|
+| `data/lakehouse.duckdb` | Bronze, Silver e Gold | apenas o pipeline (geração e transformação) |
+| `data/gold_isolada.duckdb` | somente as quatro tabelas Gold | motor Text-to-SQL, harness de avaliação, qualquer consulta de usuário |
+
+O teste rápido verifica que a Gold isolada contém só o schema `gold`, com as
+quatro tabelas e as mesmas contagens do lakehouse, nenhuma coluna de
+`CAMPOS_SENSIVEIS`, e que consultas a Bronze e Silver (inclusive por função de
+tabela) são recusadas pelo próprio banco.
+
 ## 5. Mapeamento para o código
 
 | Item | Local | Status |
@@ -105,6 +125,8 @@ encerradas (nulo se ativa); `taxa_ocupacao` em percentual `[0,100]`. A Gold
 | Transformação Silver | `src/pipeline.py:construir_silver` | IMPLEMENTADO |
 | Transformação Gold | `src/pipeline.py:construir_gold` | IMPLEMENTADO |
 | Tabelas Gold autorizadas | `src/config.py:41-46` (`GOLD_TABLES`) | IMPLEMENTADO |
+| Caminho da Gold isolada | `src/config.py` (`GOLD_DB_PATH`) | IMPLEMENTADO |
+| Exportação da Gold isolada | `src/pipeline.py:exportar_gold` | IMPLEMENTADO |
 
 ## 6. Teste rápido
 
@@ -117,3 +139,7 @@ coluna de PII direta em `silver.paciente` (RNC-005); `faixa_etaria` dentro do
 domínio; pseudônimo determinista e sem colisão; `taxa_ocupacao ∈ [0,100]`;
 `ativa ⟺ data_alta_real` nula com `tempo_permanencia` coerente; as quatro
 tabelas Gold presentes; e soma de leitos por unidade igual a `VOL_LEITOS`.
+Verifica ainda a Gold isolada (§4.1): só schema `gold`, contagens iguais às do
+lakehouse, nenhum campo sensível, e recusa pelo banco das consultas que
+contornavam a análise textual (`query_table('bronze.paciente')`,
+`silver.paciente`, `bronze.paciente`). Este teste roda na CI.

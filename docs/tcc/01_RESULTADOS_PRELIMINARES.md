@@ -2,7 +2,7 @@
 
 **Status**: documento vivo
 **Prioridade**: ALTA
-**Última atualização**: 2026-06-15
+**Última atualização**: 2026-09-13
 **Alimenta (template TCC)**: Resultados Preliminares · Metodologia
 
 ---
@@ -255,6 +255,50 @@ registradas no documento.
 - **Evidência**: `results/avaliacao_llm.json`; `results/auditoria.log`;
   [avaliacao/01_METODOLOGIA_AVALIACAO.md](../avaliacao/01_METODOLOGIA_AVALIACAO.md).
 
+### RES-008: A análise textual não isolava as camadas; o isolamento passou a ser físico
+
+Resultado da fase de conclusão (Etapa A, 2026-09-13), originado na banca
+simulada ([rodada 01, P-09](banca/2026-09-13_rodada-01.md)). Até então, a
+afirmação "Bronze e Silver inacessíveis ao modelo" era garantida apenas pela
+análise textual da SQL. Reproduziu-se que três consultas, todas aprovadas
+pelos seis guardrails de entrada e pela validação de saída, executavam sobre
+a conexão "somente leitura" e devolviam dados internos:
+
+| Consulta hostil | Antes (texto apenas) | Depois (texto + dado) |
+|---|---|---|
+| `SELECT nome AS n, cpf AS c FROM query_table('bronze.paciente')` | aprovada; devolveu 2 linhas com nome e CPF | bloqueada em CTRL-GOV-002; banco recusa (tabela inexistente) |
+| `SELECT ... FROM information_schema.columns WHERE column_name = 'cpf'` | aprovada; revelou a coluna `cpf` da Bronze | bloqueada em CTRL-GOV-002; catálogo só contém a Gold |
+| `SELECT schema_name, table_name FROM duckdb_tables()` | aprovada; listou 10 tabelas internas | bloqueada em CTRL-GOV-002; catálogo só contém a Gold |
+| `SELECT cpf FROM silver.paciente` | bloqueada em CTRL-GOV-004 | bloqueada em CTRL-GOV-004; banco recusa |
+
+Causas: o esvaziamento de literais (necessário contra falsos positivos)
+escondia o nome da tabela dentro de `query_table(...)`; o catálogo não cita
+`bronze`/`silver` no texto; o filtro de saída é por nome de coluna e um alias o
+contorna. Correção em duas camadas independentes:
+[DA-LAKE-005](../arquitetura/02_DECISOES_ARQUITETURAIS.md#da-lake-005-isolamento-físico-da-gold-em-arquivo-próprio)
+e [CTRL-GOV-007](../camadas/02_GOVERNANCA_ENTRADA.md) (a Gold é exportada para
+`data/gold_isolada.duckdb` e o motor só conecta a ele) e reforço de
+CTRL-GOV-002 (funções de tabela e catálogo). Os casos entraram nos testes
+rápidos (`src/governance.py`: 18 casos bloqueados; `src/pipeline.py`:
+isolamento verificado no banco) e na CI.
+
+Leitura para a Discussão: o achado confirma, no próprio protótipo, o que a
+literatura recente sobre controle de acesso em Text-to-SQL afirma
+(`docs/referencias/03`: Miyamoto et al. 2026; Klisura et al. 2025; Fei et al.
+2026), a saber, que restrições expressas apenas sobre o texto (no prompt ou por
+inspeção da SQL) não garantem isolamento, e que a garantia precisa ser imposta
+de forma determinista fora do texto. A arquitetura de referência passa a
+descrever duas barreiras: o dado (o que o motor pode ler) e o texto (o que o
+motor pode pedir), e o texto deixa de ser a única. Nenhum número de acurácia
+muda com esta etapa: as 18 perguntas, as SQL de referência e o prompt são os
+mesmos, e `run_all.py oracle` segue em 100%.
+
+- **Status**: VALIDADO (reprodução do desvio e da correção em 2026-09-13,
+  registradas em [tcc/etapas/2026-09-13_etapa-A.md](etapas/2026-09-13_etapa-A.md)).
+- **Evidência**: `src/pipeline.py:exportar_gold`;
+  `src/governance.py:conectar_somente_leitura`, `PALAVRAS_PROIBIDAS`,
+  `PREFIXOS_PROIBIDOS`; `.github/workflows/ci.yml`.
+
 ## 5. O que ainda falta
 
 Os primeiros números reais já foram coletados (RES-007: 61,1% de execution match
@@ -279,7 +323,7 @@ Ver o índice reverso em [02_MAPA_DOC_PARA_TEMPLATE.md](02_MAPA_DOC_PARA_TEMPLAT
 - **Metodologia**: determinismo, ambiente versionado e harness de avaliação
   descrevem o material e os métodos de forma reprodutível.
 - **Resultados Preliminares**: RES-001 a RES-007 são os resultados parciais
-  apresentáveis.
+  apresentáveis; RES-008 em diante são os resultados da fase de conclusão.
 - **Integridade**: os números do modelo (RES-007: 60,0% e 61,1%) vêm de execução
   real, com a metodologia decidida antes de re-rodar e os valores bruto e refinado
   reportados lado a lado; o 100% do oráculo (RES-006) é autoteste da tubulação, não

@@ -2,7 +2,7 @@
 
 **Status**: PARCIAL
 **Prioridade**: CRÍTICA
-**Última atualização**: 2026-06-04
+**Última atualização**: 2026-09-13
 **Alimenta (template TCC)**: Metodologia · Resultados Preliminares
 
 ---
@@ -76,14 +76,20 @@ qualquer alteração relevante.
 - **Motivação**: É a materialização da anonimização exigida pela LGPD para dados
   sensíveis de saúde. A camada exposta ao LLM (Gold) jamais contém dado
   individual identificável.
-- **Enforcement**: Transformação Bronze→Silver remove PII e deriva
-  `faixa_etaria`; filtro de saída barra nomes de campo sensível.
-- **Status**: IMPLEMENTADO na Silver (PII removida, `id_paciente` pseudonimizado
-  por SHA-256 com salt, `faixa_etaria` derivada; teste rápido verifica que
-  `silver.paciente` não contém `nome`/`cpf`/`data_nascimento`). Filtro de saída
-  ao usuário final ainda a implementar em `governance.py`.
-- **Código**: `src/config.py:59` (`CAMPOS_SENSIVEIS`);
-  `src/pipeline.py:construir_silver` e `src/pipeline.py:_pseudo`.
+- **Enforcement**: (1) Transformação Bronze→Silver remove PII e deriva
+  `faixa_etaria`; (2) **isolamento físico**: o motor e o avaliador só
+  conectam ao arquivo da Gold isolada, no qual Bronze e Silver não existem
+  (DA-LAKE-005, CTRL-GOV-007); (3) análise textual da SQL (CTRL-GOV-002 e
+  004) e filtro de saída por nome de campo sensível (CTRL-VALID-002) como
+  camadas adicionais. Até 2026-09-13 o enforcement dependia só de (1) e (3), e
+  (3) era contornável (banca, rodada 01, P-09).
+- **Status**: IMPLEMENTADO (Silver sem PII direta, `id_paciente`
+  pseudonimizado por SHA-256 com salt, `faixa_etaria` derivada; Gold isolada
+  sem nenhum campo de `CAMPOS_SENSIVEIS`; testes rápidos em `src/pipeline.py`
+  e `src/governance.py`).
+- **Código**: `src/config.py` (`CAMPOS_SENSIVEIS`, `GOLD_DB_PATH`);
+  `src/pipeline.py:construir_silver`, `_pseudo` e `exportar_gold`;
+  `src/governance.py:conectar_somente_leitura`.
 - **Relacionado**: [DA-LAKE-002](02_DECISOES_ARQUITETURAIS.md#da-lake-002-pii-proposital-na-bronze),
   [REG-LGPD-001](../governanca/01_CONFORMIDADE_REGULATORIA.md),
   [REG-LGPD-002](../governanca/01_CONFORMIDADE_REGULATORIA.md).

@@ -2,7 +2,7 @@
 
 **Status**: PARCIAL (mapeamento concluído; controles em implementação)
 **Prioridade**: CRÍTICA
-**Última atualização**: 2026-06-04
+**Última atualização**: 2026-09-13
 **Alimenta (template TCC)**: Introdução · Metodologia · Resultados Preliminares
 
 ---
@@ -53,7 +53,7 @@ passando.
 |---|---|---|---|---|---|
 | `REG-LGPD-001` | Proteção reforçada de dados sensíveis e minimização | LGPD art. 11; art. 6º (necessidade) | Anonimização na Silver: remoção de `nome`, `cpf`, `data_nascimento`; derivação de `faixa_etaria` | Silver / `pipeline.py` | projetado |
 | `REG-LGPD-002` | Anonimização e pseudonimização | LGPD art. 5º, XI; art. 12 | Pseudonimização de `id_paciente` por hash; nenhuma coluna de identificação direta sobrevive à Silver | Silver / `pipeline.py` | projetado |
-| `REG-LGPD-003` | Minimização na exposição (só o necessário) | LGPD art. 6º (necessidade, adequação) | Apenas a Gold, agregada, é exposta ao motor; Bronze e Silver inacessíveis | Gold / `config.GOLD_TABLES`, CTRL-GOV-004 | config |
+| `REG-LGPD-003` | Minimização na exposição (só o necessário) | LGPD art. 6º (necessidade, adequação) | Apenas a Gold é exposta ao motor; Bronze e Silver inacessíveis por isolamento físico (arquivo próprio da Gold) e, adicionalmente, por análise textual | Gold / `config.GOLD_DB_PATH`, CTRL-GOV-007, CTRL-GOV-004, CTRL-GOV-002 | implementado |
 | `REG-LGPD-004` | Controle de acesso por finalidade e perfil | LGPD art. 6º (finalidade); ANVISA RDC | Perfis `gestor`, `enfermagem`, `administrativo` autorizam só tabelas Gold específicas | Entrada / `config.PERFIS`, CTRL-GOV-005 | config |
 | `REG-LGPD-005` | Segurança e prevenção de comando indevido | LGPD art. 46; art. 6º (segurança, prevenção) | Guardrails CTRL-GOV-001 a 003 e 006: SQL única somente leitura, bloqueio de escrita/admin, bloqueio de múltiplas instruções, conexão read-only | Entrada / `governance.py` | projetado |
 | `REG-LGPD-006` | Prevenção de vazamento de sensível na resposta | LGPD art. 11; ANPD (uso secundário) | Filtro de saída CTRL-VALID-002: bloqueia coluna com nome de campo sensível | Saída / `config.CAMPOS_SENSIVEIS`, `governance.validar_saida` | implementado |
@@ -82,7 +82,7 @@ Este mapeamento é registrado como resultado parcial em
 | Requisito | Controles | Decisões | Regra crítica |
 |---|---|---|---|
 | REG-LGPD-001/002 | - (transformação Silver) | DA-LAKE-002, DA-LAKE-004 | RNC-005 |
-| REG-LGPD-003 | CTRL-GOV-004 | DA-LAKE-003 | - |
+| REG-LGPD-003 | CTRL-GOV-007, CTRL-GOV-004, CTRL-GOV-002 | DA-LAKE-003, DA-LAKE-005 | RNC-005 |
 | REG-LGPD-004 | CTRL-GOV-005 | DA-GOV-001 | - |
 | REG-LGPD-005 | CTRL-GOV-001/002/003/006 | DA-GOV-002 | - |
 | REG-LGPD-006 | CTRL-VALID-002 | DA-VALID-002 | RNC-005 |

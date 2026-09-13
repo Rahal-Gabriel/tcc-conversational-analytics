@@ -21,10 +21,10 @@ from src import config, data_gen, evaluate, pipeline
 
 
 def garantir_dados():
-    """Constroi Bronze, Silver e Gold se o banco ainda nao existe."""
-    if config.DB_PATH.exists():
+    """Constroi Bronze, Silver, Gold e a Gold isolada se algo ainda nao existe."""
+    if config.DB_PATH.exists() and config.GOLD_DB_PATH.exists():
         return
-    print("dados ausentes; gerando Bronze, Silver e Gold...")
+    print("dados ausentes; gerando Bronze, Silver, Gold e Gold isolada...")
     data_gen.construir()
     pipeline.construir()
 

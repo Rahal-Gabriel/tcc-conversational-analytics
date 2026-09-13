@@ -2,9 +2,12 @@
 
 Antes de qualquer consulta tocar o banco, a SQL gerada pelo motor passa por uma
 verificacao em camadas (CTRL-GOV-001 a 005), e a pergunta do usuario e
-registrada na trilha de auditoria. A barreira final, a conexao DuckDB somente
-leitura (CTRL-GOV-006), entra como defesa em profundidade e mora aqui como
-helper, para ser usada na execucao.
+registrada na trilha de auditoria. As barreiras finais moram aqui como helper
+de conexao: a execucao acontece em conexao DuckDB somente leitura
+(CTRL-GOV-006) e apenas sobre o arquivo isolado da Gold (CTRL-GOV-007,
+DA-LAKE-005), onde Bronze e Silver nao existem. A analise textual e, portanto,
+uma camada a mais, e nao a unica: a banca simulada (rodada 01, P-09) mostrou
+que, sozinha, ela era contornavel por funcoes de tabela, catalogo e alias.
 
 Depois da execucao, a validacao de saida (Camada 4) e a ultima barreira:
 aterramento contra o schema Gold conhecido (CTRL-VALID-001), filtro de campo
@@ -46,8 +49,22 @@ PALAVRAS_PROIBIDAS = (
     "merge", "replace",  # 'or replace' / 'insert or replace': formas de escrita
     "read_csv", "read_parquet", "read_json", "read_text", "read_blob",
     "parquet_scan", "glob", "sniff_csv",
+    # Funcoes de tabela que recebem o nome da tabela como texto: o literal e
+    # esvaziado por _limpar antes da inspecao, entao 'bronze.x' dentro de
+    # query_table('bronze.x') escaparia de CTRL-GOV-004 (banca, rodada 01, P-09).
+    "query", "query_table",
+    # Catalogo: revela schemas, tabelas e colunas internas (inclusive as
+    # sensiveis) sem citar bronze/silver no texto da SQL.
+    "information_schema", "sqlite_master", "sqlite_schema",
 )
-_RE_PROIBIDAS = re.compile(r"\b(" + "|".join(PALAVRAS_PROIBIDAS) + r")\b", re.IGNORECASE)
+# Familias de funcoes e views de catalogo e de I/O, casadas por prefixo:
+# duckdb_tables(), duckdb_columns(), pragma_table_info(), read_*(), etc.
+PREFIXOS_PROIBIDOS = ("duckdb_", "sqlite_", "pragma_", "read_")
+_RE_PROIBIDAS = re.compile(
+    r"\b(" + "|".join(PALAVRAS_PROIBIDAS) + r"|(?:"
+    + "|".join(PREFIXOS_PROIBIDOS) + r")\w+)\b",
+    re.IGNORECASE,
+)
 
 # CTRL-GOV-004: as camadas internas nunca podem ser referenciadas.
 _RE_CAMADA_INTERNA = re.compile(r"\b(bronze|silver)\b", re.IGNORECASE)
@@ -127,15 +144,21 @@ def validar_sql(sql, perfil):
 
 
 def conectar_somente_leitura():
-    """Abre a conexao DuckDB em modo somente leitura (CTRL-GOV-006).
+    """Abre a conexao de consulta: Gold isolada, somente leitura (CTRL-GOV-006 e 007).
 
-    Barreira final de defesa em profundidade: mesmo que a analise textual
-    falhasse, o banco recusa qualquer escrita. Importa duckdb localmente para
-    manter a analise de governanca utilizavel sem o banco presente.
+    Duas barreiras no proprio banco, independentes do texto da SQL: o arquivo
+    aberto contem apenas a Gold (Bronze e Silver nao existem nele, DA-LAKE-005)
+    e a conexao e somente leitura (nenhuma escrita e possivel). Importa duckdb
+    localmente para manter a analise de governanca utilizavel sem o banco.
     """
     import duckdb
 
-    return duckdb.connect(str(config.DB_PATH), read_only=True)
+    if not config.GOLD_DB_PATH.exists():
+        raise FileNotFoundError(
+            f"Gold isolada ausente em {config.GOLD_DB_PATH}; rode src.pipeline "
+            "(ou run_all.py) para gera-la a partir do lakehouse."
+        )
+    return duckdb.connect(str(config.GOLD_DB_PATH), read_only=True)
 
 
 def registrar_pergunta(usuario, perfil, pergunta, momento=None, caminho=None):
@@ -234,6 +257,10 @@ def _autoteste():
         ("gestor", "SELECT taxa_ocupacao FROM gold.ocupacao_unidade;"),
         ("gestor", "WITH x AS (SELECT * FROM gold.ocupacao_diaria) SELECT * FROM x"),
         ("enfermagem", "SELECT * FROM gold.leitos_status WHERE tipo = 'drop'"),
+        # Colunas e aliases legitimos que contem os prefixos proibidos como
+        # substring nao podem gerar falso positivo (prefixo casa so no inicio).
+        ("gestor", "SELECT COUNT(*) AS n_read_ok, tipo FROM gold.internacoes GROUP BY tipo"),
+        ("gestor", "SELECT unidade AS query_unidade_nome FROM gold.ocupacao_unidade"),
     ]
     for perfil, sql in validos:
         r = validar_sql(sql, perfil)
@@ -251,6 +278,16 @@ def _autoteste():
         ("CTRL-GOV-004", "gestor", "SELECT * FROM bronze.paciente"),
         ("CTRL-GOV-005", "enfermagem", "SELECT * FROM gold.internacoes"),
         ("CTRL-GOV-005", "intruso", "SELECT * FROM gold.leitos_status"),
+        # Desvios encontrados pela banca simulada (rodada 01, P-09): funcao de
+        # tabela com o nome em texto, catalogo e view de sistema.
+        ("CTRL-GOV-002", "enfermagem", "SELECT nome AS n, cpf AS c FROM query_table('bronze.paciente') LIMIT 2"),
+        ("CTRL-GOV-002", "gestor", "SELECT * FROM query('SELECT cpf FROM silver.paciente')"),
+        ("CTRL-GOV-002", "enfermagem", "SELECT table_schema, table_name, column_name FROM information_schema.columns"),
+        ("CTRL-GOV-002", "enfermagem", "SELECT * FROM duckdb_tables()"),
+        ("CTRL-GOV-002", "gestor", "SELECT * FROM duckdb_columns() WHERE column_name = 'cpf'"),
+        ("CTRL-GOV-002", "gestor", "SELECT * FROM pragma_table_info('bronze.paciente')"),
+        ("CTRL-GOV-002", "gestor", "SELECT * FROM sqlite_master"),
+        ("CTRL-GOV-002", "gestor", "SELECT * FROM read_text('/etc/hostname')"),
     ]
     for esperado, perfil, sql in bloqueados:
         r = validar_sql(sql, perfil)
@@ -282,6 +319,8 @@ def _autoteste():
     assert reg2["evento"] == "correto" and reg2["sql"] == "SELECT 1"
     assert reg2["momento"] == config.SIM_TODAY.isoformat()
 
+    # Nota: o isolamento fisico da Gold (CTRL-GOV-007) e verificado em
+    # src.pipeline, que gera os dados; aqui a analise roda sem banco.
     print("governance: autoteste OK")
     print(f"  {len(validos)} casos validos aprovados, {len(bloqueados)} casos bloqueados")
     print("  validacao de saida: aterramento e filtro sensivel barram; saida limpa passa")

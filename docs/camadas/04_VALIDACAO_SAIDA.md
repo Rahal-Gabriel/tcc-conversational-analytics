@@ -2,7 +2,7 @@
 
 **Status**: IMPLEMENTADO
 **Prioridade**: CRÍTICA
-**Última atualização**: 2026-06-15
+**Última atualização**: 2026-09-13
 **Alimenta (template TCC)**: Metodologia · Resultados Preliminares
 
 ---
@@ -30,7 +30,17 @@ A serem implementados em `src/governance.py`.
   LLM bloqueia a consulta.
 - **Motivação**: Mitigar alucinação, risco destacado pela ANPD no Radar de IA
   Generativa.
-- **Status**: IMPLEMENTADO (`src/governance.py:validar_saida`).
+- **Alcance real (registrado após a banca simulada, rodada 01, P-11)**: no
+  fluxo atual, uma tabela inexistente já é barrada na entrada por CTRL-GOV-005
+  e, se escapasse, a execução falharia antes de `validar_saida`. Este controle
+  é, portanto, **redundante por desenho** (defesa em profundidade sobre o
+  schema) e não trata a alucinação que mais importa à ANPD: a resposta
+  plausível e errada (por exemplo, um resultado vazio apresentado como zero).
+  A redação do TCC não deve apresentá-lo como "mitigação de alucinação" sem
+  essa ressalva. O tratamento de resultado vazio ou implausível como
+  "não respondível" fica para a Etapa E (conjunto adversarial e abstenção).
+- **Status**: IMPLEMENTADO (`src/governance.py:validar_saida`); alcance
+  limitado, ver acima.
 - **Relacionado**: [DA-VALID-001](../arquitetura/02_DECISOES_ARQUITETURAIS.md#da-valid-001-aterramento-contra-o-schema-gold-conhecido).
 
 ### CTRL-VALID-002: Filtro de campo sensível
@@ -40,7 +50,14 @@ A serem implementados em `src/governance.py`.
   bloqueada.
 - **Motivação**: Última barreira contra vazamento de dado sensível, mesmo que
   algo tenha escapado das camadas anteriores.
-- **Status**: IMPLEMENTADO (`src/governance.py:validar_saida`).
+- **Alcance real**: o filtro é por **nome** de coluna e um alias (`cpf AS c`)
+  o contorna (banca, rodada 01, P-09). Desde 2026-09-13 a garantia de que
+  nenhum campo sensível chega à saída vem do isolamento físico
+  (CTRL-GOV-007): a Gold isolada não contém coluna alguma de
+  `CAMPOS_SENSIVEIS`, o que o teste rápido de `src/pipeline.py` verifica. O
+  filtro por nome permanece como camada adicional.
+- **Status**: IMPLEMENTADO (`src/governance.py:validar_saida`); garantia
+  efetiva em CTRL-GOV-007.
 - **Código**: `src/config.py:59` (`CAMPOS_SENSIVEIS`).
 - **Relacionado**: [DA-VALID-002](../arquitetura/02_DECISOES_ARQUITETURAIS.md#da-valid-002-filtro-de-saída-por-nome-de-campo-sensível),
   [RNC-005](../arquitetura/03_REGRAS_CRITICAS.md#rnc-005-pii-nunca-sobrevive-à-silver).

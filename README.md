@@ -76,7 +76,7 @@ tcc-conversational-analytics/
     nl2sql.py          # motor Text-to-SQL + oraculo (a implementar)
     questions.py       # conjunto de avaliacao (a implementar)
     evaluate.py        # execution-match e indicadores (a implementar)
-  data/                # banco DuckDB gerado (nao versionado)
+  data/                # lakehouse.duckdb (Bronze/Silver/Gold) e gold_isolada.duckdb (so Gold), nao versionados
   results/             # saidas de avaliacao e log de auditoria (nao versionado)
 ```
 
