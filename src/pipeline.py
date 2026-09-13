@@ -20,6 +20,7 @@ Uso isolado:
 """
 
 import hashlib
+import hmac
 
 import duckdb
 
@@ -27,25 +28,32 @@ from src import config
 
 
 def _pseudo(id_paciente):
-    """Pseudonimiza um id_paciente: sha256(salt + id), truncado para 16 hex.
+    """Pseudonimiza um id_paciente: HMAC-SHA256(chave, id), truncado para 16 hex.
 
-    Deterministico (RNC-003) e, por causa do salt, nao reversivel por forca
-    bruta trivial sobre os poucos ids (RNC-005). 16 hex (64 bits) nao colidem
-    no volume deste prototipo.
+    Hash com chave (keyed hash) em vez de hash simples ou hash com salt no
+    codigo: sem a chave, reverter o pseudonimo por forca bruta sobre os poucos
+    ids deixa de ser viavel (ENISA 2022; EDPB 01/2025). Deterministico para a
+    mesma chave (RNC-003). 16 hex (64 bits) nao colidem no volume do prototipo.
+    A pseudonimizacao e reversivel por quem detem a chave, logo o dado da
+    Silver continua pessoal (LGPD art. 13, par. 4); a Gold nao carrega o
+    pseudonimo (DA-LAKE-003).
     """
-    base = f"{config.PSEUDO_SALT}{id_paciente}".encode()
-    return hashlib.sha256(base).hexdigest()[:16]
+    return hmac.new(
+        config.PSEUDO_KEY.encode(), str(id_paciente).encode(), hashlib.sha256
+    ).hexdigest()[:16]
 
 
 def _expr_faixa_etaria(col_nascimento):
     """Monta a expressao SQL que deriva a faixa etaria a partir da idade.
 
-    A idade e a diferenca em anos entre SIM_TODAY e a data de nascimento. As
-    faixas seguem config.FAIXAS_ETARIAS (limite inferior inclusivo). SIM_TODAY
-    entra como literal de data para manter o determinismo.
+    A idade e a idade completa (anos inteiros ja vividos) em SIM_TODAY,
+    obtida com age(), que considera mes e dia; date_diff('year') daria a
+    diferenca de ano-calendario, errada para quem ainda nao fez aniversario no
+    ano (banca, rodada 01, P-15). As faixas seguem config.FAIXAS_ETARIAS
+    (limite inferior inclusivo). SIM_TODAY entra como literal (determinismo).
     """
     hoje = config.SIM_TODAY.isoformat()
-    idade = f"date_diff('year', {col_nascimento}, DATE '{hoje}')"
+    idade = f"datepart('year', age(DATE '{hoje}', {col_nascimento}))"
     return (
         "CASE "
         f"WHEN {idade} < 18 THEN '0-17' "
@@ -149,21 +157,52 @@ def construir_gold(con):
         "ORDER BY o.data"
     )
 
-    # 4) internacoes: uma linha por internacao, com faixa etaria, tempo de
-    # permanencia (so para encerradas) e flag ativa. Sem id_paciente_pseudo: a
-    # Gold nao expoe nem o pseudonimo (minimizacao, DA-LAKE-003).
+    # 4) internacoes: uma linha por internacao, minimizada (DA-LAKE-006).
+    # Colunas: tipo de leito, faixa etaria, flag ativa e tempo de permanencia
+    # (so para encerradas). Ficam de fora, de proposito: id_internacao
+    # (identificador substituto), id_paciente_pseudo (DA-LAKE-003), sexo e
+    # data_admissao (quase-identificadores: com eles, quase toda linha era
+    # unica, k = 1) e id_unidade (com ele, 69 linhas ficavam em grupos com
+    # k < 5). Nenhuma pergunta do conjunto de avaliacao usa as colunas
+    # removidas; internacoes por unidade ficam como custo de utilidade
+    # declarado. O k-anonimato resultante e verificado em medir_k_anonimato.
     con.execute(
         "CREATE OR REPLACE TABLE gold.internacoes AS "
-        "SELECT i.id_internacao, l.id_unidade, l.tipo, "
-        "       p.faixa_etaria, p.sexo, i.data_admissao, "
+        "SELECT l.tipo, p.faixa_etaria, "
+        "       (i.data_alta_real IS NULL) AS ativa, "
         "       CASE WHEN i.data_alta_real IS NULL THEN NULL "
         "            ELSE date_diff('day', i.data_admissao, i.data_alta_real) END "
-        "            AS tempo_permanencia, "
-        "       (i.data_alta_real IS NULL) AS ativa "
+        "            AS tempo_permanencia "
         "FROM silver.internacao i "
         "JOIN silver.leito l USING (id_leito) "
         "JOIN silver.paciente p USING (id_paciente_pseudo)"
     )
+
+
+def medir_k_anonimato(con, quase_identificadores=None, tabela="gold.internacoes"):
+    """Mede o k-anonimato da Gold sobre um conjunto de quase-identificadores.
+
+    Devolve um dicionario com o numero de grupos, o k minimo, o k medio e as
+    fracoes de linhas em grupos com k < 5 e k < 11 (limiares usuais de
+    liberacao interna controlada e de supressao de celula pequena). E a base
+    de CTRL-LAKE-001 e do numero reportado no TCC (RES-009).
+    """
+    cols = ", ".join(quase_identificadores or config.QUASE_IDENTIFICADORES_INTERNACOES)
+    grupos, k_min, k_medio, lt5, lt11, n = con.execute(
+        f"WITH g AS (SELECT {cols}, COUNT(*) AS k FROM {tabela} GROUP BY {cols}) "
+        "SELECT COUNT(*), MIN(k), AVG(k), "
+        "       SUM(CASE WHEN k < 5 THEN k ELSE 0 END), "
+        "       SUM(CASE WHEN k < 11 THEN k ELSE 0 END), SUM(k) FROM g"
+    ).fetchone()
+    return {
+        "quase_identificadores": cols,
+        "grupos": grupos,
+        "k_min": k_min,
+        "k_medio": round(k_medio, 1),
+        "fracao_k_lt5": round(lt5 / n, 4),
+        "fracao_k_lt11": round(lt11 / n, 4),
+        "linhas": n,
+    }
 
 
 def exportar_gold(con):
@@ -252,6 +291,20 @@ def _autoteste():
         assert faixas <= set(config.FAIXAS_ETARIAS), (
             f"faixa etaria fora do dominio: {faixas - set(config.FAIXAS_ETARIAS)}"
         )
+
+        # DA-LAKE-006 / CTRL-LAKE-001: a Gold nao carrega identificador
+        # substituto nem quase-identificadores removidos, e todo grupo de
+        # quase-identificadores tem pelo menos K_MINIMO linhas.
+        cols_int = _colunas(con, "gold", "internacoes")
+        for proibida in ("id_internacao", "id_paciente_pseudo", "sexo", "data_admissao", "id_unidade"):
+            assert proibida not in cols_int, f"coluna nao minimizada em gold.internacoes: {proibida}"
+        k = medir_k_anonimato(con)
+        assert k["k_min"] >= config.K_MINIMO, (
+            f"k-anonimato violado em gold.internacoes: k_min={k['k_min']} < {config.K_MINIMO}"
+        )
+        # Sensibilidade: com 'ativa' tratado tambem como quase-identificador
+        # (risco residual reportado, nao imposto).
+        k_sens = medir_k_anonimato(con, config.QUASE_IDENTIFICADORES_INTERNACOES + ("ativa",))
 
         # pseudonimo deterministico e sem colisao: distintos de pseudo na
         # silver.paciente devem igualar o numero de pacientes.
@@ -354,6 +407,11 @@ def _autoteste():
     print("pipeline: autoteste OK")
     print(f"  Gold isolada em {config.GOLD_DB_PATH}: so schema gold, sem campo sensivel; "
           "bronze/silver inacessiveis")
+    print(f"  k-anonimato gold.internacoes sobre ({k['quase_identificadores']}): "
+          f"k_min={k['k_min']} (exigido >= {config.K_MINIMO}), grupos={k['grupos']}, "
+          f"linhas em k<11: {k['fracao_k_lt11']*100:.1f}%")
+    print(f"  sensibilidade com 'ativa': k_min={k_sens['k_min']}, "
+          f"linhas em k<5: {k_sens['fracao_k_lt5']*100:.1f}%, k<11: {k_sens['fracao_k_lt11']*100:.1f}%")
 
 
 if __name__ == "__main__":

@@ -12,7 +12,7 @@ resultados preliminares esta em [docs/](docs/README.md).
 ## Arquitetura em quatro camadas
 
 1. **Pipeline Lakehouse** (DuckDB local): Bronze (bruto, com PII proposital),
-   Silver (limpa e anonimizada) e Gold (metricas, unica camada exposta ao LLM).
+   Silver (limpa e pseudonimizada) e Gold (metricas e registros minimizados, unica camada exposta ao LLM).
 2. **Governanca de entrada**: autenticacao por perfil, registro de toda
    pergunta e verificacao de conformidade antes de qualquer execucao.
 3. **Motor Text-to-SQL**: traduz a pergunta em portugues para uma SQL somente

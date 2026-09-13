@@ -37,7 +37,7 @@ requisito → controle implementado (`CTRL-*`) → camada/módulo → situação
 Toda a pesquisa usa dados sintéticos com `SEED` e `SIM_TODAY` fixos
 (`src/config.py`). Não há tratamento de dados pessoais reais em nenhuma etapa, o
 que elimina na origem o risco de exposição. A PII existe de propósito apenas na
-Bronze, para tornar a anonimização demonstrável, e nunca sobrevive à Silver
+Bronze, para tornar a pseudonimização demonstrável, e nunca sobrevive à Silver
 ([RNC-001](../arquitetura/03_REGRAS_CRITICAS.md#rnc-001-dados-100-sintéticos),
 [RNC-005](../arquitetura/03_REGRAS_CRITICAS.md#rnc-005-pii-nunca-sobrevive-à-silver)).
 
@@ -51,8 +51,8 @@ passando.
 
 | ID | Requisito regulatório | Origem | Controle na arquitetura | Camada / módulo | Situação |
 |---|---|---|---|---|---|
-| `REG-LGPD-001` | Proteção reforçada de dados sensíveis e minimização | LGPD art. 11; art. 6º (necessidade) | Anonimização na Silver: remoção de `nome`, `cpf`, `data_nascimento`; derivação de `faixa_etaria` | Silver / `pipeline.py` | projetado |
-| `REG-LGPD-002` | Anonimização e pseudonimização | LGPD art. 5º, XI; art. 12 | Pseudonimização de `id_paciente` por hash; nenhuma coluna de identificação direta sobrevive à Silver | Silver / `pipeline.py` | projetado |
+| `REG-LGPD-001` | Proteção reforçada de dados sensíveis e minimização | LGPD art. 11; art. 6º (necessidade) | Remoção de `nome`, `cpf`, `data_nascimento` na Silver; `faixa_etaria` no lugar da data; Gold sem identificador substituto nem `sexo`, `data_admissao`, `id_unidade`, com k-anonimato verificado (k >= 5) | Silver e Gold / `pipeline.py`, CTRL-LAKE-001 | implementado |
+| `REG-LGPD-002` | Anonimização e pseudonimização | LGPD art. 5º, XI; art. 12; art. 13, par. 4 | Pseudonimização de `id_paciente` por HMAC-SHA256 com chave lida do ambiente (informação adicional guardada separadamente); o pseudônimo não chega à Gold. Declarado como pseudonimização, não anonimização: o dado da Silver continua pessoal | Silver / `pipeline.py` | implementado |
 | `REG-LGPD-003` | Minimização na exposição (só o necessário) | LGPD art. 6º (necessidade, adequação) | Apenas a Gold é exposta ao motor; Bronze e Silver inacessíveis por isolamento físico (arquivo próprio da Gold) e, adicionalmente, por análise textual | Gold / `config.GOLD_DB_PATH`, CTRL-GOV-007, CTRL-GOV-004, CTRL-GOV-002 | implementado |
 | `REG-LGPD-004` | Controle de acesso por finalidade e perfil | LGPD art. 6º (finalidade); ANVISA RDC | Perfis `gestor`, `enfermagem`, `administrativo` autorizam só tabelas Gold específicas | Entrada / `config.PERFIS`, CTRL-GOV-005 | config |
 | `REG-LGPD-005` | Segurança e prevenção de comando indevido | LGPD art. 46; art. 6º (segurança, prevenção) | Guardrails CTRL-GOV-001 a 003 e 006: SQL única somente leitura, bloqueio de escrita/admin, bloqueio de múltiplas instruções, conexão read-only | Entrada / `governance.py` | projetado |
@@ -69,10 +69,12 @@ A tabela evidencia que a governança não é apêndice do motor de IA, mas
 atravessa as quatro camadas. Já estão consolidados como resultado parcial o
 desenho dos controles e a centralização dos parâmetros que os sustentam em
 `src/config.py` (perfis, tabelas Gold autorizadas, campos sensíveis, semente e
-data de referência). A etapa seguinte implementa a lógica em `pipeline.py`
-(anonimização) e `governance.py` (guardrails, aterramento, filtro de saída e
-auditoria), o que tornará cada linha da coluna Situação verificável por teste
-automatizado.
+data de referência). A lógica está implementada em `pipeline.py`
+(pseudonimização, minimização e k-anonimato) e `governance.py` (guardrails,
+isolamento físico, filtro de saída e auditoria), e as linhas com situação
+`implementado` são verificáveis por teste automatizado. Os itens ainda
+`projetado` (REG-LGPD-005, REG-ANPD-002, REG-ANVISA-001) são tratados nas
+etapas C e E da fase de conclusão.
 
 Este mapeamento é registrado como resultado parcial em
 [RES-002](../tcc/01_RESULTADOS_PRELIMINARES.md#res-002-mapeamento-regulatório-completo).
@@ -81,7 +83,7 @@ Este mapeamento é registrado como resultado parcial em
 
 | Requisito | Controles | Decisões | Regra crítica |
 |---|---|---|---|
-| REG-LGPD-001/002 | - (transformação Silver) | DA-LAKE-002, DA-LAKE-004 | RNC-005 |
+| REG-LGPD-001/002 | CTRL-LAKE-001 | DA-LAKE-002, DA-LAKE-004, DA-LAKE-006 | RNC-005 |
 | REG-LGPD-003 | CTRL-GOV-007, CTRL-GOV-004, CTRL-GOV-002 | DA-LAKE-003, DA-LAKE-005 | RNC-005 |
 | REG-LGPD-004 | CTRL-GOV-005 | DA-GOV-001 | - |
 | REG-LGPD-005 | CTRL-GOV-001/002/003/006 | DA-GOV-002 | - |

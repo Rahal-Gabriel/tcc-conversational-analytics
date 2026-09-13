@@ -60,18 +60,20 @@ estável `DA-[MOD]-[NUM]` citável pelos demais módulos e pela redação do TCC
 ### DA-LAKE-001: Modelo de camadas Bronze / Silver / Gold
 
 - **Decisão**: Adotar o padrão Lakehouse de três camadas: Bronze (bruto),
-  Silver (limpa e anonimizada) e Gold (métricas e agregações).
+  Silver (limpa e pseudonimizada) e Gold (métricas e registros minimizados).
 - **Motivação**: Separa claramente o dado de origem do dado consumível e cria
-  um ponto natural para a anonimização (na transição Bronze→Silver).
-- **Status**: PARCIAL (Bronze implementada; Silver e Gold projetadas).
-- **Código**: `src/data_gen.py`; `src/pipeline.py` (a implementar).
+  um ponto natural para a remoção de identificadores e a pseudonimização (na
+  transição Bronze→Silver) e para a minimização (na transição Silver→Gold).
+- **Status**: IMPLEMENTADO.
+- **Código**: `src/data_gen.py`; `src/pipeline.py`.
 
 ### DA-LAKE-002: PII proposital na Bronze
 
 - **Decisão**: A camada Bronze contém PII de propósito (`nome`, `cpf`,
   `data_nascimento`).
-- **Motivação**: Para que a anonimização na Silver seja **real e demonstrável**,
-  e não apenas afirmada. Sem PII na Bronze, não haveria o que anonimizar.
+- **Motivação**: Para que a remoção de identificadores e a pseudonimização na
+  Silver sejam **reais e demonstráveis**, e não apenas afirmadas. Sem PII na
+  Bronze, não haveria o que pseudonimizar.
 - **Status**: IMPLEMENTADO.
 - **Código**: `src/data_gen.py:gerar_pacientes`.
 - **Relacionado**: [REG-LGPD-002](../governanca/01_CONFORMIDADE_REGULATORIA.md),
@@ -82,7 +84,12 @@ estável `DA-[MOD]-[NUM]` citável pelos demais módulos e pela redação do TCC
 - **Decisão**: O motor de linguagem só enxerga as tabelas da camada Gold.
   Bronze e Silver ficam inacessíveis ao usuário e ao LLM.
 - **Motivação**: Minimização na exposição (princípio da necessidade da LGPD):
-  o consumo se restringe a métricas agregadas, sem dado individual.
+  o consumo se restringe às tabelas Gold, sem identificadores diretos nem
+  pseudônimos. Duas delas são agregadas (`ocupacao_unidade`, `ocupacao_diaria`)
+  e duas são de nível de linha (`leitos_status`, por leito, sem atributo de
+  pessoa; `internacoes`, minimizada e com k-anonimato verificado,
+  DA-LAKE-006). Até 2026-09-13 a documentação chamava a Gold de "agregada",
+  o que a banca simulada apontou como impreciso (rodada 01, P-16).
 - **Status**: IMPLEMENTADO (enforcement textual em CTRL-GOV-004 e físico em
   DA-LAKE-005 / CTRL-GOV-007).
 - **Código**: `src/config.py` (`GOLD_TABLES`, `GOLD_DB_PATH`);
@@ -132,6 +139,65 @@ estável `DA-[MOD]-[NUM]` citável pelos demais módulos e pela redação do TCC
   [RNC-005](03_REGRAS_CRITICAS.md#rnc-005-pii-nunca-sobrevive-à-silver),
   [RES-008](../tcc/01_RESULTADOS_PRELIMINARES.md),
   [banca, rodada 01, P-09](../tcc/banca/2026-09-13_rodada-01.md).
+
+### DA-LAKE-006: Minimização da Gold com k-anonimato verificado e pseudonimização por HMAC
+
+- **Decisão**: (1) `gold.internacoes` fica com quatro colunas (`tipo`,
+  `faixa_etaria`, `ativa`, `tempo_permanencia`); saem `id_internacao`,
+  `sexo`, `data_admissao` e `id_unidade`. (2) O pipeline mede o k-anonimato
+  sobre os quase-identificadores (`tipo`, `faixa_etaria`) e exige
+  `k >= K_MINIMO = 5` (CTRL-LAKE-001), reportando também a sensibilidade com
+  `ativa` incluído. (3) A pseudonimização de `id_paciente` passa de SHA-256
+  com salt no código para HMAC-SHA256 com chave lida do ambiente
+  (`PSEUDO_KEY`), com valor padrão apenas para o dado sintético. (4) A idade
+  passa a ser a idade completa (`age()`), não a diferença de ano-calendário.
+- **Motivação**: A banca simulada mediu k = 1 em 1.763 grupos da Gold com as
+  colunas originais (rodada 01, P-16) e apontou que hash com salt no código e
+  ids sequenciais são revertíveis por quem tem o repositório (P-17). A
+  literatura converge: datas de eventos, sexo, idade e localização são
+  quase-identificadores (El Emam e Arbuckle 2013; HIPAA Safe Harbor, 45 CFR
+  164.514(b), que exige remover datas exceto o ano); hash simples e hash com
+  salt são fracos contra força bruta em domínio pequeno, e o recomendado é
+  hash com chave, com a chave guardada como "informação adicional" fora do
+  domínio de quem processa o dado pseudonimizado (ENISA 2022; EDPB 01/2025,
+  par. 19-20 e 35); LLMs em Text-to-SQL tendem a expor identificadores
+  substitutos e linhas quando um agregado bastaria (Ballesteros-Rodríguez et
+  al. 2026). Os limiares: k >= 5 é o usual para liberação interna controlada;
+  k >= 11 (nenhuma célula de 1 a 10) é a regra de supressão do CMS, adotada
+  como referência mais estrita e também satisfeita.
+- **Medição que fundamentou a escolha das colunas** (2.012 internações):
+
+  | Quase-identificadores | grupos | k mínimo | linhas em k<5 | linhas em k<11 |
+  |---|---|---|---|---|
+  | unidade, tipo, faixa, sexo, data de admissão (original) | 1.883 | 1 | 100% | 100% |
+  | unidade, tipo, faixa, mês de admissão | 387 | 1 | 23,1% | 59,6% |
+  | unidade, tipo, faixa | 120 | 1 | 3,4% | 13,6% |
+  | tipo, faixa, ativa (sensibilidade) | 30 | 3 | 0,4% | 3,2% |
+  | **tipo, faixa (adotado)** | 15 | **29** | 0% | 0% |
+
+- **Alternativa descartada**: agregar `gold.internacoes` em contagens e
+  médias por grupo, com supressão de células pequenas. É a forma mais estrita
+  e fica registrada como evolução; foi descartada nesta etapa porque as
+  perguntas de tempo médio virariam médias ponderadas (mais difíceis para o
+  motor), a coerência "150 internações ativas = 150 leitos ocupados" se
+  perderia com supressão, e a comparabilidade com o preliminar cairia.
+- **Custo de utilidade declarado**: perguntas de internações por unidade
+  deixam de ser respondíveis por esta tabela (a ocupação por unidade continua
+  em `gold.ocupacao_unidade`). Nenhuma das 18 perguntas do conjunto usa as
+  colunas removidas.
+- **Consequência para a redação**: a Silver é **pseudonimizada** (reversível
+  por quem detém a chave; continua dado pessoal nos termos da LGPD, art. 13,
+  par. 4); a Gold é **minimizada, sem identificadores e com risco de
+  reidentificação medido**, e não "anonimizada" nem "agregada". A faixa
+  etária corrigida altera a distribuição reportada em RES-005 (errata lá).
+- **Status**: IMPLEMENTADO (2026-09-13). Teste rápido em `src/pipeline.py`.
+- **Código**: `src/config.py` (`PSEUDO_KEY`, `QUASE_IDENTIFICADORES_INTERNACOES`,
+  `K_MINIMO`); `src/pipeline.py:_pseudo`, `_expr_faixa_etaria`,
+  `construir_gold`, `medir_k_anonimato`.
+- **Relacionado**: [CTRL-LAKE-001](../camadas/01_PIPELINE_LAKEHOUSE.md),
+  [RES-009](../tcc/01_RESULTADOS_PRELIMINARES.md),
+  [REG-LGPD-001/002](../governanca/01_CONFORMIDADE_REGULATORIA.md),
+  fichas em [referencias/09](../referencias/09_PRIVACIDADE_E_MINIMIZACAO.md).
 
 ---
 

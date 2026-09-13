@@ -90,7 +90,7 @@ Em resumo:
 | Prioridade | Documento | Quando ler |
 |---|---|---|
 | CRÍTICA | arquitetura/03_REGRAS_CRITICAS | SEMPRE, antes de qualquer alteração |
-| CRÍTICA | governanca/01_CONFORMIDADE_REGULATORIA | Ao mexer em governança ou anonimização |
+| CRÍTICA | governanca/01_CONFORMIDADE_REGULATORIA | Ao mexer em governança, pseudonimização ou minimização |
 | ALTA | arquitetura/01_VISAO_GERAL | Ao iniciar trabalho em qualquer camada |
 | ALTA | camadas/[N] | Ao implementar a camada correspondente |
 | ALTA | tcc/02_MAPA_DOC_PARA_TEMPLATE | Ao redigir qualquer seção do TCC |
@@ -123,7 +123,7 @@ tcc-conversational-analytics/
   Esta convenção vale também para a documentação em `docs/`.
 - Centralizar parâmetros em `config.py`. Nada de valores mágicos espalhados.
 - Cada módulo deve rodar isolado (`python -m` ou bloco `__main__`).
-- Escrever um teste rápido por módulo (contagens, anonimização, casos de
+- Escrever um teste rápido por módulo (contagens, pseudonimização e k-anonimato, casos de
   governança que devem ser bloqueados).
 
 ## Convenções de identificadores (documentação)

@@ -52,15 +52,28 @@ GOLD_TABLES = (
 # Faixas etarias derivadas na Silver (limite inferior inclusivo)
 FAIXAS_ETARIAS = ("0-17", "18-39", "40-59", "60-79", "80+")
 
-# Salt determinista da pseudonimizacao de id_paciente na Silver. Por se tratar
-# de dado 100% sintetico, o salt mora no codigo de proposito: sem ele a
-# reprodutibilidade (RNC-003) se perderia. Em producao com dado real, viria de
-# um cofre de segredos. Com salt, reverter o hash dos poucos ids por forca bruta
-# deixa de ser trivial (RNC-005).
-PSEUDO_SALT = "tcc-leitos-2026"
+# Chave da pseudonimizacao de id_paciente na Silver (HMAC-SHA256, DA-LAKE-006).
+# Hash simples e hash com salt embutido sao considerados fracos contra forca
+# bruta quando o dominio do identificador e pequeno (ENISA 2022); a chave e a
+# "informacao adicional" que a LGPD (art. 13, par. 4) e o EDPB (01/2025) mandam
+# guardar separada de quem processa o dado pseudonimizado. Por isso ela e lida
+# do ambiente. O valor padrao existe SO porque o dado e 100% sintetico e a
+# reprodutibilidade (RNC-003) exige pseudonimos estaveis entre execucoes; em
+# producao, a variavel vem de um cofre e nunca do codigo (RNC-004).
+PSEUDO_KEY = os.environ.get("PSEUDO_KEY", "tcc-leitos-2026-chave-sintetica")
 
 # Campos sensiveis que jamais podem aparecer na saida ao usuario final
 CAMPOS_SENSIVEIS = ("nome", "cpf", "data_nascimento", "id_paciente_pseudo")
+
+# Minimizacao e risco de reidentificacao na Gold (DA-LAKE-006, CTRL-LAKE-001).
+# Quase-identificadores de gold.internacoes: atributos que um terceiro poderia
+# conhecer sobre uma pessoa (tipo de leito e faixa etaria). O pipeline verifica
+# que todo grupo formado por eles tem pelo menos K_MINIMO linhas (k-anonimato).
+# K_MINIMO = 5 e o limiar usual para liberacao interna e controlada (El Emam);
+# o teste tambem reporta a fracao de linhas em grupos com k < 11, limiar de
+# supressao de celula pequena do CMS, como referencia mais estrita.
+QUASE_IDENTIFICADORES_INTERNACOES = ("tipo", "faixa_etaria")
+K_MINIMO = 5
 
 # Governanca de acesso: cada perfil so enxerga as tabelas Gold autorizadas
 
@@ -88,6 +101,7 @@ def _autoteste():
     """Checagem rapida de invariantes da configuracao."""
     assert SIM_TODAY.isoformat() == SIM_TODAY_ISO
     assert HIST_DAYS > 0 and SEED >= 0
+    assert PSEUDO_KEY and K_MINIMO >= 2 and QUASE_IDENTIFICADORES_INTERNACOES
     assert all(v > 0 for v in (VOL_UNIDADES, VOL_LEITOS, VOL_PACIENTES, VOL_INTERNACOES))
     # Todo perfil so pode autorizar tabelas Gold conhecidas.
     for perfil, tabelas in PERFIS.items():
@@ -103,6 +117,8 @@ def _autoteste():
     print(f"  perfis: {', '.join(PERFIS)}")
     print(f"  modelo LLM: {ANTHROPIC_MODEL}")
     print(f"  chave no ambiente: {'sim' if ANTHROPIC_API_KEY else 'nao'}")
+    print(f"  pseudonimizacao: HMAC-SHA256, chave {'do ambiente' if 'PSEUDO_KEY' in os.environ else 'padrao (dado sintetico)'}")
+    print(f"  k-anonimato Gold: k >= {K_MINIMO} sobre {QUASE_IDENTIFICADORES_INTERNACOES}")
 
 
 if __name__ == "__main__":

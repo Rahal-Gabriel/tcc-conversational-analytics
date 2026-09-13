@@ -2,7 +2,7 @@
 
 **Status**: base consolidada (revisão de 2026-09-08)
 **Prioridade**: ALTA
-**Última atualização**: 2026-09-08
+**Última atualização**: 2026-09-13
 **Alimenta (template TCC)**: Introdução · Metodologia · Resultados e Discussão · Referências
 
 ---
@@ -55,7 +55,8 @@ docs/referencias/
 ├── 05_METODO_E_DADOS_SINTETICOS.md        # estudo de caso, arquitetura de referência, Synthea, lakehouse
 ├── 06_PORTUGUES_E_BRASIL.md               # Text-to-SQL em português e produção brasileira
 ├── 07_MAPA_LITERATURA_PARA_CAMINHOS.md    # o que a literatura diz sobre cada caminho da conclusão
-└── 08_REFERENCIAS_FORMATADAS.md           # lista no formato USP/Esalq, pronta para colar
+├── 08_REFERENCIAS_FORMATADAS.md           # lista no formato USP/Esalq, pronta para colar
+└── 09_PRIVACIDADE_E_MINIMIZACAO.md        # k-anonimato, quase-identificadores, pseudonimização, minimização em Text-to-SQL
 ```
 
 ## 5. Síntese em uma página
@@ -115,4 +116,5 @@ docs/referencias/
 | Regulação Brasil | 8 |
 | Método e dados sintéticos | 9 |
 | Português e Brasil | 6 |
-| **Total** | **55** (algumas fontes aparecem em mais de um tema) |
+| Privacidade e minimização (acrescentado em 2026-09-13) | 9 |
+| **Total** | **64** (algumas fontes aparecem em mais de um tema) |

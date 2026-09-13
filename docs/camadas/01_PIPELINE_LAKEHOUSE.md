@@ -11,7 +11,7 @@
 
 Descrever o pipeline de dados em três camadas (Bronze, Silver, Gold)
 implementado em DuckDB. A Bronze recebe os dados sintéticos brutos com PII
-proposital; a Silver limpa e anonimiza; a Gold expõe métricas agregadas, sendo
+proposital; a Silver limpa e pseudonimiza; a Gold expõe métricas e registros minimizados, sendo
 a **única camada visível ao motor de linguagem**.
 
 Decisões de fundo: [DA-LAKE-001](../arquitetura/02_DECISOES_ARQUITETURAIS.md#da-lake-001-modelo-de-camadas-bronze--silver--gold)
@@ -20,7 +20,7 @@ a DA-LAKE-004. Regra crítica associada:
 
 ## 2. Camada Bronze (bruta, com PII proposital) - IMPLEMENTADA
 
-A PII existe de propósito para que a anonimização na Silver seja real e
+A PII existe de propósito para que a pseudonimização na Silver seja real e
 demonstrável ([DA-LAKE-002](../arquitetura/02_DECISOES_ARQUITETURAIS.md#da-lake-002-pii-proposital-na-bronze)).
 
 | Tabela | Colunas | Observação |
@@ -46,18 +46,26 @@ janela) ou seguir ativas em `SIM_TODAY` (alta real nula).
 > Números reprodutíveis da Bronze e do snapshot de ocupação estão em
 > [RES-001](../tcc/01_RESULTADOS_PRELIMINARES.md#res-001-camada-bronze-gerada-e-coerente).
 
-## 3. Camada Silver (limpa e anonimizada) - IMPLEMENTADA
+## 3. Camada Silver (limpa e pseudonimizada) - IMPLEMENTADA
 
 Transformação em `src/pipeline.py:construir_silver`:
 
 - Remove `nome`, `cpf` e `data_nascimento` (não sobrevivem à Silver).
-- Pseudonimiza `id_paciente` por `id_paciente_pseudo`, com SHA-256 sobre
-  `PSEUDO_SALT + id`, truncado em 16 hex (`src/pipeline.py:_pseudo`,
-  `src/config.py:56`). O salt determinista preserva a reprodutibilidade
-  ([RNC-003](../arquitetura/03_REGRAS_CRITICAS.md#rnc-003-determinismo-e-reprodutibilidade))
-  e dificulta reverter o hash por força bruta sobre os poucos ids.
-- Deriva `faixa_etaria` a partir da idade contra `SIM_TODAY` (nunca o relógio do
-  sistema) e descarta a data
+- Pseudonimiza `id_paciente` por `id_paciente_pseudo`, com HMAC-SHA256 sobre o
+  id usando a chave `PSEUDO_KEY`, truncado em 16 hex (`src/pipeline.py:_pseudo`,
+  `src/config.py`). Hash com chave, e não hash simples ou com salt no código:
+  sem a chave, a reversão por força bruta sobre os poucos ids deixa de ser
+  viável (ENISA 2022; EDPB 01/2025). A chave é lida do ambiente e é a
+  "informação adicional" que deve ficar fora do domínio de quem processa o
+  dado pseudonimizado; o valor padrão existe só porque o dado é sintético e a
+  reprodutibilidade exige pseudônimos estáveis
+  ([RNC-003](../arquitetura/03_REGRAS_CRITICAS.md#rnc-003-determinismo-e-reprodutibilidade)).
+  A Silver é, portanto, **pseudonimizada e não anonimizada**: quem detém a
+  chave reverte, e o dado continua pessoal (LGPD, art. 13, par. 4).
+- Deriva `faixa_etaria` a partir da **idade completa** em `SIM_TODAY` (função
+  `age()`, que considera mês e dia; até 2026-09-13 usava-se a diferença de
+  ano-calendário, o que classificava errado 11 dos 600 pacientes) e descarta
+  a data
   ([DA-LAKE-004](../arquitetura/02_DECISOES_ARQUITETURAIS.md#da-lake-004-faixa-etária-derivada-substitui-a-data-de-nascimento)).
 - `silver.unidade`, `silver.leito` e `silver.ocupacao_diaria` são espelho da
   Bronze (não contêm PII), tornando a Silver auto-suficiente como fonte da Gold.
@@ -72,16 +80,18 @@ Faixas etárias (limite inferior inclusivo): `0-17, 18-39, 40-59, 60-79, 80+`
 
 ## 4. Camada Gold (única exposta ao LLM) - IMPLEMENTADA
 
-Quatro tabelas, agregadas e sem dado individual identificável
+Quatro tabelas, sem identificadores diretos nem pseudônimos, minimizadas e
+com risco de reidentificação medido
 ([DA-LAKE-003](../arquitetura/02_DECISOES_ARQUITETURAIS.md#da-lake-003-gold-é-a-única-camada-exposta-ao-llm),
-`src/config.py:42-47`):
+[DA-LAKE-006](../arquitetura/02_DECISOES_ARQUITETURAIS.md#da-lake-006-minimização-da-gold-com-k-anonimato-verificado-e-pseudonimização-por-hmac),
+`src/config.py`):
 
-| Tabela Gold | Conteúdo |
-|---|---|
-| `gold.leitos_status` | snapshot do estado de cada leito em `SIM_TODAY` |
-| `gold.ocupacao_unidade` | métricas por unidade: total, ocupados, livres, bloqueados, taxa de ocupação (0-100) |
-| `gold.ocupacao_diaria` | série histórica diária do hospital |
-| `gold.internacoes` | internações com `faixa_etaria`, `tempo_permanencia`, flag `ativa` |
+| Tabela Gold | Granularidade | Conteúdo |
+|---|---|---|
+| `gold.leitos_status` | uma linha por leito (sem atributo de pessoa) | `id_leito, id_unidade, tipo, situacao` em `SIM_TODAY` |
+| `gold.ocupacao_unidade` | agregada por unidade | total, ocupados, livres, bloqueados, taxa de ocupação (0-100) |
+| `gold.ocupacao_diaria` | agregada por dia | série histórica diária do hospital |
+| `gold.internacoes` | uma linha por internação, minimizada | `tipo, faixa_etaria, ativa, tempo_permanencia` |
 
 Regras de derivação (`src/pipeline.py:construir_gold`): `ativa = TRUE` quando
 `data_alta_real` é nula; `tempo_permanencia` em dias apenas para internações
@@ -92,7 +102,24 @@ encerradas (nulo se ativa); `taxa_ocupacao` em percentual `[0,100]`. A Gold
 
 > Números reprodutíveis da Silver/Gold (snapshot por unidade, distribuição de
 > faixa etária, internações ativas) estão em
-> [RES-005](../tcc/01_RESULTADOS_PRELIMINARES.md#res-005-camadas-silver-e-gold-anonimizadas-e-agregadas).
+> [RES-005](../tcc/01_RESULTADOS_PRELIMINARES.md#res-005-camadas-silver-pseudonimizada-e-gold-minimizada).
+
+### 4.2. Minimização e k-anonimato de `gold.internacoes` (CTRL-LAKE-001) - IMPLEMENTADO
+
+| ID | Controle | Requisito | Status |
+|---|---|---|---|
+| `CTRL-LAKE-001` | `gold.internacoes` não carrega identificador substituto nem os quase-identificadores `sexo`, `data_admissao` e `id_unidade`; todo grupo formado por (`tipo`, `faixa_etaria`) tem `k >= K_MINIMO` (5), verificado no teste rápido | REG-LGPD-001, REG-LGPD-003 | IMPLEMENTADO |
+
+`src/pipeline.py:medir_k_anonimato` calcula, para um conjunto de
+quase-identificadores, o número de grupos, o k mínimo e médio e as frações de
+linhas em grupos com k < 5 e k < 11. Números atuais (SEED 42): sobre
+(`tipo`, `faixa_etaria`), 15 grupos, k mínimo 29, nenhuma linha em grupo com
+k < 11; incluindo `ativa` como quase-identificador (sensibilidade reportada,
+não imposta), 30 grupos, k mínimo 3, 0,4% das linhas em k < 5 e 3,2% em
+k < 11. O k mínimo 3 ocorre só entre internações ativas, cujas linhas não
+têm atributo sensível além dos próprios quase-identificadores
+(`tempo_permanencia` é nulo enquanto ativa). A tabela completa das variantes
+avaliadas está em DA-LAKE-006.
 
 ### 4.1. Gold isolada (arquivo próprio) - IMPLEMENTADA
 
@@ -121,9 +148,11 @@ tabela) são recusadas pelo próprio banco.
 | Volumes e janela | `src/config.py:26-29` | IMPLEMENTADO |
 | Geração Bronze | `src/data_gen.py:construir` | IMPLEMENTADO |
 | Schema Bronze | `src/data_gen.py:_criar_schema_e_tabelas` | IMPLEMENTADO |
-| Salt da pseudonimização | `src/config.py:56` (`PSEUDO_SALT`) | IMPLEMENTADO |
 | Transformação Silver | `src/pipeline.py:construir_silver` | IMPLEMENTADO |
 | Transformação Gold | `src/pipeline.py:construir_gold` | IMPLEMENTADO |
+| Chave da pseudonimização (HMAC) | `src/config.py` (`PSEUDO_KEY`, do ambiente) | IMPLEMENTADO |
+| Quase-identificadores e k mínimo | `src/config.py` (`QUASE_IDENTIFICADORES_INTERNACOES`, `K_MINIMO`) | IMPLEMENTADO |
+| Medição do k-anonimato | `src/pipeline.py:medir_k_anonimato` | IMPLEMENTADO |
 | Tabelas Gold autorizadas | `src/config.py:41-46` (`GOLD_TABLES`) | IMPLEMENTADO |
 | Caminho da Gold isolada | `src/config.py` (`GOLD_DB_PATH`) | IMPLEMENTADO |
 | Exportação da Gold isolada | `src/pipeline.py:exportar_gold` | IMPLEMENTADO |
@@ -142,4 +171,7 @@ tabelas Gold presentes; e soma de leitos por unidade igual a `VOL_LEITOS`.
 Verifica ainda a Gold isolada (§4.1): só schema `gold`, contagens iguais às do
 lakehouse, nenhum campo sensível, e recusa pelo banco das consultas que
 contornavam a análise textual (`query_table('bronze.paciente')`,
-`silver.paciente`, `bronze.paciente`). Este teste roda na CI.
+`silver.paciente`, `bronze.paciente`). Verifica a minimização (§4.2):
+`gold.internacoes` sem `id_internacao`, `id_paciente_pseudo`, `sexo`,
+`data_admissao` e `id_unidade`, e `k >= K_MINIMO` sobre os
+quase-identificadores. Este teste roda na CI.

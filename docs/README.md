@@ -25,13 +25,13 @@ A documentação cumpre dois papéis ao mesmo tempo:
 
 | Métrica | Total |
 |---|---|
-| Arquivos de documentação | 24 |
-| Decisões Arquiteturais (DA-*) | 16 |
+| Arquivos de documentação | 26 |
+| Decisões Arquiteturais (DA-*) | 17 |
 | Regras Críticas (RNC-*) | 5 |
 | Requisitos Regulatórios (REG-*) | 11 |
-| Controles de Governança (CTRL-*) | 10 |
+| Controles de Governança (CTRL-*) | 11 |
 | Critérios de Avaliação (AVAL-*) | 3 |
-| Resultados Preliminares (RES-*) | 8 |
+| Resultados Preliminares (RES-*) | 9 |
 
 > Os totais são mantidos manualmente. Ao adicionar ou remover um identificador,
 > atualize esta tabela e a contagem no módulo de origem.
@@ -46,7 +46,7 @@ docs/
 │   ├── 02_DECISOES_ARQUITETURAIS.md    # DA-* (o "porquê" de cada escolha)
 │   └── 03_REGRAS_CRITICAS.md           # RNC-* (princípios inegociáveis)
 ├── camadas/                            # Uma doc por camada da arquitetura
-│   ├── 01_PIPELINE_LAKEHOUSE.md        # Bronze / Silver / Gold, anonimização
+│   ├── 01_PIPELINE_LAKEHOUSE.md        # Bronze / Silver / Gold, pseudonimização e minimização
 │   ├── 02_GOVERNANCA_ENTRADA.md        # Perfis, registro, guardrails de entrada
 │   ├── 03_MOTOR_TEXT2SQL.md            # Motor LLM + oráculo
 │   └── 04_VALIDACAO_SAIDA.md           # Aterramento, filtro de saída, auditoria
@@ -94,7 +94,7 @@ de leitura) fica no [GUIA_DESENVOLVIMENTO.md](../GUIA_DESENVOLVIMENTO.md) na rai
 
 | # | Arquivo | Prefixo | Descrição |
 |---|---|---|---|
-| 01 | [01_PIPELINE_LAKEHOUSE.md](camadas/01_PIPELINE_LAKEHOUSE.md) | LAKE | Bronze, Silver e Gold; modelo de dados e anonimização |
+| 01 | [01_PIPELINE_LAKEHOUSE.md](camadas/01_PIPELINE_LAKEHOUSE.md) | LAKE | Bronze, Silver e Gold; modelo de dados, pseudonimização e minimização |
 | 02 | [02_GOVERNANCA_ENTRADA.md](camadas/02_GOVERNANCA_ENTRADA.md) | GOV | Perfis de acesso, registro e guardrails de entrada |
 | 03 | [03_MOTOR_TEXT2SQL.md](camadas/03_MOTOR_TEXT2SQL.md) | NL2SQL | Tradução de pergunta em SQL (motor LLM e oráculo) |
 | 04 | [04_VALIDACAO_SAIDA.md](camadas/04_VALIDACAO_SAIDA.md) | VALID | Aterramento, filtro de sensíveis e auditoria |
@@ -163,11 +163,11 @@ Lakehouse), `GOV` (governança de entrada), `NL2SQL` (motor Text-to-SQL),
 | arquitetura/01_VISAO_GERAL | IMPLEMENTADO |
 | arquitetura/02_DECISOES_ARQUITETURAIS | PARCIAL |
 | arquitetura/03_REGRAS_CRITICAS | PARCIAL |
-| camadas/01_PIPELINE_LAKEHOUSE | IMPLEMENTADO (Bronze, Silver, Gold e Gold isolada) |
+| camadas/01_PIPELINE_LAKEHOUSE | IMPLEMENTADO (Bronze, Silver pseudonimizada, Gold minimizada e isolada) |
 | camadas/02_GOVERNANCA_ENTRADA | IMPLEMENTADO |
 | camadas/03_MOTOR_TEXT2SQL | IMPLEMENTADO (oráculo e LLM; números do LLM pendentes de execução real) |
 | camadas/04_VALIDACAO_SAIDA | IMPLEMENTADO |
-| governanca/01_CONFORMIDADE_REGULATORIA | PARCIAL |
+| governanca/01_CONFORMIDADE_REGULATORIA | PARCIAL (8 de 11 requisitos implementados) |
 | avaliacao/01_METODOLOGIA_AVALIACAO | IMPLEMENTADO (tubulação verde no oráculo; acurácia do LLM pendente) |
 | avaliacao/02_REPRODUTIBILIDADE_CI | IMPLEMENTADO |
 | tcc/01_RESULTADOS_PRELIMINARES | documento vivo |

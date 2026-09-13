@@ -53,7 +53,7 @@ Subtópicos na mesma ordem da Metodologia, com os resultados parciais.
 | Resultado | Fonte |
 |---|---|
 | Camada Bronze coerente (com números) | [RES-001](01_RESULTADOS_PRELIMINARES.md#res-001-camada-bronze-gerada-e-coerente) |
-| Camadas Silver e Gold anonimizadas e agregadas | [RES-005](01_RESULTADOS_PRELIMINARES.md#res-005-camadas-silver-e-gold-anonimizadas-e-agregadas) |
+| Camadas Silver pseudonimizada e Gold minimizada | [RES-005](01_RESULTADOS_PRELIMINARES.md#res-005-camadas-silver-pseudonimizada-e-gold-minimizada) |
 | Mapeamento regulatório | [RES-002](01_RESULTADOS_PRELIMINARES.md#res-002-mapeamento-regulatório-completo) |
 | Reprodutibilidade e integridade | [RES-003](01_RESULTADOS_PRELIMINARES.md#res-003-reprodutibilidade-e-integridade) |
 | Arquitetura de referência documentada | [RES-004](01_RESULTADOS_PRELIMINARES.md#res-004-arquitetura-de-referência-documentada) |

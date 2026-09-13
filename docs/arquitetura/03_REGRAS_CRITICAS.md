@@ -73,7 +73,8 @@ qualquer alteração relevante.
 - **Descrição**: As colunas de identificação direta (`nome`, `cpf`,
   `data_nascimento`) existem só na Bronze e não podem existir na Silver nem na
   Gold. `id_paciente` é pseudonimizado (hash) na Silver.
-- **Motivação**: É a materialização da anonimização exigida pela LGPD para dados
+- **Motivação**: É a materialização da minimização e da pseudonimização
+  exigidas pela LGPD (art. 6º, III; art. 13, par. 4) para dados
   sensíveis de saúde. A camada exposta ao LLM (Gold) jamais contém dado
   individual identificável.
 - **Enforcement**: (1) Transformação Bronze→Silver remove PII e deriva
@@ -84,9 +85,11 @@ qualquer alteração relevante.
   camadas adicionais. Até 2026-09-13 o enforcement dependia só de (1) e (3), e
   (3) era contornável (banca, rodada 01, P-09).
 - **Status**: IMPLEMENTADO (Silver sem PII direta, `id_paciente`
-  pseudonimizado por SHA-256 com salt, `faixa_etaria` derivada; Gold isolada
-  sem nenhum campo de `CAMPOS_SENSIVEIS`; testes rápidos em `src/pipeline.py`
-  e `src/governance.py`).
+  pseudonimizado por HMAC-SHA256 com chave do ambiente, `faixa_etaria`
+  derivada da idade completa; Gold isolada sem nenhum campo de
+  `CAMPOS_SENSIVEIS`, sem identificador substituto e com k-anonimato
+  verificado, DA-LAKE-006; testes rápidos em `src/pipeline.py` e
+  `src/governance.py`).
 - **Código**: `src/config.py` (`CAMPOS_SENSIVEIS`, `GOLD_DB_PATH`);
   `src/pipeline.py:construir_silver`, `_pseudo` e `exportar_gold`;
   `src/governance.py:conectar_somente_leitura`.

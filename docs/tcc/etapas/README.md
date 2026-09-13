@@ -20,7 +20,7 @@ etapa gera para a Discussão. É o insumo direto da redação final.
 | Etapa | Tema | Fecha (banca) | API | Situação |
 |---|---|---|---|---|
 | A | Isolamento físico da Gold e guardrails endurecidos | P-09, P-11 | não | concluída (2026-09-13) |
-| B | Minimização da Gold, k-anonimato, idade correta, nomenclatura (pseudonimização) | P-15, P-16, P-17 | não | pendente |
+| B | Minimização da Gold, k-anonimato, idade correta, nomenclatura (pseudonimização) | P-15, P-16, P-17 | não | concluída (2026-09-13) |
 | C | Harness: rotulagem por tipo, Over/Proper Refusal e Safe-EX, Soft F1, auditoria com horário real | P-02, P-04, P-14, P-20 | não | pendente |
 | D | Matriz 2×2 de prompt (value linking × schema por perfil), artefatos versionados, tag | P-03, P-08, P-10 | sim | pendente |
 | E | Conjunto adversarial, abstenção, inventário do que sai para a API | P-12, P-18 | sim (baixo) | pendente |
@@ -31,3 +31,4 @@ etapa gera para a Discussão. É o insumo direto da redação final.
 | Arquivo | Etapa | Resultado gerado |
 |---|---|---|
 | [2026-09-13_etapa-A.md](2026-09-13_etapa-A.md) | A | RES-008, DA-LAKE-005, CTRL-GOV-007 |
+| [2026-09-13_etapa-B.md](2026-09-13_etapa-B.md) | B | RES-009, DA-LAKE-006, CTRL-LAKE-001, errata de RES-005 |

@@ -21,7 +21,7 @@ Resultados Preliminares do TCC.
 ## 2. Visão geral
 
 O protótipo concluiu o pipeline de dados nas três camadas (Bronze determinista,
-Silver anonimizada, Gold agregada), a governança de entrada e de saída, o motor
+Silver pseudonimizada, Gold minimizada), a governança de entrada e de saída, o motor
 Text-to-SQL nas duas implementações (oráculo e LLM) e o harness de avaliação. A
 tubulação completa (geração → governança → execução → avaliação) roda de ponta a
 ponta com o motor oráculo e fecha em 100% de execution match, o que comprova que
@@ -39,7 +39,7 @@ de cálculo
 | a | Revisão da literatura (Conversational Analytics, Text-to-SQL, governança de LLMs) | Em andamento | Fora do repositório (projeto de pesquisa) |
 | b | Mapear requisitos regulatórios (LGPD, ANVISA, ANPD) | Concluído | [governanca/01_CONFORMIDADE_REGULATORIA.md](../governanca/01_CONFORMIDADE_REGULATORIA.md) |
 | c | Projetar a arquitetura técnica (ingestão, Lakehouse, motor com guardrails) | Parcial | [arquitetura/01_VISAO_GERAL.md](../arquitetura/01_VISAO_GERAL.md); Lakehouse e motor Text-to-SQL implementados |
-| d | Desenvolver o modelo de governança (acesso, rastreabilidade, anonimização, validação) | Concluído (implementação) | Anonimização Silver ([RES-005](#res-005-camadas-silver-e-gold-anonimizadas-e-agregadas)); guardrails de entrada e saída, e auditoria de pergunta e resposta implementados |
+| d | Desenvolver o modelo de governança (acesso, rastreabilidade, anonimização, validação) | Concluído (implementação) | Pseudonimização na Silver e minimização da Gold ([RES-005](#res-005-camadas-silver-pseudonimizada-e-gold-minimizada), [RES-009](#res-009-minimização-da-gold-com-k-anonimato-medido-e-pseudonimização-por-hmac)); guardrails de entrada e saída, e auditoria de pergunta e resposta implementados |
 | e | Implementar e avaliar o protótipo sobre dados sintéticos | Em andamento | Tubulação de avaliação verde no oráculo ([RES-006](#res-006-tubulação-de-avaliação-verde-com-o-motor-oráculo)); acurácia do LLM pendente de execução real |
 
 ## 4. Resultados preliminares disponíveis
@@ -74,25 +74,43 @@ direta ao DuckDB em 2026-06-04.
 - **Evidência**: `src/data_gen.py`; `data/lakehouse.duckdb`;
   [camadas/01_PIPELINE_LAKEHOUSE.md](../camadas/01_PIPELINE_LAKEHOUSE.md).
 
-### RES-005: Camadas Silver e Gold anonimizadas e agregadas
+### RES-005: Camadas Silver (pseudonimizada) e Gold (minimizada)
+
+> **Nomenclatura corrigida em 2026-09-13** (banca, rodada 01, P-16 e P-17):
+> este resultado chamava-se "Silver e Gold anonimizadas e agregadas". A Silver
+> é **pseudonimizada** (reversível por quem detém a chave; o dado continua
+> pessoal, LGPD art. 13, par. 4) e a Gold é **minimizada, sem identificadores e
+> com risco de reidentificação medido** (RES-009); duas de suas quatro tabelas
+> são de nível de linha, não agregadas.
 
 A transformação `src/pipeline.py` materializa, de forma determinista sobre a
-Bronze, a Silver anonimizada e as quatro tabelas Gold expostas ao motor de
+Bronze, a Silver pseudonimizada e as quatro tabelas Gold expostas ao motor de
 linguagem.
 
-Anonimização (Silver), verificada no teste rápido
+Pseudonimização (Silver), verificada no teste rápido
 ([RNC-005](../arquitetura/03_REGRAS_CRITICAS.md#rnc-005-pii-nunca-sobrevive-à-silver)):
 `silver.paciente` não contém `nome`, `cpf` nem `data_nascimento`; `id_paciente`
-vira `id_paciente_pseudo` (SHA-256 com salt, sem colisão nos 600 pacientes); a
-data de nascimento dá lugar a `faixa_etaria`. Distribuição das faixas:
+vira `id_paciente_pseudo` (HMAC-SHA256 com chave do ambiente, sem colisão nos
+600 pacientes); a data de nascimento dá lugar a `faixa_etaria`, derivada da
+idade completa em `SIM_TODAY`. Distribuição das faixas (SEED 42):
 
 | Faixa etária | Pacientes |
 |---|---|
-| 0-17 | 105 |
-| 18-39 | 142 |
+| 0-17 | 108 |
+| 18-39 | 143 |
 | 40-59 | 127 |
-| 60-79 | 128 |
-| 80+ | 98 |
+| 60-79 | 129 |
+| 80+ | 93 |
+
+> **Errata (2026-09-13).** O documento de Resultados Preliminares aprovado
+> reporta 105 / 142 / 127 / 128 / 98. Dois problemas: (1) os dados
+> deterministas com a fórmula então em uso (diferença de ano-calendário)
+> produzem 106 / 143 / 127 / 126 / 98, e não os valores publicados, cuja
+> origem não pôde ser reconstituída (provável erro de transcrição; a soma de
+> ambos é 600); (2) a fórmula classificava errado quem ainda não tinha feito
+> aniversário no ano (banca, rodada 01, P-15), o que a correção para idade
+> completa altera em 11 pacientes. A versão final do TCC deve reportar a
+> distribuição acima e registrar a errata.
 
 Snapshot Gold da ocupação por unidade em `SIM_TODAY` (2026-05-31):
 
@@ -110,8 +128,8 @@ Snapshot Gold da ocupação por unidade em `SIM_TODAY` (2026-05-31):
 
 Coerência verificada: a soma dos 200 leitos por unidade fecha com `VOL_LEITOS`, e
 os 150 leitos ocupados batem com as 150 internações marcadas como `ativa` em
-`gold.internacoes`. Números confirmados por consulta direta ao DuckDB em
-2026-06-04.
+`gold.internacoes`. Snapshot por unidade confirmado por consulta direta ao
+DuckDB em 2026-06-04 e reconfirmado em 2026-09-13 (não depende da idade).
 
 - **Status**: VALIDADO.
 - **Evidência**: `src/pipeline.py`; `data/lakehouse.duckdb`;
@@ -298,6 +316,49 @@ mesmos, e `run_all.py oracle` segue em 100%.
 - **Evidência**: `src/pipeline.py:exportar_gold`;
   `src/governance.py:conectar_somente_leitura`, `PALAVRAS_PROIBIDAS`,
   `PREFIXOS_PROIBIDOS`; `.github/workflows/ci.yml`.
+
+### RES-009: Minimização da Gold com k-anonimato medido e pseudonimização por HMAC
+
+Resultado da fase de conclusão (Etapa B, 2026-09-13), originado na banca
+simulada ([rodada 01, P-15, P-16 e P-17](banca/2026-09-13_rodada-01.md)). Com
+as colunas originais de `gold.internacoes` (unidade, tipo, faixa etária, sexo,
+data de admissão), 1.763 dos 1.883 grupos de quase-identificadores tinham
+k = 1: cada internação era, na prática, única, e a tabela não era "agregada".
+A decisão de minimização, tomada por literatura e por medição (tabela completa
+em [DA-LAKE-006](../arquitetura/02_DECISOES_ARQUITETURAIS.md#da-lake-006-minimização-da-gold-com-k-anonimato-verificado-e-pseudonimização-por-hmac)):
+
+| Medida | Antes | Depois |
+|---|---|---|
+| Colunas de `gold.internacoes` | `id_internacao, id_unidade, tipo, faixa_etaria, sexo, data_admissao, tempo_permanencia, ativa` | `tipo, faixa_etaria, ativa, tempo_permanencia` |
+| k mínimo sobre os quase-identificadores | 1 (1.763 grupos com k = 1) | 29 sobre (tipo, faixa); 3 na sensibilidade com `ativa` |
+| Linhas em grupos com k < 11 | 100% | 0% (3,2% na sensibilidade com `ativa`) |
+| Pseudonimização de `id_paciente` | SHA-256 com salt no código | HMAC-SHA256 com chave do ambiente (`PSEUDO_KEY`) |
+| Idade para a faixa etária | diferença de ano-calendário (11 pacientes errados) | idade completa (`age()`) |
+| Verificação | nenhuma | teste rápido exige `k >= 5` (CTRL-LAKE-001), na CI |
+
+Limiares usados como referência: k >= 5 (liberação interna controlada, El
+Emam e Arbuckle 2013) imposto; k >= 11 (regra de supressão de célula do CMS)
+também satisfeito sobre (tipo, faixa). Custo de utilidade declarado:
+internações por unidade deixam de ser respondíveis por esta tabela. Nenhuma
+das 18 perguntas usa as colunas removidas e `run_all.py oracle` segue em
+100%; os números do LLM do preliminar foram medidos sobre a Gold anterior e
+serão remedidos na Etapa D sobre a Gold minimizada.
+
+Leitura para a Discussão: o protótipo passa a apresentar a proteção de dados
+em três afirmações verificáveis, em vez de uma alegação de anonimização:
+identificadores diretos removidos e pseudônimo por hash com chave (Silver,
+ENISA 2022; EDPB 01/2025); pseudônimo ausente e quase-identificadores
+minimizados na camada exposta ao modelo (Gold, DA-LAKE-003 e 006); risco de
+reidentificação medido e imposto por teste (k-anonimato, Sweeney 2002),
+conforme o modelo baseado em risco do estudo preliminar da ANPD. A
+alternativa mais estrita (agregação com supressão de células) fica
+registrada como evolução.
+
+- **Status**: VALIDADO (medições e correção em 2026-09-13, registradas em
+  [tcc/etapas/2026-09-13_etapa-B.md](etapas/2026-09-13_etapa-B.md)).
+- **Evidência**: `src/pipeline.py:medir_k_anonimato`, `_pseudo`,
+  `_expr_faixa_etaria`, `construir_gold`; `src/config.py`;
+  fichas em [referencias/09](../referencias/09_PRIVACIDADE_E_MINIMIZACAO.md).
 
 ## 5. O que ainda falta
 

@@ -2,7 +2,7 @@
 
 **Status**: IMPLEMENTADO
 **Prioridade**: CRÍTICA
-**Última atualização**: 2026-06-15
+**Última atualização**: 2026-09-13
 **Alimenta (template TCC)**: Introdução · Metodologia · Resultados Preliminares
 
 ---
@@ -46,7 +46,7 @@ endereça os requisitos da LGPD, das normas da ANVISA e das diretrizes da ANPD
             |                                                       |
             |   bronze  --->  silver  --->  gold                    |
             |   (PII       (limpa e      (métricas; ÚNICA          |
-            |   proposital) anonimizada)  camada exposta ao LLM)    |
+            |   proposital) pseudonim.)   camada exposta ao LLM)    |
             +-------------------------------------------------------+
                                    |  resultado
                                    v
@@ -62,7 +62,7 @@ endereça os requisitos da LGPD, das normas da ANVISA e das diretrizes da ANPD
 
 | # | Camada | Responsabilidade | Doc |
 |---|---|---|---|
-| 1 | Pipeline Lakehouse | Ingestão (Bronze), limpeza e anonimização (Silver), métricas (Gold) | [camadas/01](../camadas/01_PIPELINE_LAKEHOUSE.md) |
+| 1 | Pipeline Lakehouse | Ingestão (Bronze), limpeza e pseudonimização (Silver), métricas e registros minimizados (Gold) | [camadas/01](../camadas/01_PIPELINE_LAKEHOUSE.md) |
 | 2 | Governança de entrada | Perfil, registro da pergunta, conformidade antes de executar | [camadas/02](../camadas/02_GOVERNANCA_ENTRADA.md) |
 | 3 | Motor Text-to-SQL | Pergunta em português para SQL somente leitura na Gold | [camadas/03](../camadas/03_MOTOR_TEXT2SQL.md) |
 | 4 | Validação de saída | Aterramento, filtro de sensíveis, auditoria | [camadas/04](../camadas/04_VALIDACAO_SAIDA.md) |

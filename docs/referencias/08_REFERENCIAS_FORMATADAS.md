@@ -1,6 +1,6 @@
 # 08. Referências formatadas no padrão USP/Esalq
 
-**Última atualização**: 2026-09-08
+**Última atualização**: 2026-09-13
 **Alimenta**: seção Referências do TCC
 
 Formato do manual (itens 18 e 19): `Sobrenome, I.N.; Sobrenome, I.N. Ano.
@@ -16,6 +16,8 @@ ABNT para o padrão do manual; **todos** os que forem citados no texto final
 precisam constar, e nenhum item da lista pode ficar sem citação no texto.
 
 ---
+
+Abedini, S.; Mohapatra, S.; Emerson, D.B.; Shafieinejad, M.; Cresswell, J.C.; He, X. 2025. MaskSQL: safeguarding privacy for LLM-based text-to-SQL via abstraction. arXiv:2509.23459. Disponível em: <https://arxiv.org/abs/2509.23459>. Acesso em: 13 set. 2026. [aceito no Workshop on Regulatable ML, NeurIPS 2025; conferir]
 
 Affolter, K.; Stockinger, K.; Bernstein, A. 2019. A comparative survey of recent natural language interfaces for databases. The VLDB Journal 28(5): 793-819.
 
@@ -33,6 +35,8 @@ Autoridade Nacional de Proteção de Dados [ANPD]. 2024. Radar tecnológico: int
 
 Autoridade Nacional de Proteção de Dados [ANPD]. [ano, conferir]. Estudo preliminar: anonimização e pseudonimização para a proteção de dados pessoais. ANPD, Brasília, DF, Brasil. Disponível em: <https://www.gov.br/participamaisbrasil/blob/baixar/37060>. Acesso em: 8 set. 2026.
 
+Ballesteros-Rodríguez, A.; González-García, L.; Sicilia, M.-A.; García-Barriocanal, E. 2026. Do open-weight LLMs respect minimum-necessary access in text-to-SQL? An automated audit on EHR benchmarks. Electronics 15(15): 3252.
+
 Bardhan, J.; Roberts, K.; Wang, D.Z. 2023. Question answering for electronic health records: a scoping review of datasets and models. arXiv:2310.08759. Disponível em: <https://arxiv.org/abs/2310.08759>. Acesso em: 8 set. 2026.
 
 Bellanda, V.C.F.; Medeiros, A.S.; Ferraz, D.A. 2025. Transforming Brazilian healthcare with AI: progress and future perspectives. Discover Health Systems 4(47).
@@ -47,9 +51,17 @@ Brown, L.D.; Cai, T.T.; DasGupta, A. 2001. Interval estimation for a binomial pr
 
 Bui, C.D.; Nguyen, H.H.; Ngo, T.Q.; Vu-Thi, H.K.; Nguyen, C.H.; Nguyen, D.V.; Ngo, S.T. 2026. A systematic survey of LLM-based text-to-SQL: methodologies, security vulnerabilities, and future challenges. PeerJ Computer Science 12: e3773.
 
+Centers for Medicare & Medicaid Services [CMS]. [ano, conferir]. CMS cell suppression policy. U.S. Department of Health and Human Services, Baltimore, MD, USA. Disponível em: <https://www.hhs.gov/guidance/document/cms-cell-suppression-policy>. Acesso em: 13 set. 2026.
+
 Chen, J.; Chun, D.; Patel, M.; Chiang, E.; James, J. 2019. The validity of synthetic clinical data: a validation study of a leading synthetic data generator (Synthea) using clinical quality measures. BMC Medical Informatics and Decision Making 19: 44. [conferir]
 
 Dou, L.; Gao, Y.; Pan, M.; Wang, D.; Che, W.; Zhan, D.; Lou, J.-G. 2023. MultiSpider: towards benchmarking multilingual text-to-SQL semantic parsing. In: AAAI Conference on Artificial Intelligence, 37., 2023, Washington, DC, USA. Anais... p. 12745-12753. [conferir páginas]
+
+El Emam, K.; Arbuckle, L. 2013. Anonymizing Health Data: Case studies and methods to get you started. O'Reilly Media, Sebastopol, CA, USA.
+
+European Data Protection Board [EDPB]. 2025. Guidelines 01/2025 on pseudonymisation (version for public consultation, adopted on 16 January 2025). EDPB, Brussels, Belgium. Disponível em: <https://www.edpb.europa.eu/system/files/2025-01/edpb_guidelines_202501_pseudonymisation_en.pdf>. Acesso em: 13 set. 2026.
+
+European Union Agency for Cybersecurity [ENISA]. 2022. Deploying pseudonymisation techniques: the case of the health sector. ENISA, Athens, Greece. Disponível em: <https://www.enisa.europa.eu/publications/deploying-pseudonymisation-techniques>. Acesso em: 13 set. 2026.
 
 Fei, Y.; Jiang, Y.; Yang, Y.; Xiao, X. 2026. Benchmarking text-to-SQL under role-based access control. arXiv:2607.22115. Disponível em: <https://arxiv.org/abs/2607.22115>. Acesso em: 8 set. 2026.
 
@@ -65,6 +77,8 @@ Klisura, Đ.; Khoury, J.; Kundu, A.; Krishnan, R.; Rios, A. 2025. Role-condition
 
 Klisura, Đ.; Rios, A. 2025. Unmasking database vulnerabilities: zero-knowledge schema inference attacks in text-to-SQL systems. In: Findings of the Association for Computational Linguistics: NAACL 2025. Anais... [conferir páginas]
 
+Li, N.; Li, T.; Venkatasubramanian, S. 2007. t-Closeness: privacy beyond k-anonymity and l-diversity. In: IEEE International Conference on Data Engineering (ICDE), 23., 2007, Istanbul, Turkey. Anais... p. 106-115. [conferir páginas]
+
 Lee, G.; Chay, W.; Cho, S.; Choi, E. 2024b. TrustSQL: benchmarking text-to-SQL reliability with penalty-based scoring. arXiv:2403.15879. Disponível em: <https://arxiv.org/abs/2403.15879>. Acesso em: 8 set. 2026.
 
 Lee, G.; Hwang, H.; Bae, S.; Kwon, Y.; Shin, W.; Yang, S.; Seo, M.; Kim, J.-Y.; Choi, E. 2022. EHRSQL: a practical text-to-SQL benchmark for electronic health records. In: Advances in Neural Information Processing Systems (NeurIPS), Datasets and Benchmarks Track, 2022. Anais... [conferir páginas]
@@ -78,6 +92,8 @@ Li, J.; Zhang, Y.; Zhao, J.; He, S.; Li, D. 2026. Harnessing the potential of LL
 Liu, W.; Qu, B.; Mallya, P.; Wu, J.; Thomas, K.; Hall, J.L.; Zhao, J.; Yin, Z. 2026. Optimizing an LLM-based clinical data querying system using metadata enrichment and task decomposition. AMIA Joint Summits on Translational Science Proceedings. [conferir volume e páginas]
 
 Maamari, K.; Abubaker, F.; Jaroslawicz, D.; Mhedhbi, A. 2024. The death of schema linking? Text-to-SQL in the age of well-reasoned language models. arXiv:2408.07702. Disponível em: <https://arxiv.org/abs/2408.07702>. Acesso em: 8 set. 2026.
+
+Machanavajjhala, A.; Kifer, D.; Gehrke, J.; Venkitasubramaniam, M. 2007. l-Diversity: privacy beyond k-anonymity. ACM Transactions on Knowledge Discovery from Data 1(1): 3.
 
 Miguel, P.A.C.; Fleury, A.; Mello, C.H.P.; Nakano, D.N.; Lima, E.P.; Turrioni, J.B.; Ho, L.L.; Morabito, R.; Martins, R.A.; Sousa, R.; Costa, S.E.G.; Pureza, V. 2012. Metodologia de pesquisa em engenharia de produção e gestão de operações. 2ed. Elsevier, Rio de Janeiro, RJ, Brasil.
 
@@ -120,6 +136,8 @@ Song, Y.; Wang, G.; Li, S.; Lin, B.Y. 2024. The good, the bad, and the greedy: e
 Sweeney, L. 2002. k-anonymity: a model for protecting privacy. International Journal of Uncertainty, Fuzziness and Knowledge-Based Systems 10(5): 557-570.
 
 Tanković, N.; Šajina, R.; Lorencin, I. 2025. Transforming medical data access: the role and challenges of recent language models in SQL query automation. Algorithms 18(3): 124.
+
+United States. 2002. Code of Federal Regulations, Title 45, Part 164, Section 164.514(b): other requirements relating to uses and disclosures of protected health information (de-identification, Safe Harbor). Office of the Federal Register, Washington, DC, USA. [conferir edição vigente]
 
 Walonoski, J.; Kramer, M.; Nichols, J.; Quina, A.; Moesel, C.; Hall, D.; Duffett, C.; Dube, K.; Gallagher, T.; McLachlan, S. 2018. Synthea: an approach, method, and software mechanism for generating synthetic patients and the synthetic electronic health care record. Journal of the American Medical Informatics Association 25(3): 230-238.
 
