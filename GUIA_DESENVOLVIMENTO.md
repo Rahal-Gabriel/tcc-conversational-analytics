@@ -58,6 +58,10 @@ Em resumo:
 4. [docs/referencias/07_MAPA_LITERATURA_PARA_CAMINHOS.md](docs/referencias/07_MAPA_LITERATURA_PARA_CAMINHOS.md)
    - antes de desenhar qualquer experimento novo, ler o que a literatura já
    sabe sobre ele. Templates e manual oficiais ficam em `docs-tcc/`.
+5. `/banca` - simula a banca examinadora com contexto limpo (agente em
+   `.claude/agents/banca.md`) e registra a rodada em
+   [docs/tcc/banca/](docs/tcc/banca/README.md). Rodar ao fim de cada etapa
+   entregue e antes do depósito.
 
 ## Mapa de módulos por área
 

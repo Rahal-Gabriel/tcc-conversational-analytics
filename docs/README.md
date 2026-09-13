@@ -58,7 +58,8 @@ docs/
 ├── tcc/
 │   ├── 01_RESULTADOS_PRELIMINARES.md   # Registro vivo de resultados (RES-*)
 │   ├── 02_MAPA_DOC_PARA_TEMPLATE.md    # Ponte doc → seção do template do TCC
-│   └── 03_RASCUNHO_RESULTADOS_PRELIMINARES.md  # Rascunho da seção para o template
+│   ├── 03_RASCUNHO_RESULTADOS_PRELIMINARES.md  # Rascunho da seção para o template
+│   └── banca/                          # Rodadas da banca simulada (/banca)
 └── referencias/                        # Base de literatura para a conclusão (fichas por tema)
     ├── README.md                       # Protocolo da busca, legenda de verificação, síntese
     ├── 01..06_*.md                     # Fichas: Text-to-SQL clínico, métricas, governança, regulação, método, português
@@ -112,6 +113,7 @@ de leitura) fica no [GUIA_DESENVOLVIMENTO.md](../GUIA_DESENVOLVIMENTO.md) na rai
 | 01 | [tcc/01_RESULTADOS_PRELIMINARES.md](tcc/01_RESULTADOS_PRELIMINARES.md) | RES | Registro vivo dos resultados parciais verificáveis |
 | 02 | [tcc/02_MAPA_DOC_PARA_TEMPLATE.md](tcc/02_MAPA_DOC_PARA_TEMPLATE.md) | - | Ponte de cada módulo/ID para a seção do template |
 | 03 | [tcc/03_RASCUNHO_RESULTADOS_PRELIMINARES.md](tcc/03_RASCUNHO_RESULTADOS_PRELIMINARES.md) | - | Rascunho da seção Resultados Preliminares para o template |
+| - | [tcc/banca/README.md](tcc/banca/README.md) | - | Rodadas da banca simulada: perguntas, lacunas e riscos por etapa |
 
 ## Módulos - Referências (base de literatura)
 
