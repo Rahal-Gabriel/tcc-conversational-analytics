@@ -55,12 +55,12 @@ passando.
 | `REG-LGPD-002` | Anonimização e pseudonimização | LGPD art. 5º, XI; art. 12; art. 13, par. 4 | Pseudonimização de `id_paciente` por HMAC-SHA256 com chave lida do ambiente (informação adicional guardada separadamente); o pseudônimo não chega à Gold. Declarado como pseudonimização, não anonimização: o dado da Silver continua pessoal | Silver / `pipeline.py` | implementado |
 | `REG-LGPD-003` | Minimização na exposição (só o necessário) | LGPD art. 6º (necessidade, adequação) | Apenas a Gold é exposta ao motor; Bronze e Silver inacessíveis por isolamento físico (arquivo próprio da Gold) e, adicionalmente, por análise textual | Gold / `config.GOLD_DB_PATH`, CTRL-GOV-007, CTRL-GOV-004, CTRL-GOV-002 | implementado |
 | `REG-LGPD-004` | Controle de acesso por finalidade e perfil | LGPD art. 6º (finalidade); ANVISA RDC | Perfis `gestor`, `enfermagem`, `administrativo` autorizam só tabelas Gold específicas | Entrada / `config.PERFIS`, CTRL-GOV-005 | config |
-| `REG-LGPD-005` | Segurança e prevenção de comando indevido | LGPD art. 46; art. 6º (segurança, prevenção) | Guardrails CTRL-GOV-001 a 003 e 006: SQL única somente leitura, bloqueio de escrita/admin, bloqueio de múltiplas instruções, conexão read-only | Entrada / `governance.py` | projetado |
+| `REG-LGPD-005` | Segurança e prevenção de comando indevido | LGPD art. 46; art. 6º (segurança, prevenção) | Guardrails CTRL-GOV-001 a 003 e 006: SQL única somente leitura, bloqueio de escrita/admin, bloqueio de múltiplas instruções, conexão read-only | Entrada / `governance.py` | implementado (validado na Etapa E: cinco injeções barradas, RES-013) |
 | `REG-LGPD-006` | Prevenção de vazamento de sensível na resposta | LGPD art. 11; ANPD (uso secundário) | Filtro de saída CTRL-VALID-002: bloqueia coluna com nome de campo sensível | Saída / `config.CAMPOS_SENSIVEIS`, `governance.validar_saida` | implementado |
 | `REG-LGPD-007` | Rastreabilidade e prestação de contas | LGPD art. 6º (responsabilização); ANVISA RDC | Auditoria CTRL-AUD-001: registro de toda pergunta e resposta com horário real e data de simulação, usuário, perfil, SQL, motor, evento, controle e hash do resultado entregue, em cadeia de hashes verificável (`verificar_trilha`); autenticação fora do escopo, com ponto de integração declarado | Auditoria / `governance.registrar_pergunta`, `governance.registrar_resposta`, `governance.verificar_trilha` | implementado |
 | `REG-LGPD-008` | Controle do que sai do perímetro (transferência de dados a terceiro, inclusive internacional, quando o motor é uma API externa) | LGPD art. 33; art. 6º (necessidade) | Inventário do que sai por motor ([camadas/03](../camadas/03_MOTOR_TEXT2SQL.md) §3.3): nunca linhas da Gold, nada da Bronze ou Silver, nunca a chave HMAC; a pergunta só sai filtrada por CTRL-GOV-008 (dado pessoal barrado e mascarado antes da chamada); implantação local como decisão de arquitetura, em que nada sai (DA-GOV-003). Nome próprio na pergunta é limitação declarada | Entrada e Motor / `governance.filtrar_pii`, `nl2sql.MotorLocal` | projetado para atender (controle implementado; inventário documentado) |
 | `REG-ANPD-001` | Mitigação de alucinação da IA generativa | ANPD, Radar de IA Generativa | Aterramento CTRL-VALID-001: toda tabela citada deve existir no schema Gold conhecido | Saída / `governance.validar_saida` | implementado |
-| `REG-ANPD-002` | Prevenção de uso secundário não autorizado | ANPD, Radar de IA Generativa | Escopo restrito por perfil, execução somente leitura e registro integral limitam o uso ao fim declarado | Entrada e Auditoria / `governance.py` | projetado |
+| `REG-ANPD-002` | Prevenção de uso secundário não autorizado | ANPD, Radar de IA Generativa | Escopo restrito por perfil, execução somente leitura e registro integral limitam o uso ao fim declarado | Entrada e Auditoria / `governance.py` | implementado (validado na Etapa E: nenhuma consulta entregue fora do escopo nas 25 adversariais, RES-013) |
 | `REG-ANVISA-001` | Controle, segurança e rastreabilidade do SaMD | ANVISA RDC 657/751/830 | Conjunto de guardrails versionados, auditoria e reprodutibilidade do software | Transversal / `governance.py`, CI | projetado |
 | `REG-PESQ-001` | Reprodutibilidade e integridade do experimento | Boas práticas de pesquisa; suporte à responsabilização | Determinismo por `SEED` e `SIM_TODAY`; dados sintéticos; separação motor LLM (números) vs oráculo (autoteste) | Transversal / `config.py`, `nl2sql.py`, CI | config |
 
@@ -75,9 +75,10 @@ data de referência). A lógica está implementada em `pipeline.py`
 isolamento físico, filtro de saída e auditoria), e as linhas com situação
 `implementado` são verificáveis por teste automatizado. A Etapa C revisou a
 auditoria (REG-LGPD-007): horário real, hash do resultado entregue e cadeia
-de hashes, com a completude lida do arquivo pelo indicador AVAL-003. Os itens
-ainda `projetado` (REG-LGPD-005, REG-ANPD-002, REG-ANVISA-001) são tratados
-na Etapa E da fase de conclusão e na Discussão. A Etapa E acrescentou
+de hashes, com a completude lida do arquivo pelo indicador AVAL-003. A Etapa E validou
+REG-LGPD-005 e REG-ANPD-002 com o conjunto adversarial (RES-013); só
+REG-ANVISA-001 continua `projetado`, por enquadramento por analogia, e é
+tratado na Discussão (Etapa F). A Etapa E acrescentou
 REG-LGPD-008 (o que sai do perímetro) com o controle CTRL-GOV-008 em código e
 o inventário por motor; com dado sintético a LGPD não incide sobre o
 protótipo, por isso a situação de conformidade é "projetada para atender",

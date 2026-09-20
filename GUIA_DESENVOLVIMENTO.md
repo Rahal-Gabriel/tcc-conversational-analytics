@@ -166,7 +166,9 @@ python run_all.py llm --motor local --matriz                     # cinco celulas
 python run_all.py llm --motor local --adversarial                # E0 e E1 sobre 18 legitimas + 25 adversariais (Etapa E)
 ```
 
-As células de prompt (C0 a C4) estão pré-registradas em `config.CELULAS`.
+As células de prompt (C0 a C4) estão pré-registradas em `config.CELULAS`; as
+da Etapa E (E0, E1) em `config.CELULAS_E`. A célula operacional (usada sem
+`--celula`) é `config.CELULA_OPERACIONAL` (E1: C3 com instrução de recusa).
 Detalhes do contrato do prompt em
 [docs/camadas/03_MOTOR_TEXT2SQL.md](docs/camadas/03_MOTOR_TEXT2SQL.md).
 

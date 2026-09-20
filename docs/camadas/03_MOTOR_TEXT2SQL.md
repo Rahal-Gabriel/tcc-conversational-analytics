@@ -1,6 +1,6 @@
 # NL2SQL: Camada 3 - Motor Text-to-SQL
 
-**Status**: VALIDADO (três motores; as cinco células de prompt medidas com o motor local na Etapa D, RES-011: C3 é a célula padrão, 72,2% estrito, Violation e Over-Refusal zero)
+**Status**: VALIDADO (três motores; cinco células medidas na Etapa D, RES-011, C3 é a base; instrução de recusa medida na Etapa E, RES-013, E1 é a célula operacional)
 **Prioridade**: ALTA
 **Última atualização**: 2026-09-20
 **Alimenta (template TCC)**: Metodologia · Resultados e Discussão
@@ -89,7 +89,10 @@ o Role-Schema seguem os caminhos 1 e 2 de
 As células da Etapa E (`config.CELULAS_E`) herdam a variante da célula
 padrão (C3) e variam só a instrução de recusa: E0 (sem) e E1 (com). O
 oráculo se abstém nas perguntas adversariais (`questions.ADVERSARIAL`), o que
-mantém o autoteste em 100% de recusa devida sem chamar modelo algum.
+mantém o autoteste em 100% de recusa devida sem chamar modelo algum. Depois
+da execução da Etapa E, **E1 é a célula operacional**
+(`config.CELULA_OPERACIONAL`): `run_all.py llm` sem `--celula` a usa.
+`CELULA_PADRAO` continua C3, a base.
 
 ### 3.2 Configuração das chamadas
 
@@ -148,14 +151,14 @@ do envio (MaskSQL, Abedini et al. 2025) é o trabalho futuro para esse caso.
 |---|---|---|
 | Motores oráculo, API e local; interface comum | `src/nl2sql.py` (`MotorOraculo`, `MotorLLM`, `MotorLocal`, `obter_motor`) | IMPLEMENTADO |
 | Variante de prompt e células | `src/nl2sql.py:VariantePrompt`; `src/config.py:CELULAS`, `CELULA_PADRAO` | IMPLEMENTADO |
-| Instrução de recusa e células da Etapa E | `src/nl2sql.py:prompt_sistema`, `VariantePrompt.instrucao_recusa`; `src/config.py:INSTRUCAO_RECUSA`, `CELULAS_E` | IMPLEMENTADO (execução real pendente) |
+| Instrução de recusa e células da Etapa E | `src/nl2sql.py:prompt_sistema`, `VariantePrompt.instrucao_recusa`; `src/config.py:INSTRUCAO_RECUSA`, `CELULAS_E`, `CELULA_OPERACIONAL` | VALIDADO (RES-013) |
 | Inventário do que sai do perímetro | §3.3 deste módulo; `src/governance.py:filtrar_pii` | DOCUMENTADO |
 | Introspecção e descrição do schema Gold | `src/nl2sql.py:introspectar_gold`, `descrever_schema` | IMPLEMENTADO |
 | Dicionário de dados da Gold | `src/config.py:GOLD_NOTAS` | IMPLEMENTADO |
 | Parâmetros dos motores | `src/config.py` (seções "Configuração do LLM via API" e "Motor local") | IMPLEMENTADO |
 | Disponibilidade do servidor local | `src/nl2sql.py:ollama_disponivel` | IMPLEMENTADO |
 | Execução da matriz de células | `src/matriz.py`; `run_all.py llm --motor local --matriz` | VALIDADO (RES-011) |
-| Execução do conjunto adversarial (E0, E1) | `src/adversarial.py`; `run_all.py llm --motor local --adversarial` | IMPLEMENTADO (execução real pendente) |
+| Execução do conjunto adversarial (E0, E1) | `src/adversarial.py`; `run_all.py llm --motor local --adversarial` | VALIDADO (RES-013) |
 | Conjunto pergunta → SQL de referência, e conjunto adversarial | `src/questions.py` (`CONJUNTO`, `ADVERSARIAL`, `CONJUNTO_COMBINADO`) | IMPLEMENTADO (18 + 25 perguntas) |
 
 ## 6. Teste rápido

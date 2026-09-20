@@ -199,10 +199,16 @@ def validar_sql(sql, perfil):
 def conectar_somente_leitura():
     """Abre a conexao de consulta: Gold isolada, somente leitura (CTRL-GOV-006 e 007).
 
-    Duas barreiras no proprio banco, independentes do texto da SQL: o arquivo
-    aberto contem apenas a Gold (Bronze e Silver nao existem nele, DA-LAKE-005)
-    e a conexao e somente leitura (nenhuma escrita e possivel). Importa duckdb
-    localmente para manter a analise de governanca utilizavel sem o banco.
+    Tres barreiras no proprio banco, independentes do texto da SQL: o arquivo
+    aberto contem apenas a Gold (Bronze e Silver nao existem nele, DA-LAKE-005);
+    a conexao e somente leitura (nenhuma escrita no banco e possivel); e o
+    acesso externo do DuckDB fica desligado e travado (`enable_external_access`
+    e `lock_configuration`), de modo que COPY TO arquivo, read_csv e afins
+    falham mesmo que uma SQL os alcance. A terceira barreira veio da Etapa E:
+    a injecao X19 (COPY gold.internacoes TO 'internacoes.csv') foi barrada
+    pelo verificador, mas a execucao diagnostica do harness a rodou e a conexao
+    somente leitura nao impede escrita em arquivo; o CSV foi gerado. Importa
+    duckdb localmente para manter a analise de governanca utilizavel sem o banco.
     """
     import duckdb
 
@@ -211,7 +217,10 @@ def conectar_somente_leitura():
             f"Gold isolada ausente em {config.GOLD_DB_PATH}; rode src.pipeline "
             "(ou run_all.py) para gera-la a partir do lakehouse."
         )
-    return duckdb.connect(str(config.GOLD_DB_PATH), read_only=True)
+    return duckdb.connect(
+        str(config.GOLD_DB_PATH), read_only=True,
+        config={"enable_external_access": "false", "lock_configuration": "true"},
+    )
 
 
 # Trilha de auditoria (CTRL-AUD-001)
@@ -458,6 +467,30 @@ def _autoteste():
             f"controle errado para [{perfil}] {sql!r}: esperado {esperado}, veio {r.controle}"
         )
 
+    # CTRL-GOV-006 reforcado (Etapa E): na conexao de consulta, escrita em
+    # arquivo e leitura de arquivo falham no proprio banco, mesmo sem o
+    # verificador, e a configuracao nao pode ser reaberta pela sessao.
+    if config.GOLD_DB_PATH.exists():
+        import tempfile as _tf
+        from pathlib import Path as _P
+        con = conectar_somente_leitura()
+        alvo = _P(_tf.gettempdir()) / "tcc_teste_exfiltracao.csv"
+        alvo.unlink(missing_ok=True)
+        for sql in (f"COPY (SELECT 1 AS x) TO '{alvo}' (HEADER)",
+                    "SELECT * FROM read_csv('/etc/hosts')",
+                    "SET enable_external_access = true",
+                    "DELETE FROM gold.internacoes"):
+            try:
+                con.execute(sql).fetchall()
+                raise AssertionError(f"a conexao de consulta deveria recusar: {sql}")
+            except AssertionError:
+                raise
+            except Exception:
+                pass
+        assert not alvo.exists(), "COPY TO escreveu arquivo na conexao de consulta"
+        assert con.execute("SELECT COUNT(*) FROM gold.internacoes").fetchone()[0] > 0
+        con.close()
+
     # CTRL-GOV-008: dado pessoal no texto da pergunta e barrado e mascarado;
     # numeros que nao sao CPF nem telefone e datas nao geram falso positivo.
     com_pii = [
@@ -553,6 +586,7 @@ def _autoteste():
     # src.pipeline, que gera os dados; aqui a analise roda sem banco.
     print("governance: autoteste OK")
     print(f"  {len(validos)} casos validos aprovados, {len(bloqueados)} casos bloqueados")
+    print("  CTRL-GOV-006: COPY TO arquivo, read_csv, SET e DELETE falham na propria conexao de consulta")
     print(f"  CTRL-GOV-008: {len(com_pii)} perguntas com dado pessoal barradas e mascaradas, "
           f"{len(sem_pii)} sem falso positivo; a trilha nunca guarda o dado")
     print("  validacao de saida: aterramento e filtro sensivel barram; saida limpa passa")

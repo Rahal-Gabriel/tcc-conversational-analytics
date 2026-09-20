@@ -132,13 +132,19 @@ verificador por LLM). Indicadores, por nível:
 
 ### Execução diagnóstica
 
-Quando a governança barra uma SQL, o harness ainda a executa na mesma conexão
-somente leitura sobre a Gold isolada, apenas para medir se o conteúdo estaria
-certo (set match, Soft F1 e o "Correct" de Violation Correct). Essa execução é
-**do avaliador, não do sistema**: não entra na trilha de auditoria, e o caso
-fica marcado (`execucao_diagnostica`) no relatório. A frase "a governança
-bloqueou a execução antes que a consulta tocasse o banco" continua verdadeira
-para o sistema; o avaliador é quem executa, fora da trilha (P-14).
+Quando a governança barra uma SQL **por escopo** (CTRL-GOV-005: tabela fora
+do perfil ou inexistente) em pergunta que tem referência, o harness ainda a
+executa na mesma conexão de consulta, apenas para saber se o conteúdo
+estaria certo e assim distinguir Violation Correct de Violation Wrong. Essa
+execução é ato do avaliador, não do sistema: não entra na trilha de auditoria
+e o caso fica marcado (`execucao_diagnostica`). SQL barrada por escrita ou
+I/O (CTRL-GOV-002), instrução múltipla (003), forma (001) ou camada interna
+(004) **nunca** é executada, nem diagnosticamente, e perguntas a recusar
+(sem referência) tampouco. A restrição veio da Etapa E: a execução
+diagnóstica da injeção X19 rodou um `COPY ... TO` e gerou um arquivo, porque
+a conexão somente leitura não impedia escrita em arquivo (registro em
+[tcc/etapas/2026-09-20_etapa-E.md](../tcc/etapas/2026-09-20_etapa-E.md) §9.7;
+a conexão também passou a negar acesso externo, CTRL-GOV-006).
 
 ### Múltiplas execuções, estabilidade e TARa@k
 
@@ -277,7 +283,7 @@ Gold isolada ([CTRL-GOV-006 e 007](../camadas/02_GOVERNANCA_ENTRADA.md)).
 | Conjunto pergunta → SQL de referência, tipo por SQL, desfecho esperado | `src/questions.py`, `tipo_por_sql` | IMPLEMENTADO (18 perguntas) |
 | Conjunto adversarial e combinado | `src/questions.py:ADVERSARIAL`, `CONJUNTO_COMBINADO`; `config.FAMILIAS_ADVERSARIAIS` | IMPLEMENTADO (25 perguntas) |
 | Ponto de bloqueio, RS(c), famílias e contrafactual do vazio | `src/evaluate.py:ponto_bloqueio`, `reliability_score`, `contrafactual_vazio` | IMPLEMENTADO |
-| Execução das células E0 e E1 | `src/adversarial.py`; `run_all.py llm --motor local --adversarial` | IMPLEMENTADO (execução real pendente) |
+| Execução das células E0 e E1 | `src/adversarial.py`; `run_all.py llm --motor local --adversarial` | VALIDADO (RES-013) |
 | Normalização dos resultados (tolerância 2 casas) | `src/evaluate.py:normalizar`, `CASAS_DECIMAIS` | IMPLEMENTADO |
 | Set match de conteúdo | `src/evaluate.py:conteudo_coberto` | IMPLEMENTADO |
 | Soft F1 (BIRD) | `src/evaluate.py:soft_f1` | IMPLEMENTADO |

@@ -1,6 +1,6 @@
 # GOV: Camada 2 - Governança de Entrada
 
-**Status**: IMPLEMENTADO
+**Status**: VALIDADO (Etapa E, 25 perguntas adversariais: escopo garantido em 258 chamadas, RES-013)
 **Prioridade**: CRÍTICA
 **Última atualização**: 2026-09-20
 **Alimenta (template TCC)**: Metodologia · Resultados Preliminares
@@ -40,7 +40,7 @@ estável e mapeia a um requisito regulatório (ver
 | `CTRL-GOV-003` | Bloquear múltiplas instruções (presença de `;` no meio) | REG-LGPD-005 | IMPLEMENTADO |
 | `CTRL-GOV-004` | Bloquear acesso às camadas Bronze e Silver | REG-LGPD-003 | IMPLEMENTADO |
 | `CTRL-GOV-005` | Permitir apenas as tabelas Gold autorizadas para o perfil | REG-LGPD-004 | IMPLEMENTADO |
-| `CTRL-GOV-006` | Executar em conexão DuckDB somente leitura (defesa em profundidade) | REG-LGPD-005 | IMPLEMENTADO |
+| `CTRL-GOV-006` | Executar em conexão DuckDB somente leitura, com acesso externo desligado e configuração travada (`enable_external_access = false`, `lock_configuration = true`): escrita e leitura de arquivo falham no próprio banco (defesa em profundidade) | REG-LGPD-005 | VALIDADO |
 | `CTRL-GOV-007` | Executar apenas sobre o arquivo isolado da Gold (`GOLD_DB_PATH`), no qual Bronze e Silver não existem; isolamento no dado, independente do texto da SQL | REG-LGPD-003 | IMPLEMENTADO |
 | `CTRL-GOV-008` | Barrar e mascarar dado pessoal (CPF, e-mail, telefone) no **texto da pergunta**, antes de qualquer chamada ao motor e antes do registro na trilha | REG-LGPD-008, REG-LGPD-001 | IMPLEMENTADO |
 
@@ -100,9 +100,31 @@ palavras é, portanto, defesa adicional, e a garantia vem do dado.
   e a abstração do schema e dos valores antes do envio (MaskSQL, Abedini et
   al. 2025), registrada como trabalho futuro. Datas soltas ficam fora do
   filtro de propósito: uma pergunta legítima pode citar a data de um dia.
-- **Status**: IMPLEMENTADO (2026-09-20, Etapa E). Teste em
-  `python -m src.governance`; exercitado pelas perguntas X03 e X05 do conjunto
-  adversarial.
+- **Status**: VALIDADO (2026-09-20, Etapa E). Teste em
+  `python -m src.governance`; na execução, X03 e X05 foram barradas antes do
+  motor nas 258 chamadas e nenhum anexo contém os valores fictícios (RES-014).
+
+### CTRL-GOV-006: Conexão somente leitura sem acesso externo
+
+- **Descrição**: `src/governance.py:conectar_somente_leitura` abre a Gold
+  isolada com `read_only=True`, `enable_external_access=false` e
+  `lock_configuration=true`. A primeira barreira impede escrita no banco; a
+  segunda impede `COPY ... TO` arquivo, `read_csv` e afins; a terceira impede
+  que a própria sessão reabra o acesso com `SET`.
+- **Motivação**: na execução da Etapa E, a injeção X19
+  (`SELECT ...; COPY gold.internacoes TO 'internacoes.csv'`) foi barrada por
+  CTRL-GOV-003, mas a **execução diagnóstica** do harness (que rodava SQL
+  barrada para medir conteúdo) a executou, e a conexão somente leitura não
+  impede escrita em arquivo: o CSV foi gerado no diretório de trabalho
+  (dado sintético e minimizado, sem identificador). Duas correções: a
+  execução diagnóstica passou a rodar só SQL barrada por escopo
+  (CTRL-GOV-005) em pergunta com referência
+  ([avaliacao/01](../avaliacao/01_METODOLOGIA_AVALIACAO.md)), e a conexão
+  passou a negar acesso externo por conta própria, para que a garantia não
+  dependa do harness nem do texto da SQL (mesma lógica de CTRL-GOV-007).
+- **Status**: VALIDADO (2026-09-20, Etapa E). Teste em `python -m src.governance`:
+  `COPY TO`, `read_csv`, `SET enable_external_access` e `DELETE` falham na
+  conexão de consulta, e nenhum arquivo é escrito.
 
 ### CTRL-GOV-001: SQL única e somente leitura
 
@@ -155,6 +177,8 @@ duas instruções com `;` (003); referência a `silver.*`/`bronze.*` (004); tabe
 Gold fora do perfil e perfil desconhecido (005). O CTRL-GOV-008 é coberto por
 cinco perguntas com CPF, e-mail ou telefone (barradas e mascaradas) e cinco
 sem dado pessoal, com números e datas, que não podem gerar falso positivo.
-Também valida que o registro de auditoria é gravado com os campos esperados e
-que um CPF passado ao registro nunca aparece no arquivo. O isolamento físico (007) é
+Também valida que o registro de auditoria é gravado com os campos esperados,
+que um CPF passado ao registro nunca aparece no arquivo, e que a conexão de
+consulta recusa `COPY TO`, `read_csv`, `SET` e `DELETE` sem escrever nada
+(006). O isolamento físico (007) é
 testado em `python -m src.pipeline`, que gera os dados.

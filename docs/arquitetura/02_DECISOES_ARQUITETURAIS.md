@@ -246,9 +246,9 @@ estável `DA-[MOD]-[NUM]` citável pelos demais módulos e pela redação do TCC
 - **Alternativas descartadas**: MaskSQL como implementação (custo de
   acurácia de 13 a 20 pontos no BIRD e fora do prazo); filtro de nome próprio
   por lista ou por modelo (falso positivo alto em português e sem garantia).
-- **Status**: IMPLEMENTADO (`src/governance.py:filtrar_pii`,
+- **Status**: VALIDADO (`src/governance.py:filtrar_pii`,
   `src/config.py:PADROES_PII`; inventário em camadas/03 §3.3;
-  REG-LGPD-008). Etapa E, 2026-09-20.
+  REG-LGPD-008; RES-014). Etapa E, 2026-09-20.
 - **Relacionado**: [DA-NL2SQL-003](#da-nl2sql-003-motor-local-com-modelo-aberto-via-ollama),
   [RNC-004](03_REGRAS_CRITICAS.md#rnc-004-nenhuma-credencial-no-código-ou-no-histórico-do-git),
   [referencias/09](../referencias/09_PRIVACIDADE_E_MINIMIZACAO.md).
@@ -516,11 +516,13 @@ estável `DA-[MOD]-[NUM]` citável pelos demais módulos e pela redação do TCC
   2024), inviável pela API do Ollama; fine-tuning para recusa (Klisura et
   al. 2025), fora do escopo; sexta família de perguntas ambíguas (TrustSQL
   trata "inviável" como incompatível com o schema ou além do SQL).
-- **Status**: IMPLEMENTADO (`src/evaluate.py:ponto_bloqueio`,
+- **Status**: VALIDADO (`src/evaluate.py:ponto_bloqueio`,
   `reliability_score`, `contrafactual_vazio`, `_por_familia`;
   `src/adversarial.py`; `src/questions.py:ADVERSARIAL`). Hipóteses H5 a H8
-  e critério de decisão no [registro da Etapa E](../tcc/etapas/2026-09-20_etapa-E.md)
-  §3; números na execução (RES-013).
+  e critério no [registro da Etapa E](../tcc/etapas/2026-09-20_etapa-E.md)
+  §3; resultado em §9 e RES-013: H5 confirmada no escopo e refutada na
+  pertinência, H6 confirmada com custo não previsto (Q02), H7 e H8
+  confirmadas; E1 é a célula operacional.
 - **Relacionado**: [DA-AVAL-004](#da-aval-004-desfechos-de-governança-em-dois-níveis),
   [DA-GOV-003](#da-gov-003-implantação-local-como-decisão-de-arquitetura-e-inventário-do-que-sai-do-perímetro),
   [referencias/07](../referencias/07_MAPA_LITERATURA_PARA_CAMINHOS.md) caminho 5.

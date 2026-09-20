@@ -105,7 +105,7 @@ def rodar_llm(motor_nome="local", celula=None, repeticoes=1, matriz_completa=Fal
         print(f"numeros gerados pelo motor real '{motor_nome}' (modelo {modelo}); "
               "estes sim representam o desempenho do modelo.")
         return 0
-    motor = nl2sql.obter_motor(motor_nome, celula or config.CELULA_PADRAO)
+    motor = nl2sql.obter_motor(motor_nome, celula or config.CELULA_OPERACIONAL)
     if repeticoes > 1:
         resultado = evaluate.avaliar_repetido(motor, repeticoes)
         evaluate.imprimir_resumo_repetido(resultado)
@@ -140,7 +140,7 @@ def main(argv=None):
         "--celula",
         choices=celulas + celulas_e,
         default=None,
-        help=f"celula de prompt pre-registrada (padrao {config.CELULA_PADRAO}); ver config.CELULAS.",
+        help=f"celula de prompt pre-registrada (padrao {config.CELULA_OPERACIONAL}); ver config.CELULAS e CELULAS_E.",
     )
     parser.add_argument(
         "--matriz",

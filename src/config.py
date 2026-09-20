@@ -218,6 +218,15 @@ CELULAS_E = (
 )
 ADVERSARIAL_DIR = RESULTS_DIR / "adversarial"
 
+# Celula operacional: a que o sistema usa por padrao (run_all.py llm sem
+# --celula) depois da Etapa E. Pelo criterio pre-registrado (secao 3.7 do
+# registro da etapa), E1 passou a ser o padrao: Proper Refusal no sistema subiu
+# de 60% para 88% e o Over-Refusal nas legitimas ficou em zero. O custo
+# declarado: uma pergunta legitima (Q02) trocou de SQL e passou de Correct a
+# Wrong (estrito 72,2% para 66,7%). CELULA_PADRAO continua sendo a base (C3),
+# vencedora da matriz da Etapa D e ponto de partida de E0 e E1.
+CELULA_OPERACIONAL = "E1"
+
 # CTRL-GOV-008: padroes de dado pessoal no texto da pergunta, verificados antes
 # de qualquer chamada ao motor e antes do registro na trilha (banca, rodada 01,
 # P-18). CPF com ou sem pontuacao, e-mail e telefone brasileiro. Nome proprio
@@ -257,6 +266,7 @@ def _autoteste():
     assert len(nomes_e) == 2 and not set(nomes_e) & set(nomes)
     assert all(c["base"] == CELULA_PADRAO for c in CELULAS_E)
     assert [c["instrucao_recusa"] for c in CELULAS_E] == [False, True]
+    assert CELULA_OPERACIONAL in nomes + nomes_e
     assert MARCADOR_RECUSA in INSTRUCAO_RECUSA and len(FAMILIAS_ADVERSARIAIS) == 5
     assert set(PADROES_PII) == {"cpf", "email", "telefone"} and RS_PENALIDADES[-1] == "N"
     for c in CELULAS:
@@ -272,7 +282,8 @@ def _autoteste():
     print(f"  modelo via API: {ANTHROPIC_MODEL}; chave no ambiente: {'sim' if ANTHROPIC_API_KEY else 'nao'}")
     print(f"  modelo local: {MODELO_LOCAL} em {OLLAMA_ENDPOINT}")
     print(f"  matriz de prompt: {len(CELULAS)} celulas ({', '.join(nomes)}), k={REPETICOES_MATRIZ}; padrao {CELULA_PADRAO}")
-    print(f"  etapa E: celulas {', '.join(nomes_e)} sobre {CELULA_PADRAO}; {len(FAMILIAS_ADVERSARIAIS)} familias adversariais; "
+    print(f"  etapa E: celulas {', '.join(nomes_e)} sobre {CELULA_PADRAO}; operacional {CELULA_OPERACIONAL}; "
+          f"{len(FAMILIAS_ADVERSARIAIS)} familias adversariais; "
           f"PII na pergunta: {', '.join(PADROES_PII)}")
     print(f"  pseudonimizacao: HMAC-SHA256, chave {'do ambiente' if 'PSEUDO_KEY' in os.environ else 'padrao (dado sintetico)'}")
     print(f"  k-anonimato Gold: k >= {K_MINIMO} sobre {QUASE_IDENTIFICADORES_INTERNACOES}")

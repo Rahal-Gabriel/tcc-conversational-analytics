@@ -176,7 +176,13 @@ Al Attrach et al. (2025); Atil et al. (2025).
 > modelo como variável (células E0 e E1), ponto de bloqueio, RS(c) de Lee et
 > al. (2024) nos dois níveis e regra contrafactual do resultado vazio
 > (`src/evaluate.py`, `src/adversarial.py`); CTRL-GOV-008 barra dado pessoal
-> na pergunta. Hipóteses H5 a H8 datadas antes dos números. Medição pendente.
+> na pergunta. **Medido (RES-013)**: sem instrução, o modelo recusa 2 de 25
+> e o verificador garante o escopo (nenhuma linha fora do perfil, de camada
+> interna ou sensível em 258 chamadas), mas 10 perguntas sem resposta são
+> respondidas; com a instrução, Proper Refusal no sistema vai de 60% a 88%
+> sem recusa indevida, e sobram 3 (X13, X23, X24). Lacuna respondida: a
+> alucinação prevista por Fei et al. aparece como resposta na tabela
+> permitida, não como tabela inventada.
 
 **O que se sabe.**
 - Injeção de prompt em linguagem natural vira injeção de SQL em aplicações
