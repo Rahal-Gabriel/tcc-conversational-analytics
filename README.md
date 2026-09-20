@@ -72,10 +72,10 @@ tcc-conversational-analytics/
     config.py          # parametros centrais (SIM_TODAY, SEED, volumes, perfis, LLM)
     data_gen.py        # geracao sintetica -> Bronze (a implementar)
     pipeline.py        # Bronze -> Silver -> Gold (a implementar)
-    governance.py      # guardrails e auditoria (a implementar)
+    governance.py      # guardrails, validacao de saida e trilha de auditoria
     nl2sql.py          # motor Text-to-SQL + oraculo (a implementar)
     questions.py       # conjunto de avaliacao (a implementar)
-    evaluate.py        # execution-match e indicadores (a implementar)
+    evaluate.py        # execution match, desfechos de governanca e Soft F1
   data/                # lakehouse.duckdb (Bronze/Silver/Gold) e gold_isolada.duckdb (so Gold), nao versionados
   results/             # saidas de avaliacao e log de auditoria (nao versionado)
 ```

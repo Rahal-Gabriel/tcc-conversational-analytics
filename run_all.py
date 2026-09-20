@@ -37,7 +37,8 @@ def rodar_oracle():
     caminho = evaluate.salvar_relatorio(resultado)
     print(f"relatorio: {caminho}")
 
-    acuracia = resultado["metricas"]["AVAL-001_acuracia"]
+    m = resultado["metricas"]
+    acuracia = m["AVAL-001_acuracia"]
     if acuracia != 1.0:
         print(
             f"FALHA: oraculo deveria dar 100% de execution match, deu "
@@ -45,7 +46,16 @@ def rodar_oracle():
             file=sys.stderr,
         )
         return 1
-    print("oraculo: tubulacao consistente (100% de execution match).")
+    if m["AVAL-003_completude_log"] != 1.0 or not m["AVAL-003_trilha_integra"]:
+        print(
+            "FALHA: trilha de auditoria incompleta ou com cadeia de hashes quebrada "
+            f"({config.AUDIT_LOG_PATH}). Isso indica erro na tubulacao, nao no modelo. "
+            "Um arquivo gerado antes do encadeamento por hash (Etapa C) tambem cai "
+            "aqui: mova-o para outro nome e rode de novo.",
+            file=sys.stderr,
+        )
+        return 1
+    print("oraculo: tubulacao consistente (100% de execution match; trilha integra).")
     return 0
 
 

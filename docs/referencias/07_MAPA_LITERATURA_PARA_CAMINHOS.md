@@ -57,6 +57,10 @@ Gao et al. (2024) para tratar prompt como variável experimental.
 
 ## 2. Schema por perfil (Role-Schema) sob verificador determinista
 
+> **Situação (2026-09-20)**: a classificação nos seis desfechos, em dois níveis
+> (modelo e sistema), está implementada na Etapa C (DA-AVAL-004); o
+> experimento Full-Schema × Role-Schema fica para a Etapa D.
+
 **O que se sabe.**
 - Fei et al. (2026) definem seis desfechos (Correct, Wrong, Proper Refusal,
   Violation Correct, Violation Wrong, Over-Refusal) e as métricas Violation
@@ -184,6 +188,12 @@ unitários e mapeamento.
 et al. (2024); Lee et al. (2024b); Fei et al. (2026); OWASP (2025).
 
 ## 6. Discussão da métrica e adoção do Soft F1
+
+> **Situação (2026-09-20)**: implementado na Etapa C (`src/evaluate.py:soft_f1`,
+> DA-AVAL-005), com IC de Wilson e TARa@k no harness. O recálculo sobre o
+> preliminar não foi possível: as SQL do Sonnet não foram guardadas (o log de
+> auditoria da época continha apenas execuções do oráculo). O harness passou a
+> guardar SQL e resultado por pergunta; os números saem na Etapa D.
 
 **O que se sabe.**
 - Execution match em um único banco tem falsos negativos e positivos

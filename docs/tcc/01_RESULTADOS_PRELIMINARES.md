@@ -2,7 +2,7 @@
 
 **Status**: documento vivo
 **Prioridade**: ALTA
-**Última atualização**: 2026-09-13
+**Última atualização**: 2026-09-20
 **Alimenta (template TCC)**: Resultados Preliminares · Metodologia
 
 ---
@@ -261,9 +261,44 @@ match. É um custo deliberado (menor privilégio) e mensurável, e responde com 
 Não se buscou elevar o número com novos ajustes (evitar overfitting sobre estas 18
 perguntas). Q12 (value linking) e a ampliação do conjunto ficam na continuidade.
 
-Por tipo de pergunta: faixa etária 4/4 (estrito); a forma/projeção concentra-se
-em métrica por unidade (3 de 4 casos) e a governança/value-linking em status
-atual. As ameaças à validade (dados sintéticos, n=18, autor único de
+Por tipo de pergunta (texto original do documento aprovado): "faixa etária
+4/4 (estrito); a forma/projeção concentra-se em métrica por unidade (3 de 4
+casos) e a governança/value-linking em status atual".
+
+> **Errata (2026-09-20, Etapa C, banca P-02)**: os rótulos de tipo do
+> documento aprovado não tinham critério explícito e três estavam errados
+> (Q07 como série histórica; Q10 e Q18 como "faixa etária" sem envolver faixa
+> etária). Com o critério mecânico adotado
+> ([DA-AVAL-003](../arquitetura/02_DECISOES_ARQUITETURAIS.md#da-aval-003-tipo-de-pergunta-derivado-da-sql-de-referência)),
+> a estratificação dos mesmos 18 resultados fica:
+>
+> | Tipo (critério novo) | n | Estrito | Não-acertos |
+> |---|---|---|---|
+> | status atual (Q01, Q02, Q03, Q07, Q11, Q12) | 6 | 3 | Q01, Q11 (bloqueio), Q12 (conteúdo) |
+> | métrica por unidade (Q04, Q05, Q06, Q13, Q14) | 5 | 2 | Q04, Q13, Q14 (forma) |
+> | série histórica (Q08, Q15, Q16) | 3 | 2 | Q15 (forma) |
+> | internações (Q09, Q10, Q17, Q18) | 4 | 4 | nenhum |
+>
+> A leitura qualitativa sobrevive (forma concentrada em métrica por unidade;
+> bloqueios e erro de conteúdo em status atual; internações 4/4), mas com dois
+> cuidados que a versão final deve declarar: o grupo 4/4 chama-se
+> "internações", não "faixa etária", e **tipo e perfil estão quase
+> confundidos** (todos os bloqueios são do perfil enfermagem, que só aparece
+> em status atual), de modo que "os bloqueios recaem sobre status atual" é
+> indistinguível de "recaem sobre enfermagem".
+
+**Reclassificação nos desfechos de Fei et al. (2026)** (Etapa C, banca P-04;
+[AVAL-002](../avaliacao/01_METODOLOGIA_AVALIACAO.md)), no nível do sistema:
+Correct 11, Wrong 5 (Q04, Q13, Q14, Q15, Q12), Over-Refusal 2 (Q01, Q11);
+Safe-EX 61,1%, Over-Refusal Rate 11,1%, Violation Rate 0. No nível do modelo,
+Q01 e Q11 são violações da política (tabela fora do perfil) com conteúdo
+correto por set match; a classificação estrita como Violation Correct exige
+as SQL geradas, que não foram guardadas, e será remedida na Etapa D. O "88,9%
+de aprovação na governança" do documento aprovado corresponde, nesse
+vocabulário, a 2 Over-Refusals no nível do sistema causados por 2 Violation
+Correct no nível do modelo: custo da governança, não falha dela.
+
+As ameaças à validade (dados sintéticos, n=18, autor único de
 perguntas+gold+sistema, domínio e modelo únicos, set match como teto) estão
 registradas no documento.
 
@@ -360,6 +395,51 @@ registrada como evolução.
   `_expr_faixa_etaria`, `construir_gold`; `src/config.py`;
   fichas em [referencias/09](../referencias/09_PRIVACIDADE_E_MINIMIZACAO.md).
 
+### RES-010: Harness de avaliação revisto: desfechos nomeados, Soft F1 e auditoria verificável
+
+Quatro fragilidades do harness apontadas pela banca simulada (rodada 01) foram
+corrigidas na Etapa C, sem chamada a modelo algum
+([tcc/etapas/2026-09-20_etapa-C.md](etapas/2026-09-20_etapa-C.md)):
+
+| Fragilidade (banca) | Antes | Depois |
+|---|---|---|
+| Rótulos de tipo sem critério (P-02) | 4 rótulos declarados à mão; 3 errados | Tipo derivado da SQL de referência e conferido por teste (DA-AVAL-003); errata da Tabela 4 registrada em RES-007 |
+| "Aprovação na governança" (P-04) | Contava qualquer bloqueio (88,9%) | Seis desfechos de Fei et al. (2026) em dois níveis (modelo e sistema), com Safe-EX, Violation Rate, Over-Refusal Rate e Proper Refusal Rate (DA-AVAL-004) |
+| Set match permissivo, execução de SQL barrada fora da trilha (P-14) | Só recall de valores | Soft F1 do BIRD reproduzido da implementação de referência (DA-AVAL-005); execução diagnóstica marcada e declarada como do avaliador |
+| Auditoria sem horário real e AVAL-003 tautológico (P-20) | `momento = SIM_TODAY`; `if sql and evento` | Horário real (UTC) e data de simulação, `id_interacao`, motor, controle, hash do resultado; cadeia de hashes; AVAL-003 lê o arquivo e falha em adulteração (DA-VALID-003) |
+
+Verificação (SEED 42, 2026-09-20):
+
+- Oráculo: 18 Correct nos dois níveis; execution match 100% (IC95% Wilson
+  [82,4%; 100%]); Soft F1 médio 1,0; AVAL-003 100% lido do arquivo, trilha
+  íntegra; 0 execuções diagnósticas.
+- Motor de falhas sintético (18 perguntas mais 3 a recusar): cada um dos seis
+  desfechos ocorre nos dois níveis; Safe-EX 66,7% (sistema); Over-Refusal
+  16,7% (sistema) contra 5,6% (modelo), diferença que é exatamente o custo
+  do verificador; Violation Rate 19,1% (modelo, 4 de 21) contra 4,8% (sistema), a
+  violação restante sendo uma SQL dentro do escopo do perfil em pergunta que
+  devia ser recusada (o verificador determinista não a distingue, o que
+  motiva a abstenção da Etapa E); Soft F1 0,8 para coluna extra; trilha
+  adulterada detectada na linha certa.
+- O harness passou a guardar, por pergunta, a SQL gerada, o resultado
+  normalizado entregue e seu hash (`results/avaliacao_<motor>.json`), o que
+  permite recalcular métricas sem nova chamada e versionar a execução (P-03).
+
+Achado colateral: as SQL das três execuções do Sonnet do preliminar (RES-007)
+não existem em lugar algum (o log de auditoria da época só tinha execuções do
+oráculo). Os 61,1% / 94,4% continuam verificáveis apenas pela prosa; o Soft F1
+do preliminar não pode ser calculado e a Etapa D remede tudo sobre a Gold
+minimizada.
+
+- **Status**: VALIDADO (autotestes em `python -m src.evaluate`,
+  `python -m src.governance`, `python -m src.questions`; `run_all.py oracle`
+  passa a exigir trilha íntegra). Nenhum número de modelo foi produzido nesta
+  etapa (RNC-002).
+- **Evidência**: `src/evaluate.py` (`classificar_desfechos`, `soft_f1`,
+  `intervalo_wilson`, `avaliar`, `avaliar_repetido`), `src/governance.py`
+  (`registrar_pergunta`, `registrar_resposta`, `verificar_trilha`),
+  `src/questions.py:tipo_por_sql`, `src/config.py`.
+
 ## 5. O que ainda falta
 
 Os primeiros números reais já foram coletados (RES-007: 61,1% de execution match
@@ -371,8 +451,9 @@ próximas entregas atacam essas frentes:
 | Próxima entrega | Onde | Resultado que habilita |
 |---|---|---|
 | Value linking (valores categóricos no prompt ou comparação sem caixa) | `nl2sql.py` / schema | Corrigir erros como Q12 (`'enfermaria'` vs `'Enfermaria'`) |
-| Discussão da métrica forma-sensível | `evaluate.py` / `tcc` | Separar erro de cálculo de divergência de projeção na análise |
-| Ampliação e estratificação do conjunto | `questions.py` | Reduzir ruído e medir por tipo de pergunta e por perfil |
+| Discussão da métrica forma-sensível | `evaluate.py` / `tcc` | Concluída na Etapa C (RES-010): Soft F1 e desfechos nomeados; números na Etapa D |
+| Ampliação e estratificação do conjunto | `questions.py` | Reduzir ruído e medir por tipo de pergunta e por perfil (cruzar tipo × perfil) |
+| Remedição sobre a Gold minimizada com o harness revisto | Etapa D | Números comparáveis com o preliminar, artefatos versionados |
 
 Cada novo ajuste será medido e reportado de forma transparente (bruto × refinado),
 sem iterar sobre o mesmo conjunto a ponto de overfittar (RNC-002).

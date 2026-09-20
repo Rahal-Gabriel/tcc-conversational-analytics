@@ -2,7 +2,7 @@
 
 **Status**: IMPLEMENTADO
 **Prioridade**: CRÍTICA
-**Última atualização**: 2026-09-13
+**Última atualização**: 2026-09-20
 **Alimenta (template TCC)**: Metodologia · Resultados Preliminares
 
 ---
@@ -21,7 +21,7 @@ A serem implementados em `src/governance.py`.
 |---|---|---|
 | `CTRL-VALID-001` | Aterramento: toda tabela referenciada na SQL deve existir no schema Gold conhecido | REG-ANPD-001 |
 | `CTRL-VALID-002` | Filtro de saída: bloquear a resposta se qualquer coluna do resultado tiver nome de campo sensível | REG-LGPD-006 |
-| `CTRL-AUD-001` | Auditoria: registrar toda pergunta e toda resposta com timestamp, usuário, perfil, SQL e evento | REG-LGPD-007 |
+| `CTRL-AUD-001` | Auditoria: registrar toda pergunta e toda resposta com horário real, data de simulação, usuário, perfil, SQL, motor, evento, controle e hash do resultado, em cadeia de hashes verificável | REG-LGPD-007 |
 
 ### CTRL-VALID-001: Aterramento (anti-alucinação)
 
@@ -64,32 +64,56 @@ A serem implementados em `src/governance.py`.
 
 ### CTRL-AUD-001: Auditoria da pergunta e da resposta
 
-- **Descrição**: Registrar em log toda pergunta recebida e toda resposta, com
-  timestamp, usuário, perfil, SQL e o evento (`correto`, `incorreto`,
-  `bloqueado`, `erro`).
+- **Descrição**: Registrar em log toda pergunta recebida e toda resposta.
+  Cada interação gera dois registros JSON ligados por `id_interacao`:
+  - **entrada**: `momento_real` (UTC, relógio do sistema), `data_simulacao`
+    (`SIM_TODAY`), `usuario`, `perfil`, `pergunta`;
+  - **saída**: os mesmos campos mais `sql`, `motor`, `evento`, `controle` e
+    `motivo` (quando bloqueada), `hash_resultado` e `n_linhas` (quando algo foi
+    entregue; o resultado em si nunca é copiado para o log).
+  Todo registro carrega `hash_anterior` e `hash` (SHA-256 do conteúdo
+  canônico), formando uma cadeia a partir de `config.AUDIT_HASH_GENESIS`.
+  `verificar_trilha` lê o arquivo, confere cada hash e a cadeia, e devolve as
+  interações completas (entrada e saída com todos os campos obrigatórios).
 - **Motivação**: Rastreabilidade e prestação de contas, exigidas tanto pela
   LGPD (responsabilização) quanto pelas normas da ANVISA (rastreabilidade do
-  software de saúde).
+  software de saúde). A versão anterior ancorava o horário em `SIM_TODAY`, não
+  registrava o que foi entregue e não protegia a integridade do arquivo; a
+  banca simulada (rodada 01, P-20) apontou que isso não sustentava
+  responsabilização. Revisto na Etapa C
+  ([DA-VALID-003](../arquitetura/02_DECISOES_ARQUITETURAIS.md#da-valid-003-trilha-de-auditoria-com-horário-real-e-encadeamento-por-hash)).
+- **Fora do escopo (declarado)**: autenticação. `usuario` e `perfil` são
+  recebidos do chamador; numa implantação, a assinatura de
+  `registrar_pergunta` receberia a identidade verificada pelo provedor de
+  identidade do hospital. O encadeamento detecta adulteração, mas não
+  autentica o autor do registro (exigiria assinatura com chave).
 - **Status**: IMPLEMENTADO. Registro de entrada em
-  `src/governance.py:registrar_pergunta` e registro de resposta em
-  `src/governance.py:registrar_resposta`, com o evento da interação.
-- **Código**: `src/config.py:37` (`AUDIT_LOG_PATH`);
-  `src/governance.py:registrar_pergunta` (entrada);
-  `src/governance.py:registrar_resposta` (resposta e evento).
+  `src/governance.py:registrar_pergunta`, de resposta em
+  `src/governance.py:registrar_resposta`, verificação em
+  `src/governance.py:verificar_trilha`. O autoteste adultera e remove
+  registros e exige que a quebra seja detectada na linha certa.
+- **Código**: `src/config.py` (`AUDIT_LOG_PATH`, `AUDIT_HASH_GENESIS`);
+  `src/governance.py` (`CAMPOS_ENTRADA`, `CAMPOS_SAIDA`, `EVENTOS`,
+  `hash_resultado`, `registrar_pergunta`, `registrar_resposta`,
+  `verificar_trilha`).
 - **Relacionado**: [REG-LGPD-007](../governanca/01_CONFORMIDADE_REGULATORIA.md),
-  [REG-ANVISA-001](../governanca/01_CONFORMIDADE_REGULATORIA.md).
+  [REG-ANVISA-001](../governanca/01_CONFORMIDADE_REGULATORIA.md),
+  [AVAL-003](../avaliacao/01_METODOLOGIA_AVALIACAO.md).
 
 ## 3. Eventos de auditoria
 
 | Evento | Significado |
 |---|---|
-| `correto` | Resultado bate com a referência (execution match positivo) |
-| `incorreto` | Resultado não bate com a referência |
-| `bloqueado` | Consulta barrada por algum guardrail (entrada ou saída) |
-| `erro` | Falha de execução (SQL inválida, erro de banco) |
+| `correto` | Resultado entregue bate com a referência (execution match positivo) |
+| `incorreto` | Resultado entregue não bate com a referência |
+| `bloqueado` | Consulta barrada por algum guardrail (entrada ou saída); `controle` e `motivo` dizem qual |
+| `erro` | Falha de geração ou de execução (SQL inválida, erro de banco, falha do motor) |
+| `recusado` | O motor se absteve de gerar SQL (resposta vazia ou `config.MARCADOR_RECUSA`) |
 
-A completude do log é um dos indicadores de avaliação
-([AVAL-003](../avaliacao/01_METODOLOGIA_AVALIACAO.md)).
+A completude e a integridade do log são lidas do arquivo pelo indicador
+[AVAL-003](../avaliacao/01_METODOLOGIA_AVALIACAO.md). A execução diagnóstica
+do avaliador (SQL barrada executada só para medir conteúdo) **não** gera
+evento: é do harness, não do sistema.
 
 ## 4. Mapeamento para o código
 
@@ -99,13 +123,18 @@ A completude do log é um dos indicadores de avaliação
 | Caminho do log de auditoria | `src/config.py:37` (`AUDIT_LOG_PATH`) | IMPLEMENTADO |
 | Registro de auditoria da entrada | `src/governance.py:registrar_pergunta` | IMPLEMENTADO |
 | Aterramento e filtro de saída | `src/governance.py:validar_saida` | IMPLEMENTADO |
-| Registro da resposta e evento | `src/governance.py:registrar_resposta` | IMPLEMENTADO |
+| Registro da resposta, evento, controle e hash do resultado | `src/governance.py:registrar_resposta`, `hash_resultado` | IMPLEMENTADO |
+| Cadeia de hashes e verificação da trilha | `src/governance.py:_gravar`, `verificar_trilha`; `config.AUDIT_HASH_GENESIS` | IMPLEMENTADO |
 
 ## 5. Teste rápido
 
 `python -m src.governance`: além dos casos de entrada, cobre os casos que
 **devem** bloquear na saída — SQL que cita uma tabela Gold inexistente
 (aterramento, CTRL-VALID-001) e resultado cuja projeção inclui uma coluna
-sensível (filtro de saída, CTRL-VALID-002) — e confirma que `registrar_resposta`
-grava a interação com o evento. O fluxo completo (entrada → execução → saída →
-auditoria) é exercitado de ponta a ponta em `python run_all.py oracle`.
+sensível (filtro de saída, CTRL-VALID-002), e exercita a trilha num arquivo
+temporário: entrada e saída encadeadas, horário real em UTC distinto da data
+de simulação, hash do resultado, interação incompleta detectada, e quebra da
+cadeia detectada na linha certa após adulteração e após remoção de um
+registro. O fluxo completo (entrada → execução → saída → auditoria) é
+exercitado de ponta a ponta em `python run_all.py oracle`, que falha se a
+trilha ficar incompleta ou quebrada.

@@ -1,6 +1,6 @@
 # 08. Referências formatadas no padrão USP/Esalq
 
-**Última atualização**: 2026-09-13
+**Última atualização**: 2026-09-20
 **Alimenta**: seção Referências do TCC
 
 Formato do manual (itens 18 e 19): `Sobrenome, I.N.; Sobrenome, I.N. Ano.
@@ -53,7 +53,13 @@ Bui, C.D.; Nguyen, H.H.; Ngo, T.Q.; Vu-Thi, H.K.; Nguyen, C.H.; Nguyen, D.V.; Ng
 
 Centers for Medicare & Medicaid Services [CMS]. [ano, conferir]. CMS cell suppression policy. U.S. Department of Health and Human Services, Baltimore, MD, USA. Disponível em: <https://www.hhs.gov/guidance/document/cms-cell-suppression-policy>. Acesso em: 13 set. 2026.
 
+BIRD-SQL. 2025. mini_dev: evaluation_f1.py (implementação de referência do Soft F1). Repositório bird-bench/mini_dev, commit f9d2750. Disponível em: <https://github.com/bird-bench/mini_dev>. Acesso em: 20 set. 2026.
+
+
 Chen, J.; Chun, D.; Patel, M.; Chiang, E.; James, J. 2019. The validity of synthetic clinical data: a validation study of a leading synthetic data generator (Synthea) using clinical quality measures. BMC Medical Informatics and Decision Making 19: 44. [conferir]
+
+Crosby, S.A.; Wallach, D.S. 2009. Efficient data structures for tamper-evident logging. In: 18th USENIX Security Symposium, 2009, Montreal, Canada. Anais... p. 317-334. [conferir páginas]
+
 
 Dou, L.; Gao, Y.; Pan, M.; Wang, D.; Che, W.; Zhan, D.; Lou, J.-G. 2023. MultiSpider: towards benchmarking multilingual text-to-SQL semantic parsing. In: AAAI Conference on Artificial Intelligence, 37., 2023, Washington, DC, USA. Anais... p. 12745-12753. [conferir páginas]
 
@@ -72,6 +78,9 @@ Gil, A.C. 2017. Como elaborar projetos de pesquisa. 6ed. Atlas, São Paulo, SP, 
 Hevner, A.R.; March, S.T.; Park, J.; Ram, S. 2004. Design science in information systems research. MIS Quarterly 28(1): 75-105.
 
 Johnson, A.E.W.; Bulgarelli, L.; Shen, L.; Gayles, A.; Shammout, A.; Horng, S.; Pollard, T.J.; Hao, S.; Moody, B.; Gow, B.; Lehman, L.H.; Celi, L.A.; Mark, R.G. 2023. MIMIC-IV, a freely accessible electronic health record dataset. Scientific Data 10(1): 1.
+
+Kent, K.; Souppaya, M. 2006. Guide to computer security log management. NIST Special Publication 800-92. National Institute of Standards and Technology, Gaithersburg, MD, USA.
+
 
 Klisura, Đ.; Khoury, J.; Kundu, A.; Krishnan, R.; Rios, A. 2025. Role-conditioned refusals: evaluating access control reasoning in large language models. arXiv:2510.07642. Disponível em: <https://arxiv.org/abs/2510.07642>. Acesso em: 8 set. 2026. [conferir publicação em Findings of EACL 2026]
 
@@ -130,6 +139,9 @@ Shi, L.; Tang, Z.; Zhang, N.; Zhang, X.; Yang, Z. 2024. A survey on employing la
 Silva, L.O.; Silva, P.H.C.; Silva, F.A. 2025. Leis de escala para Text-to-SQL: um estudo sobre a relação entre tamanho e desempenho de modelos de linguagem. In: Simpósio Brasileiro de Bancos de Dados (SBBD), 40., 2025, Fortaleza, CE, Brasil. Anais... Sociedade Brasileira de Computação, p. 140-153.
 
 Sivasubramaniam, S.; Osei-Akoto, C.; Zhang, Y.; Stockinger, K.; Fuerst, J. 2024. SM3-Text-to-Query: synthetic multi-model medical text-to-query benchmark. In: Advances in Neural Information Processing Systems (NeurIPS), Datasets and Benchmarks Track, 2024. Anais... [conferir páginas]
+
+Schneier, B.; Kelsey, J. 1999. Secure audit logs to support computer forensics. ACM Transactions on Information and System Security 2(2): 159-176.
+
 
 Song, Y.; Wang, G.; Li, S.; Lin, B.Y. 2024. The good, the bad, and the greedy: evaluation of LLMs should not ignore non-determinism. arXiv:2407.10457. Disponível em: <https://arxiv.org/abs/2407.10457>. Acesso em: 8 set. 2026.
 

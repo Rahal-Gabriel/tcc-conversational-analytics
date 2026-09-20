@@ -1,6 +1,6 @@
 # 03. Governança e segurança de LLMs sobre bancos de dados
 
-**Última atualização**: 2026-09-08
+**Última atualização**: 2026-09-20
 **Alimenta**: Introdução · Metodologia · Resultados e Discussão
 
 Legenda de verificação: ✔ lido na fonte · ◐ só resumo de busca · ⚠ conferir dado.
@@ -188,6 +188,56 @@ Legenda de verificação: ✔ lido na fonte · ◐ só resumo de busca · ⚠ co
 ### NIST (2023) e WHO (2024) ✔ (já citados)
 
 - Manter como referências de gestão de risco de IA e de ética em saúde.
+
+## Fichas acrescentadas em 2026-09-20 (Etapa C): integridade da trilha de auditoria
+
+A banca simulada (rodada 01, P-20) perguntou se um log sem horário real e sem
+proteção de integridade sustenta responsabilização. As três fontes abaixo
+fundamentam a decisão DA-VALID-003 (encadeamento por hash). Foram lidas em
+nível de resumo e conhecimento prévio da área; conferir páginas antes do
+depósito.
+
+### Schneier e Kelsey (1999): logs de auditoria seguros ◐ ⚠
+
+- **Referência**: Schneier, B.; Kelsey, J. 1999. Secure audit logs to support
+  computer forensics. ACM Transactions on Information and System Security
+  2(2): 159-176.
+- **O que faz**: propõe o esquema clássico de log em que cada entrada é
+  encadeada à anterior por hash (e autenticada por chave evoluída), de modo
+  que um atacante que comprometa a máquina depois do registro não consiga
+  alterar ou apagar entradas anteriores sem que a verificação detecte.
+- **Relevância**: é a origem da técnica adotada em `governance._gravar` e
+  `verificar_trilha` (cadeia de hashes). O protótipo adota só a cadeia, sem a
+  chave evoluída; limitação declarada (detecta adulteração, não autentica o
+  autor).
+- **Citar como**: Schneier e Kelsey (1999).
+
+### Crosby e Wallach (2009): estruturas para logs resistentes a adulteração ◐ ⚠
+
+- **Referência**: Crosby, S.A.; Wallach, D.S. 2009. Efficient data structures
+  for tamper-evident logging. In: 18th USENIX Security Symposium, 2009,
+  Montreal, Canada. Anais... p. 317-334.
+- **O que faz**: formaliza a propriedade de "evidência de adulteração"
+  (tamper-evident) para logs, com árvores de hash que permitem auditoria
+  eficiente e provas de consistência entre versões do log.
+- **Relevância**: dá o nome da propriedade que o protótipo garante
+  (tamper-evident, não tamper-proof) e mostra a evolução natural (árvore de
+  hash) caso a trilha cresça.
+- **Citar como**: Crosby e Wallach (2009).
+
+### Kent e Souppaya (2006): NIST SP 800-92, gestão de logs de segurança ◐ ⚠
+
+- **Referência**: Kent, K.; Souppaya, M. 2006. Guide to computer security log
+  management. NIST Special Publication 800-92. National Institute of Standards
+  and Technology, Gaithersburg, MD, USA.
+- **O que faz**: guia oficial de gestão de logs; recomenda registrar horário
+  confiável e sincronizado, proteger a integridade e a confidencialidade dos
+  logs, e definir o que registrar sem copiar dados sensíveis.
+- **Relevância**: sustenta três escolhas: horário real em UTC, hash do
+  resultado em vez do resultado (não copiar dados para o log) e verificação
+  de integridade como parte da rotina. Documento oficial de órgão público,
+  aceito pelo manual.
+- **Citar como**: Kent e Souppaya (2006).
 
 ### Nota sobre literatura de fornecedor (não citar)
 

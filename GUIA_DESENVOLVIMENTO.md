@@ -111,7 +111,7 @@ tcc-conversational-analytics/
     governance.py       # guardrails de entrada/saida e auditoria
     nl2sql.py           # motor Text-to-SQL (LLM real) + oraculo
     questions.py        # conjunto de avaliacao (pergunta PT + SQL de referencia)
-    evaluate.py         # execution match, governanca, indicadores
+    evaluate.py         # execution match, desfechos de governanca, Soft F1, auditoria
   data/                 # banco DuckDB gerado (nao versionar)
   results/              # saidas de avaliacao e log de auditoria (nao versionar)
 ```

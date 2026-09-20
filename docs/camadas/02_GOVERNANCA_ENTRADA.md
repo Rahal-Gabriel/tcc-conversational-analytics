@@ -93,13 +93,15 @@ banco em modo somente leitura (006).
 
 ## 4. Registro da pergunta
 
-Toda pergunta recebida é registrada antes da execução, com timestamp, usuário e
-perfil (`src/governance.py:registrar_pergunta`). O registro é uma linha JSON com
-`evento = "entrada"` anexada à trilha em `config.AUDIT_LOG_PATH`. O horário
-ancora em `SIM_TODAY` (RNC-003) para que a trilha seja reproduzível. O registro
-de entrada compõe, junto com o registro de saída
+Toda pergunta recebida é registrada antes da execução, com horário real (UTC),
+data de simulação, usuário e perfil (`src/governance.py:registrar_pergunta`).
+O registro é uma linha JSON com `evento = "entrada"` e um `id_interacao`,
+anexada à trilha em `config.AUDIT_LOG_PATH` e encadeada por hash ao registro
+anterior. O registro de entrada compõe, junto com o registro de saída
 ([CTRL-AUD-001](04_VALIDACAO_SAIDA.md)), a trilha de auditoria completa exigida
-por [REG-LGPD-007](../governanca/01_CONFORMIDADE_REGULATORIA.md).
+por [REG-LGPD-007](../governanca/01_CONFORMIDADE_REGULATORIA.md). A
+autenticação do usuário e do perfil fica fora do escopo do protótipo; o ponto
+de integração é a assinatura desta função.
 
 ## 5. Mapeamento para o código
 

@@ -1,6 +1,6 @@
 # 02. Métricas de avaliação, não determinismo e inferência estatística
 
-**Última atualização**: 2026-09-08
+**Última atualização**: 2026-09-20
 **Alimenta**: Metodologia · Resultados e Discussão
 
 Legenda de verificação: ✔ lido na fonte · ◐ só resumo de busca · ⚠ conferir dado.
@@ -75,7 +75,23 @@ Legenda de verificação: ✔ lido na fonte · ◐ só resumo de busca · ⚠ co
   para dialogar com a literatura (ver 07 §6). Página oficial é fonte primária
   do benchmark; citar o artigo de 2023 para a métrica e a página para o valor
   do leaderboard, com data de acesso.
-- **Citar como**: Li et al. (2023); BIRD (2026) para o leaderboard.
+- **Implementação conferida (2026-09-20, Etapa C)**: a prosa da página
+  oficial não basta para reproduzir a métrica; o código de referência
+  (`bird-bench/mini_dev`, `evaluation/evaluation_f1.py`, último commit
+  `f9d2750`, 19 set. 2025) faz o seguinte: remove linhas duplicadas
+  preservando a ordem; **alinha as linhas por índice** (sensível à ordem em
+  que o banco devolve); em cada par, conta as células geradas presentes na
+  linha de referência (por valor, em qualquer posição) como acerto, as
+  ausentes como excesso e as células de referência não encontradas como
+  falta, todas como fração do número de colunas da referência; linhas
+  sobrando contam 1 de excesso ou de falta; precisão, recall e F1
+  micro-agregados por consulta; dois resultados vazios dão 1,0; erro de
+  execução dá 0. `src/evaluate.py:soft_f1` reproduz isso sobre as linhas já
+  ordenadas pela regra do execution match (desvio declarado, que remove a
+  sensibilidade à ordem). Consequência: uma coluna extra em cada linha
+  (Q04, Q13, Q14 do preliminar) dá F1 de 0,8, não 1,0 nem 0.
+- **Citar como**: Li et al. (2023); BIRD (2026) para o leaderboard; o
+  repositório `mini_dev` como fonte da implementação.
 
 ### Lee, Chay, Cho e Choi (2024): TrustSQL ✔
 

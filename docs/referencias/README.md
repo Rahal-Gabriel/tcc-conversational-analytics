@@ -112,9 +112,9 @@ docs/referencias/
 |---|---|
 | Text-to-SQL clínico | 11 |
 | Métricas e avaliação | 9 |
-| Governança e segurança | 12 |
+| Governança e segurança | 15 (3 acrescentadas em 2026-09-20: integridade de logs) |
 | Regulação Brasil | 8 |
 | Método e dados sintéticos | 9 |
 | Português e Brasil | 6 |
 | Privacidade e minimização (acrescentado em 2026-09-13) | 9 |
-| **Total** | **64** (algumas fontes aparecem em mais de um tema) |
+| **Total** | **67** (algumas fontes aparecem em mais de um tema) |

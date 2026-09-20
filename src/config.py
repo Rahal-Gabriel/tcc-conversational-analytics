@@ -75,6 +75,23 @@ CAMPOS_SENSIVEIS = ("nome", "cpf", "data_nascimento", "id_paciente_pseudo")
 QUASE_IDENTIFICADORES_INTERNACOES = ("tipo", "faixa_etaria")
 K_MINIMO = 5
 
+# Avaliacao (harness, Etapa C)
+
+# Marcador que o motor devolve no lugar da SQL quando se recusa a responder
+# (abstencao). Uma resposta vazia tambem conta como recusa. Comparado no inicio
+# do texto, sem distinguir maiusculas. O prompt so passa a pedir esse marcador
+# na Etapa E (conjunto adversarial); aqui o harness apenas ja o reconhece.
+MARCADOR_RECUSA = "RECUSA"
+
+# Valor z do intervalo de confianca de Wilson (95%), recomendado para n pequeno
+# (Brown, Cai e DasGupta 2001).
+WILSON_Z = 1.96
+
+# Trilha de auditoria (CTRL-AUD-001): hash inicial da cadeia de registros. Cada
+# registro guarda o hash do anterior, de modo que qualquer alteracao ou remocao
+# posterior quebra a cadeia e e detectada por governance.verificar_trilha.
+AUDIT_HASH_GENESIS = "0" * 64
+
 # Governanca de acesso: cada perfil so enxerga as tabelas Gold autorizadas
 
 PERFIS = {
@@ -102,6 +119,7 @@ def _autoteste():
     assert SIM_TODAY.isoformat() == SIM_TODAY_ISO
     assert HIST_DAYS > 0 and SEED >= 0
     assert PSEUDO_KEY and K_MINIMO >= 2 and QUASE_IDENTIFICADORES_INTERNACOES
+    assert MARCADOR_RECUSA and WILSON_Z > 0 and len(AUDIT_HASH_GENESIS) == 64
     assert all(v > 0 for v in (VOL_UNIDADES, VOL_LEITOS, VOL_PACIENTES, VOL_INTERNACOES))
     # Todo perfil so pode autorizar tabelas Gold conhecidas.
     for perfil, tabelas in PERFIS.items():

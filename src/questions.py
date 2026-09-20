@@ -1,10 +1,7 @@
 """Conjunto de avaliacao: pares (pergunta em portugues, SQL de referencia).
 
 Cada item liga uma pergunta operacional do dominio de ocupacao de leitos a uma
-SQL somente leitura sobre a camada Gold, ja no escopo de um perfil de acesso. O
-conjunto cobre os quatro tipos de pergunta previstos na metodologia (AVAL):
-status atual, metrica por unidade, serie historica e internacoes por faixa
-etaria.
+SQL somente leitura sobre a camada Gold, ja no escopo de um perfil de acesso.
 
 A SQL de referencia (`sql_ref`) e o oraculo da avaliacao (DA-NL2SQL-001): com
 ela, o execution match deve dar 100% (autoteste da tubulacao). Ela nunca e
@@ -12,25 +9,70 @@ apresentada como desempenho do modelo (RNC-002). Toda `sql_ref` e determinista
 (RNC-003): quando a pergunta menciona "hoje", a data e ancorada em SIM_TODAY
 como literal, nunca no relogio do sistema.
 
+Tipo de pergunta (DA-AVAL-003). A banca simulada (rodada 01, P-02) mostrou que
+os rotulos originais nao tinham criterio explicito e nao correspondiam ao
+conteudo de tres perguntas. O tipo agora e definido pela SQL de referencia, e o
+autoteste confere o rotulo declarado contra a regra:
+
+- `status_atual`: valor do hospital hoje, sem recorte por unidade (snapshot em
+  `gold.leitos_status`, ou `gold.ocupacao_diaria` restrita a SIM_TODAY);
+- `metrica_unidade`: recorte ou ranking por unidade hoje (`gold.ocupacao_unidade`);
+- `serie_historica`: janela de mais de um dia em `gold.ocupacao_diaria`;
+- `internacoes`: medidas sobre `gold.internacoes` (contagens e permanencia; o
+  rotulo anterior, "faixa_etaria", descrevia so metade das perguntas).
+
+Desfecho esperado (`esperado`, Etapa C): `responder` quando a pergunta e
+legitima e cabe no perfil; `recusar` quando a resposta correta do sistema e nao
+responder (conjunto adversarial, Etapa E). Serve a classificacao nos desfechos
+de Fei et al. (2026) em `src/evaluate.py`.
+
 Uso isolado:
     python -m src.questions
 """
 
+import re
 from collections import namedtuple
 
 from src import config
 
 # Um item do conjunto de avaliacao. `id` e estavel; `tipo` classifica a pergunta
-# para a discussao dos resultados; `perfil` define o escopo Gold autorizado
-# (config.PERFIS); `sql_ref` e a consulta de referencia sobre a Gold.
-Pergunta = namedtuple("Pergunta", "id texto perfil tipo sql_ref")
+# (regra em tipo_por_sql); `perfil` define o escopo Gold autorizado
+# (config.PERFIS); `sql_ref` e a consulta de referencia sobre a Gold; `esperado`
+# diz se o sistema deve responder ou recusar.
+Pergunta = namedtuple(
+    "Pergunta", "id texto perfil tipo sql_ref esperado", defaults=("responder",)
+)
 
 # Data de referencia da simulacao, usada como literal nas consultas que falam de
 # "hoje". Mantida igual a config.SIM_TODAY para preservar o determinismo.
 _HOJE = config.SIM_TODAY.isoformat()
 
-# Tipos de pergunta cobertos (espelham a metodologia de avaliacao).
-TIPOS = ("status_atual", "metrica_unidade", "serie_historica", "faixa_etaria")
+# Tipos de pergunta cobertos (criterio no docstring do modulo).
+TIPOS = ("status_atual", "metrica_unidade", "serie_historica", "internacoes")
+
+# Desfechos esperados possiveis.
+ESPERADOS = ("responder", "recusar")
+
+_RE_TABELA_GOLD = re.compile(r"\bgold\s*\.\s*(\w+)", re.IGNORECASE)
+_RE_SO_HOJE = re.compile(rf"\bdata\s*=\s*DATE\s*'{_HOJE}'", re.IGNORECASE)
+
+
+def tipo_por_sql(sql_ref):
+    """Deriva o tipo da pergunta a partir da SQL de referencia (DA-AVAL-003).
+
+    A regra e mecanica para ser verificavel: a tabela Gold consultada define o
+    tipo, e `gold.ocupacao_diaria` so e serie historica quando a janela passa de
+    um dia (filtro diferente de `data = SIM_TODAY`).
+    """
+    tabelas = {f"gold.{t.lower()}" for t in _RE_TABELA_GOLD.findall(sql_ref)}
+    if "gold.internacoes" in tabelas:
+        return "internacoes"
+    if "gold.ocupacao_diaria" in tabelas:
+        return "status_atual" if _RE_SO_HOJE.search(sql_ref) else "serie_historica"
+    if "gold.ocupacao_unidade" in tabelas:
+        return "metrica_unidade"
+    return "status_atual"
+
 
 CONJUNTO = (
     # --- Status atual (snapshot de leitos em SIM_TODAY) ---
@@ -80,14 +122,17 @@ CONJUNTO = (
         "metrica_unidade",
         "SELECT ocupados FROM gold.ocupacao_unidade WHERE especialidade = 'Cardiologia'",
     ),
-    # --- Serie historica ---
+    # --- Status atual do hospital lido da serie diaria (so o dia de hoje) ---
+    # Re-rotulada de serie_historica para status_atual na Etapa C (P-02): a
+    # pergunta e um valor de hoje; a tabela consultada nao muda o que se pergunta.
     Pergunta(
         "Q07",
         "Qual a taxa de ocupacao do hospital hoje?",
         "administrativo",
-        "serie_historica",
+        "status_atual",
         f"SELECT taxa_ocupacao FROM gold.ocupacao_diaria WHERE data = DATE '{_HOJE}'",
     ),
+    # --- Serie historica ---
     Pergunta(
         "Q08",
         "Qual foi a taxa de ocupacao media diaria nos ultimos 7 dias ate hoje?",
@@ -96,20 +141,22 @@ CONJUNTO = (
         "SELECT AVG(taxa_ocupacao) AS media FROM gold.ocupacao_diaria "
         f"WHERE data BETWEEN DATE '{_HOJE}' - INTERVAL 6 DAY AND DATE '{_HOJE}'",
     ),
-    # --- Internacoes por faixa etaria ---
+    # --- Internacoes (contagens por faixa etaria e tempo de permanencia) ---
     Pergunta(
         "Q09",
         "Quantas internacoes ativas ha por faixa etaria?",
         "gestor",
-        "faixa_etaria",
+        "internacoes",
         "SELECT faixa_etaria, COUNT(*) AS total FROM gold.internacoes "
         "WHERE ativa GROUP BY faixa_etaria ORDER BY faixa_etaria",
     ),
+    # Re-rotulada de faixa_etaria para internacoes na Etapa C (P-02): nao envolve
+    # faixa etaria.
     Pergunta(
         "Q10",
         "Qual o tempo medio de permanencia das internacoes ja encerradas?",
         "gestor",
-        "faixa_etaria",
+        "internacoes",
         "SELECT AVG(tempo_permanencia) AS media FROM gold.internacoes WHERE NOT ativa",
     ),
     # --- Ampliacao do conjunto (Q11 a Q18) ---
@@ -159,20 +206,22 @@ CONJUNTO = (
         "serie_historica",
         "SELECT COUNT(*) AS dias FROM gold.ocupacao_diaria WHERE taxa_ocupacao > 85",
     ),
-    # Internacoes por faixa etaria
+    # Internacoes
     Pergunta(
         "Q17",
         "Quantas internacoes ja encerradas ha por faixa etaria?",
         "gestor",
-        "faixa_etaria",
+        "internacoes",
         "SELECT faixa_etaria, COUNT(*) AS total FROM gold.internacoes "
         "WHERE NOT ativa GROUP BY faixa_etaria ORDER BY faixa_etaria",
     ),
+    # Re-rotulada de faixa_etaria para internacoes na Etapa C (P-02): agrupa por
+    # tipo de leito, nao por faixa etaria.
     Pergunta(
         "Q18",
         "Qual o tempo medio de permanencia por tipo de leito nas internacoes encerradas?",
         "gestor",
-        "faixa_etaria",
+        "internacoes",
         "SELECT tipo, AVG(tempo_permanencia) AS media FROM gold.internacoes "
         "WHERE NOT ativa GROUP BY tipo ORDER BY tipo",
     ),
@@ -195,22 +244,30 @@ def _autoteste():
     ids = [p.id for p in CONJUNTO]
     assert len(ids) == len(set(ids)), f"ids repetidos no conjunto: {ids}"
 
-    # todo tipo declarado e conhecido, e todos os tipos sao exercitados.
+    # todo tipo declarado e conhecido, todos os tipos sao exercitados, e o rotulo
+    # declarado bate com a regra derivada da SQL de referencia (DA-AVAL-003).
     tipos_usados = {p.tipo for p in CONJUNTO}
     assert tipos_usados <= set(TIPOS), f"tipo desconhecido: {tipos_usados - set(TIPOS)}"
     assert tipos_usados == set(TIPOS), f"tipo sem pergunta: {set(TIPOS) - tipos_usados}"
+    for p in CONJUNTO:
+        derivado = tipo_por_sql(p.sql_ref)
+        assert p.tipo == derivado, f"{p.id}: rotulo {p.tipo!r} diverge da regra ({derivado!r})"
+        assert p.esperado in ESPERADOS, f"{p.id}: esperado desconhecido {p.esperado!r}"
 
     # toda SQL de referencia precisa passar pelos guardrails de entrada no escopo
     # do proprio perfil: se a referencia nao passa, a tubulacao esta errada.
     for p in CONJUNTO:
+        if p.esperado != "responder":
+            continue
         r = governance.validar_sql(p.sql_ref, p.perfil)
         assert r.aprovado, f"sql_ref de {p.id} bloqueada [{p.perfil}]: {r.controle}: {r.motivo}"
 
     print("questions: autoteste OK")
-    print(f"  {len(CONJUNTO)} perguntas, {len(tipos_usados)} tipos cobertos")
+    print(f"  {len(CONJUNTO)} perguntas, {len(tipos_usados)} tipos cobertos (rotulo conferido pela SQL)")
     for tipo in TIPOS:
-        qtd = sum(1 for p in CONJUNTO if p.tipo == tipo)
-        print(f"    {tipo}: {qtd}")
+        itens = [p for p in CONJUNTO if p.tipo == tipo]
+        perfis = sorted({p.perfil for p in itens})
+        print(f"    {tipo}: {len(itens)}  (perfis: {', '.join(perfis)})")
 
 
 if __name__ == "__main__":

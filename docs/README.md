@@ -25,13 +25,13 @@ A documentação cumpre dois papéis ao mesmo tempo:
 
 | Métrica | Total |
 |---|---|
-| Arquivos de documentação | 26 |
-| Decisões Arquiteturais (DA-*) | 17 |
+| Arquivos de documentação | 27 |
+| Decisões Arquiteturais (DA-*) | 21 |
 | Regras Críticas (RNC-*) | 5 |
 | Requisitos Regulatórios (REG-*) | 11 |
 | Controles de Governança (CTRL-*) | 11 |
 | Critérios de Avaliação (AVAL-*) | 3 |
-| Resultados Preliminares (RES-*) | 9 |
+| Resultados Preliminares (RES-*) | 10 |
 
 > Os totais são mantidos manualmente. Ao adicionar ou remover um identificador,
 > atualize esta tabela e a contagem no módulo de origem.

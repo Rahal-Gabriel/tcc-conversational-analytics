@@ -2,7 +2,7 @@
 
 **Status**: PARCIAL (mapeamento concluído; controles em implementação)
 **Prioridade**: CRÍTICA
-**Última atualização**: 2026-09-13
+**Última atualização**: 2026-09-20
 **Alimenta (template TCC)**: Introdução · Metodologia · Resultados Preliminares
 
 ---
@@ -57,7 +57,7 @@ passando.
 | `REG-LGPD-004` | Controle de acesso por finalidade e perfil | LGPD art. 6º (finalidade); ANVISA RDC | Perfis `gestor`, `enfermagem`, `administrativo` autorizam só tabelas Gold específicas | Entrada / `config.PERFIS`, CTRL-GOV-005 | config |
 | `REG-LGPD-005` | Segurança e prevenção de comando indevido | LGPD art. 46; art. 6º (segurança, prevenção) | Guardrails CTRL-GOV-001 a 003 e 006: SQL única somente leitura, bloqueio de escrita/admin, bloqueio de múltiplas instruções, conexão read-only | Entrada / `governance.py` | projetado |
 | `REG-LGPD-006` | Prevenção de vazamento de sensível na resposta | LGPD art. 11; ANPD (uso secundário) | Filtro de saída CTRL-VALID-002: bloqueia coluna com nome de campo sensível | Saída / `config.CAMPOS_SENSIVEIS`, `governance.validar_saida` | implementado |
-| `REG-LGPD-007` | Rastreabilidade e prestação de contas | LGPD art. 6º (responsabilização); ANVISA RDC | Auditoria CTRL-AUD-001: registro de toda pergunta e resposta com timestamp, usuário, perfil, SQL e evento | Auditoria / `governance.registrar_pergunta`, `governance.registrar_resposta` | implementado |
+| `REG-LGPD-007` | Rastreabilidade e prestação de contas | LGPD art. 6º (responsabilização); ANVISA RDC | Auditoria CTRL-AUD-001: registro de toda pergunta e resposta com horário real e data de simulação, usuário, perfil, SQL, motor, evento, controle e hash do resultado entregue, em cadeia de hashes verificável (`verificar_trilha`); autenticação fora do escopo, com ponto de integração declarado | Auditoria / `governance.registrar_pergunta`, `governance.registrar_resposta`, `governance.verificar_trilha` | implementado |
 | `REG-ANPD-001` | Mitigação de alucinação da IA generativa | ANPD, Radar de IA Generativa | Aterramento CTRL-VALID-001: toda tabela citada deve existir no schema Gold conhecido | Saída / `governance.validar_saida` | implementado |
 | `REG-ANPD-002` | Prevenção de uso secundário não autorizado | ANPD, Radar de IA Generativa | Escopo restrito por perfil, execução somente leitura e registro integral limitam o uso ao fim declarado | Entrada e Auditoria / `governance.py` | projetado |
 | `REG-ANVISA-001` | Controle, segurança e rastreabilidade do SaMD | ANVISA RDC 657/751/830 | Conjunto de guardrails versionados, auditoria e reprodutibilidade do software | Transversal / `governance.py`, CI | projetado |
@@ -72,9 +72,11 @@ desenho dos controles e a centralização dos parâmetros que os sustentam em
 data de referência). A lógica está implementada em `pipeline.py`
 (pseudonimização, minimização e k-anonimato) e `governance.py` (guardrails,
 isolamento físico, filtro de saída e auditoria), e as linhas com situação
-`implementado` são verificáveis por teste automatizado. Os itens ainda
-`projetado` (REG-LGPD-005, REG-ANPD-002, REG-ANVISA-001) são tratados nas
-etapas C e E da fase de conclusão.
+`implementado` são verificáveis por teste automatizado. A Etapa C revisou a
+auditoria (REG-LGPD-007): horário real, hash do resultado entregue e cadeia
+de hashes, com a completude lida do arquivo pelo indicador AVAL-003. Os itens
+ainda `projetado` (REG-LGPD-005, REG-ANPD-002, REG-ANVISA-001) são tratados
+na Etapa E da fase de conclusão e na Discussão.
 
 Este mapeamento é registrado como resultado parcial em
 [RES-002](../tcc/01_RESULTADOS_PRELIMINARES.md#res-002-mapeamento-regulatório-completo).
@@ -88,6 +90,6 @@ Este mapeamento é registrado como resultado parcial em
 | REG-LGPD-004 | CTRL-GOV-005 | DA-GOV-001 | - |
 | REG-LGPD-005 | CTRL-GOV-001/002/003/006 | DA-GOV-002 | - |
 | REG-LGPD-006 | CTRL-VALID-002 | DA-VALID-002 | RNC-005 |
-| REG-LGPD-007 | CTRL-AUD-001 | - | - |
+| REG-LGPD-007 | CTRL-AUD-001 | DA-VALID-003 | RNC-003 (escopo) |
 | REG-ANPD-001 | CTRL-VALID-001 | DA-VALID-001 | - |
 | REG-PESQ-001 | - | DA-NL2SQL-001 | RNC-001, RNC-002, RNC-003 |

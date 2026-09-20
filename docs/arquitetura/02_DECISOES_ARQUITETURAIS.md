@@ -2,7 +2,7 @@
 
 **Status**: PARCIAL
 **Prioridade**: ALTA
-**Última atualização**: 2026-09-13
+**Última atualização**: 2026-09-20
 **Alimenta (template TCC)**: Metodologia · Resultados Preliminares
 
 ---
@@ -273,6 +273,36 @@ estável `DA-[MOD]-[NUM]` citável pelos demais módulos e pela redação do TCC
 
 ---
 
+### DA-VALID-003: Trilha de auditoria com horário real e encadeamento por hash
+
+- **Decisão**: Cada registro da trilha guarda o horário real (UTC, relógio do
+  sistema) **e** a data de simulação (`SIM_TODAY`), um `id_interacao` que liga
+  entrada e saída, o motor, o controle e o motivo de bloqueio, e o hash SHA-256
+  e o número de linhas do resultado entregue (nunca o resultado em si). Os
+  registros são encadeados: cada um carrega o hash do anterior e o próprio
+  hash sobre o conteúdo canônico; `verificar_trilha` detecta alteração,
+  remoção ou inserção posterior. Autenticação de usuário e perfil fica fora do
+  escopo do protótipo, com o ponto de integração declarado (a assinatura de
+  `registrar_pergunta`).
+- **Motivação**: O log anterior tinha `momento = SIM_TODAY` sempre, não
+  registrava o que foi entregue e não tinha proteção de integridade; um
+  encarregado de dados não o aceitaria como rastreabilidade (P-20). O
+  encadeamento por hash é a técnica clássica de log resistente a adulteração
+  (Schneier e Kelsey 1999; Crosby e Wallach 2009) e a integridade do log é
+  requisito de gestão de logs de segurança (NIST SP 800-92).
+- **Alternativa descartada**: assinar cada registro com chave (exige gestão de
+  chave que o protótipo não tem; o encadeamento detecta adulteração mas não
+  autentica o autor, limitação declarada). Registrar o resultado completo
+  (copiaria dados para o log; o hash prova a resposta sem copiá-la).
+- **Efeito sobre RNC-003**: dados e métricas continuam deterministas; o horário
+  real fica explicitamente fora dessa exigência.
+- **Status**: IMPLEMENTADO (`src/governance.py:registrar_pergunta`,
+  `registrar_resposta`, `verificar_trilha`, `hash_resultado`;
+  `config.AUDIT_HASH_GENESIS`).
+- **Relacionado**: [CTRL-AUD-001](../camadas/04_VALIDACAO_SAIDA.md),
+  [AVAL-003](../avaliacao/01_METODOLOGIA_AVALIACAO.md),
+  [REG-LGPD-007](../governanca/01_CONFORMIDADE_REGULATORIA.md).
+
 ## Avaliação (AVAL)
 
 ### DA-AVAL-001: Execution match no estilo EHRSQL
@@ -281,7 +311,7 @@ estável `DA-[MOD]-[NUM]` citável pelos demais módulos e pela redação do TCC
   a SQL de referência e comparar os conjuntos de resultados.
 - **Motivação**: Avaliar o efeito (o resultado correto), não a forma exata da
   SQL, que pode variar e ainda estar correta.
-- **Status**: PROJETADO.
+- **Status**: IMPLEMENTADO (`src/evaluate.py:avaliar`).
 - **Relacionado**: [AVAL-001](../avaliacao/01_METODOLOGIA_AVALIACAO.md).
 
 ### DA-AVAL-002: Normalização dos resultados antes de comparar
@@ -290,5 +320,72 @@ estável `DA-[MOD]-[NUM]` citável pelos demais módulos e pela redação do TCC
   datas em ISO, linhas ordenadas).
 - **Motivação**: Evitar falsos negativos por diferenças irrelevantes de
   formatação ou ordem.
-- **Status**: PROJETADO.
+- **Status**: IMPLEMENTADO (`src/evaluate.py:normalizar`, `CASAS_DECIMAIS`).
 - **Relacionado**: [AVAL-001](../avaliacao/01_METODOLOGIA_AVALIACAO.md).
+
+### DA-AVAL-003: Tipo de pergunta derivado da SQL de referência
+
+- **Decisão**: O tipo de cada pergunta do conjunto é definido por uma regra
+  mecânica sobre a SQL de referência (tabela Gold consultada; para
+  `gold.ocupacao_diaria`, janela de um dia é status atual, mais de um dia é
+  série histórica), e o autoteste confere o rótulo declarado contra a regra.
+  Os tipos são `status_atual`, `metrica_unidade`, `serie_historica` e
+  `internacoes`.
+- **Motivação**: A banca simulada (rodada 01, P-02) mostrou que os rótulos
+  originais não tinham critério e que três perguntas estavam mal rotuladas
+  (Q07 como série histórica; Q10 e Q18 como "faixa etária" sem envolver faixa
+  etária). Sem critério verificável, a estratificação por tipo não é um
+  achado.
+- **Alternativa descartada**: rotular pelo texto da pergunta (subjetivo, não
+  verificável por teste).
+- **Limitação declarada**: tipo e perfil continuam quase confundidos no
+  conjunto de 18; os perfis foram mantidos pela comparabilidade com o
+  preliminar.
+- **Status**: IMPLEMENTADO (`src/questions.py:tipo_por_sql`, autoteste).
+- **Relacionado**: [AVAL, §3](../avaliacao/01_METODOLOGIA_AVALIACAO.md).
+
+### DA-AVAL-004: Desfechos de governança em dois níveis
+
+- **Decisão**: Cada interação é classificada nos seis desfechos de Fei et al.
+  (2026) (Correct, Wrong, Proper Refusal, Violation Correct, Violation Wrong,
+  Over-Refusal), em dois níveis: **modelo** (o que a SQL gerada faria sem
+  verificador) e **sistema** (o que o usuário recebeu depois do verificador
+  determinista). Os indicadores Safe-EX, Violation Rate, Over-Refusal Rate e
+  Proper Refusal Rate são reportados por nível. Substitui a "taxa de
+  aprovação na governança".
+- **Motivação**: A taxa de aprovação contava qualquer bloqueio e não dizia se
+  o bloqueio era desejado ou custo (P-04). A taxonomia publicada dá nome a
+  cada caso e torna o resultado comparável com a literatura. Os dois níveis
+  isolam a contribuição do verificador determinista, que os benchmarks não
+  medem (eles avaliam o modelo sozinho ou com verificador por LLM).
+- **Regras de classificação**: bloqueio por controle de política de acesso
+  (`evaluate.CONTROLES_POLITICA`: escrita ou I/O, camada interna, escopo do
+  perfil ou tabela inexistente, campo sensível) é violação no nível do modelo,
+  correta ou errada conforme execução diagnóstica; bloqueio por SQL malformada
+  (instrução única, forma de leitura, aterramento) e erro de execução são
+  Wrong; resposta vazia ou iniciada por `config.MARCADOR_RECUSA` é recusa.
+  "Correct" exige execution match estrito, o mesmo critério da primária.
+- **Status**: IMPLEMENTADO (`src/evaluate.py:classificar_desfechos`); autoteste
+  com motor de falhas sintético cobre os seis desfechos nos dois níveis.
+- **Relacionado**: [AVAL-002](../avaliacao/01_METODOLOGIA_AVALIACAO.md),
+  ficha de Fei et al. (2026) em [referencias/03](../referencias/03_GOVERNANCA_E_SEGURANCA.md).
+
+### DA-AVAL-005: Soft F1 do BIRD como segunda métrica secundária
+
+- **Decisão**: Reportar, ao lado do set match de conteúdo, o Soft F1 do BIRD
+  Mini-Dev (Li et al. 2023), seguindo a implementação de referência
+  (`bird-bench/mini_dev`, `evaluation/evaluation_f1.py`): linhas deduplicadas
+  e alinhadas por índice, células comparadas por pertinência dentro da linha,
+  TP, FP e FN como frações do número de colunas da referência, micro-agregados
+  em precisão, recall e F1. Desvio declarado: as linhas chegam ordenadas pela
+  regra do execution match, o que remove a sensibilidade à ordem da
+  implementação original.
+- **Motivação**: O set match de conteúdo é métrica própria, de recall, sem par
+  na literatura e permissiva por construção (P-14). O Soft F1 é a métrica
+  publicada mais próxima, penaliza excesso (colunas extras) e torna a tabela
+  de resultados comparável com o BIRD.
+- **Alternativa descartada**: substituir o set match pelo Soft F1 (perderia a
+  comparabilidade com o documento preliminar; os dois são reportados).
+- **Status**: IMPLEMENTADO (`src/evaluate.py:soft_f1`).
+- **Relacionado**: [AVAL, secundárias](../avaliacao/01_METODOLOGIA_AVALIACAO.md),
+  ficha do BIRD em [referencias/02](../referencias/02_METRICAS_E_AVALIACAO.md).

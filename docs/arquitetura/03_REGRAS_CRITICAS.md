@@ -53,6 +53,12 @@ qualquer alteração relevante.
   terceiros, o que é requisito de uma pesquisa séria.
 - **Enforcement**: `SEED` e `SIM_TODAY` centralizados em `config.py`; verificado
   entre versões de Python (3.12 e 3.14).
+- **Escopo**: dados, SQL de referência, métricas e relatórios. O horário real
+  da trilha de auditoria (`momento_real`) fica explicitamente **fora** da
+  exigência: um log sem tempo real não sustenta responsabilização
+  ([DA-VALID-003](02_DECISOES_ARQUITETURAIS.md#da-valid-003-trilha-de-auditoria-com-horário-real-e-encadeamento-por-hash)).
+  Cada registro guarda também a data de simulação, e o determinismo do que
+  foi respondido é verificável pelo hash do resultado.
 - **Status**: VALIDADO (Bronze reprodutível byte a byte sob a mesma config).
 - **Código**: `src/config.py:14-25`.
 - **Relacionado**: [avaliacao/02_REPRODUTIBILIDADE_CI.md](../avaliacao/02_REPRODUTIBILIDADE_CI.md).
