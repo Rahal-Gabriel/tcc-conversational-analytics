@@ -42,6 +42,7 @@ ação sugerida é decisão do autor.
 | Rodada | Data | Alvo | Críticas | Altas | Médias | Arquivo |
 |---|---|---|---|---|---|---|
 | 01 | 2026-09-13 | documento inteiro | 7 | 9 | 6 | [2026-09-13_rodada-01.md](2026-09-13_rodada-01.md) |
+| 02 | 2026-09-20 | documento inteiro | 4 | 10 | 4 | [2026-09-20_rodada-02.md](2026-09-20_rodada-02.md) |
 
 > Atualizar esta tabela a cada rodada (o agente grava o arquivo; a linha da
 > tabela é mantida manualmente).

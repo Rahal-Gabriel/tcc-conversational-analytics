@@ -31,7 +31,7 @@ A documentação cumpre dois papéis ao mesmo tempo:
 | Requisitos Regulatórios (REG-*) | 12 |
 | Controles de Governança (CTRL-*) | 12 |
 | Critérios de Avaliação (AVAL-*) | 3 |
-| Resultados Preliminares (RES-*) | 14 |
+| Resultados Preliminares (RES-*) | 15 |
 
 > Os totais são mantidos manualmente. Ao adicionar ou remover um identificador,
 > atualize esta tabela e a contagem no módulo de origem.

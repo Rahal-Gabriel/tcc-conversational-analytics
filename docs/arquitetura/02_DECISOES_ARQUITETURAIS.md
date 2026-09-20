@@ -308,6 +308,10 @@ estável `DA-[MOD]-[NUM]` citável pelos demais módulos e pela redação do TCC
 - **Status**: VALIDADO (`src/nl2sql.py:MotorLocal`, `ollama_disponivel`;
   `src/config.py` seção "Motor local"). Números em RES-011 e RES-012: 22,2%
   estrito com o prompt do preliminar, 72,2% na melhor célula; TARa@3 100%.
+  A ponte com o Sonnet (RES-015) cruzou modelo e prompt: 74,1% e 90,7% nas
+  mesmas células, com TARa@3 de 94,4% (a API não é determinista); o motor
+  local fica 19 pontos abaixo sob o prompt bom, sem custo, sem saída de
+  dados e com reprodutibilidade exata.
 - **Relacionado**: [piloto](../tcc/etapas/2026-09-13_piloto-modelo-local.md),
   [RNC-003](03_REGRAS_CRITICAS.md#rnc-003-determinismo-por-seed-e-sim_today)
   (a estabilidade do modelo é observada por TARa@k, não assumida),

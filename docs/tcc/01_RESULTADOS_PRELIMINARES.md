@@ -525,15 +525,18 @@ Leitura: com o prompt do preliminar, o modelo local fica muito abaixo do
 Sonnet (22,2% contra 61,1%); com a descrição enriquecida e o schema do
 perfil, alcança e supera o número do preliminar (72,2%). Como modelo, Gold e
 harness mudaram ao mesmo tempo, **nenhuma afirmação de superioridade** entre
-modelos é feita; o que a matriz sustenta é que o desenho do prompt pesou
-mais do que a troca de modelo, e que a hipótese original de acurácia acima
-de 80% continua **não confirmada** sob execution match estrito (72,2%, IC
-[49,1%; 87,5%]). A ponte com o Sonnet nas células C0 e C3 só será feita se
-houver crédito de API.
+modelos é feita a partir desta tabela. O número do preliminar (61,1% /
+94,4%) é **observação histórica com artefatos perdidos** (RES-010 §5) e não
+serve mais de base de comparação: a comparação entre modelos, com os dois
+fatores cruzados, está em RES-015 (ponte com o Sonnet sobre a Gold e o
+harness atuais), que substitui a leitura anterior deste registro de que "o
+desenho do prompt pesou mais do que a troca de modelo" (banca, rodada 02,
+P-23 e P-25).
 
-- **Status**: VALIDADO (mesmos anexos de RES-011).
+- **Status**: VALIDADO (mesmos anexos de RES-011); leitura revista após
+  RES-015.
 - **Evidência**: `docs/tcc/anexos/etapa-D/avaliacao_local_C0.json`;
-  RES-007 para os números do preliminar.
+  RES-007 para os números do preliminar (históricos).
 
 ### RES-013: Recusa devida medida: o verificador garante o escopo, a abstenção pelo modelo responde pela pertinência
 
@@ -627,14 +630,77 @@ Resposta à banca (P-18) em três partes, todas verificáveis no código:
   [camadas/03](../camadas/03_MOTOR_TEXT2SQL.md) §3.3;
   [governanca/01](../governanca/01_CONFORMIDADE_REGULATORIA.md) REG-LGPD-008.
 
+### RES-015: Ponte com o Sonnet: modelo e prompt cruzados, e o veredito da hipótese de 80%
+
+Pré-registrada na Etapa D (§2 e DA-NL2SQL-003: "se houver crédito, a ponte
+fecha com o Sonnet nas células C0 e vencedora") e pedida pela banca (rodada
+02, P-23 e P-25). Executada em 2026-09-20 com `claude-sonnet-4-6` via API,
+células C0 e C3, k=3, 108 chamadas, janela UTC 19:17:56 a 19:20:57, custo
+estimado de US$ 0,18 (44.721 tokens de entrada, 3.150 de saída). Mesmo
+conjunto, Gold, harness e trilha (216 registros, íntegra) das Etapas D e E.
+Anexos em `docs/tcc/anexos/ponte-sonnet/`.
+
+Matriz modelo × prompt, execution match estrito (18 perguntas, média de
+k=3):
+
+| | C0 (prompt do preliminar) | C3 (enriquecido, schema por perfil) | Efeito do prompt |
+|---|---|---|---|
+| Qwen2.5-Coder 14B, local (RES-011) | 22,2% (dp 0) | 72,2% (dp 0) | +50,0 pontos |
+| Claude Sonnet 4.6, API | 74,1% (dp 3,2; 72,2% a 77,8%) | **90,7%** (dp 3,2; 88,9% a 94,4%) | +16,6 pontos |
+| Efeito do modelo | +51,9 pontos | +18,5 pontos | |
+
+| Célula (Sonnet) | IC95% Wilson | Set match | Soft F1 | Violation modelo | Over-Refusal sistema | TARa@3 | Tokens |
+|---|---|---|---|---|---|---|---|
+| C0 | [49,1%; 87,5%] | 96,3% | 89,9% | 11,1% (Q01, Q11) | 11,1% | 94,4% | 317 |
+| C3 | [67,2%; 96,9%] | 96,3% | 95,2% | 0 | 0 | 94,4% | 511 |
+
+Leitura:
+
+- **Veredito da hipótese.** Sob execution match estrito, a arquitetura com o
+  modelo forte e o prompt com escopo alcança **90,7%**, acima do limiar de
+  80% da hipótese; com o modelo local, 72,2%. A estimativa pontual confirma
+  a hipótese para o modelo forte, mas o intervalo de Wilson ([67,2%; 96,9%],
+  n=18) **não exclui valores abaixo de 80%**, e o texto final diz as duas
+  coisas. Com o modelo local a hipótese não se confirma.
+- **Modelo e prompt importam, e interagem.** O prompt vale 50 pontos no
+  modelo pequeno e 17 no grande; o modelo vale 52 pontos sob o prompt pobre
+  e 19 sob o prompt bom. A frase de RES-012 de que "o prompt pesou mais do
+  que o modelo" não se sustentava sem o cruzamento e foi retirada: o que
+  os dados sustentam é que um prompt bem desenhado **reduz a distância**
+  entre o modelo local e o modelo via API de 52 para 19 pontos.
+- **O padrão do preliminar se reproduz em C0.** Q01 e Q11 barradas por
+  escopo (Violation Correct, custo de 11,1 pontos, o mesmo do preliminar),
+  Q13 e Q14 com colunas a mais, Q05 oscilando entre projeção mínima e
+  completa. A diferença de 61,1% para 74,1% vem da Gold minimizada e do
+  harness revisto (Q04, Q12 e Q15, que falhavam no preliminar, passam), não
+  do modelo, que é o mesmo.
+- **Erros residuais em C3.** Q14 (coluna `especialidade` a mais, Soft F1
+  0,8, nas três execuções) e Q12 em duas de três (`tipo = 'enfermaria'` em
+  caixa baixa; na execução em que acertou, usou `ILIKE`). São os mesmos
+  dois tipos de erro do modelo local (projeção e literal); C4 com value
+  linking não foi rodada no Sonnet.
+- **A API não é determinista a temperatura zero.** TARa@3 de 94,4% nas
+  duas células: Q05 (C0) e Q12 (C3) mudaram de SQL entre execuções
+  contíguas, o que o modelo local com semente fixa nunca fez em 528
+  chamadas (Atil et al. 2025). É o argumento de reprodutibilidade a favor
+  da implantação local, ao lado do perímetro e do custo.
+
+- **Status**: VALIDADO (execução real via API, 108 chamadas, trilha
+  íntegra, anexos versionados, tag `ponte-sonnet`). A chave de API foi
+  lida do ambiente e não consta de nenhum arquivo (RNC-004).
+- **Evidência**: `docs/tcc/anexos/ponte-sonnet/` (`matriz_llm.md`,
+  `avaliacao_llm_C0.json`, `C3.json`, `sql_geradas_llm.md`, `auditoria.log`).
+
 ## 5. O que ainda falta
 
-Os números do motor local já foram coletados (RES-011: 72,2% de execution
-match estrito na melhor célula, 18 perguntas, k=3; RES-013: 88% de recusa
+Os números estão coletados (RES-011: 72,2% estrito com o modelo local;
+RES-015: 90,7% com o Sonnet sob o mesmo prompt; RES-013: 88% de recusa
 devida com a instrução, sem recusa indevida). A hipótese de acurácia
-superior a 80% **ainda não se confirma** sob execution match estrito; os erros
-residuais são de projeção, dialeto e literal, não de cálculo, e o custo da
-governança caiu a zero com o schema por perfil. As próximas entregas:
+superior a 80% **se confirma na estimativa pontual com o modelo forte** e
+não se confirma com o modelo local; o intervalo (n=18) não exclui 80% em
+nenhum dos casos. Os erros residuais são de projeção, dialeto e literal,
+não de cálculo; a recusa indevida é zero nas 18 legítimas. As próximas
+entregas:
 
 | Próxima entrega | Onde | Resultado que habilita |
 |---|---|---|
