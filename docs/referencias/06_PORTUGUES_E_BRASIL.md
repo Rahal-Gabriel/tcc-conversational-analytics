@@ -61,6 +61,24 @@ Legenda de verificação: ✔ lido na fonte · ◐ só resumo de busca · ⚠ co
   discussão de implantação local com modelos pequenos.
 - **Citar como**: Silva et al. (2025).
 
+### Hui et al. (2024): Qwen2.5-Coder, relatório técnico ✔ ⚠
+
+- **Referência**: Hui, B.; Yang, J.; Cui, Z.; Yang, J.; Liu, D.; Zhang, L.;
+  Liu, T.; Zhang, J.; Yu, B.; Dang, K.; Yang, A.; Men, R.; Huang, F.; Ren,
+  X.; Ren, X.; Zhou, J.; Lin, J. 2024. Qwen2.5-Coder technical report.
+  arXiv:2409.12186. [conferir lista completa de autores e versão]
+- **O que faz**: descreve a família de modelos abertos especializados em código
+  (0,5B a 32B), pré-treinados em 5,5 trilhões de tokens de código e texto,
+  com pesos publicados sob licença Apache 2.0 (exceto 3B).
+- **Relevância**: é o modelo do motor local da fase de conclusão
+  (`qwen2.5-coder:14b`, servido pelo Ollama, quantização padrão). Citar na
+  Metodologia ao descrever o motor, junto de Pedroso et al. (2025) e Silva et
+  al. (2025), que já avaliam a família em português, e de Tanković et al.
+  (2025), em SQL médico. O servidor Ollama (versão registrada em cada
+  relatório) é software, citado em nota ou no texto, não como referência
+  bibliográfica, salvo exigência do manual [conferir].
+- **Citar como**: Hui et al. (2024).
+
 ### Petrola, Brayner e Franco (2025): Text-to-SQL guiado por heurísticas ◐ ⚠
 
 - **Referência**: Petrola, [inicial]; Brayner, A.; Franco, [inicial]. 2025.

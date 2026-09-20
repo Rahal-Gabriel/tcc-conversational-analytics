@@ -39,6 +39,7 @@ jobs:
           python -m src.nl2sql
           python -m src.pipeline
           python -m src.evaluate
+          python -m src.matriz
 
       # Autoteste da tubulacao completa com o motor oraculo: geracao -> governanca
       # -> execucao -> avaliacao. Exige 100% de execution match (RNC-002). O modo

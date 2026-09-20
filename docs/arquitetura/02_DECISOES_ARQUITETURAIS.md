@@ -46,11 +46,12 @@ estável `DA-[MOD]-[NUM]` citável pelos demais módulos e pela redação do TCC
 
 ### DA-ARQ-003: Chamada HTTP ao LLM via biblioteca padrão
 
-- **Decisão**: Chamar a API da Anthropic com `urllib` da biblioteca padrão, sem
-  SDK pesado.
+- **Decisão**: Chamar o modelo, seja a API da Anthropic, seja o servidor local
+  do Ollama, com `urllib` da biblioteca padrão, sem SDK.
 - **Motivação**: Manter o conjunto de dependências mínimo (apenas `faker` e
   `duckdb`), o que reduz superfície e facilita a reprodução.
-- **Status**: PROJETADO.
+- **Status**: IMPLEMENTADO (`src/nl2sql.py:_post_json`, usado por `MotorLLM` e
+  `MotorLocal`).
 - **Origem**: `requirements.txt`; `GUIA_DESENVOLVIMENTO.md` (seção Configuração do LLM).
 
 ---
@@ -225,15 +226,20 @@ estável `DA-[MOD]-[NUM]` citável pelos demais módulos e pela redação do TCC
 
 ## Motor Text-to-SQL (NL2SQL)
 
-### DA-NL2SQL-001: Dois motores intercambiáveis (LLM e oráculo)
+### DA-NL2SQL-001: Motores intercambiáveis (oráculo, API e local)
 
-- **Decisão**: O sistema tem dois motores: o **LLM** (real, que gera os números
-  do TCC) e o **oráculo** (que devolve a SQL de referência, só para autoteste
-  da tubulação).
-- **Motivação**: Permite validar todo o harness sem custo e sem chave, e impede
-  confundir autoteste com desempenho do modelo.
-- **Status**: PROJETADO.
+- **Decisão**: O sistema tem motores intercambiáveis atrás de uma interface
+  única (`gerar_sql(pergunta, perfil)`): os motores **reais** (via API e local,
+  que geram os números do TCC) e o **oráculo** (que devolve a SQL de
+  referência, só para autoteste da tubulação). O harness não distingue entre
+  eles além do nome registrado no relatório.
+- **Motivação**: Permite validar todo o harness sem custo e sem modelo, impede
+  confundir autoteste com desempenho, e permitiu trocar o motor dos Resultados
+  Preliminares (API) pelo motor local da fase de conclusão sem tocar no
+  avaliador.
+- **Status**: IMPLEMENTADO (`src/nl2sql.py:obter_motor`, `MOTORES`).
 - **Relacionado**: [RNC-002](03_REGRAS_CRITICAS.md#rnc-002-integridade-dos-resultados),
+  [DA-NL2SQL-003](#da-nl2sql-003-motor-local-com-modelo-aberto-servido-pelo-ollama),
   [avaliacao/01_METODOLOGIA_AVALIACAO.md](../avaliacao/01_METODOLOGIA_AVALIACAO.md).
 
 ### DA-NL2SQL-002: Prompt com schema Gold e data de referência
@@ -243,8 +249,72 @@ estável `DA-[MOD]-[NUM]` citável pelos demais módulos e pela redação do TCC
   explicação.
 - **Motivação**: Reduzir ambiguidade, ancorar consultas que mencionam "hoje" na
   data de referência e facilitar a validação automática da saída.
-- **Status**: PROJETADO.
-- **Código**: `src/config.py:14-16` (`SIM_TODAY`); `src/nl2sql.py` (a implementar).
+- **Status**: IMPLEMENTADO. A instrução de sistema é fixa desde os Resultados
+  Preliminares; a forma como o schema é descrito virou variável experimental
+  ([DA-NL2SQL-004](#da-nl2sql-004-prompt-como-variável-experimental-pré-registrada)).
+- **Código**: `src/config.py` (`SIM_TODAY`); `src/nl2sql.py` (`_PROMPT_SISTEMA`,
+  `montar_prompt_usuario`).
+
+### DA-NL2SQL-003: Motor local com modelo aberto servido pelo Ollama
+
+- **Decisão**: O motor real da fase de conclusão é um modelo aberto
+  (`qwen2.5-coder:14b`, quantização padrão do Ollama) servido na própria
+  máquina, chamado por `POST /api/chat` com temperatura zero e a `SEED` do
+  projeto na amostragem. O relatório de cada execução registra versão do
+  servidor, digest, tamanho e quantização do modelo, além de tokens e
+  latência por chamada.
+- **Motivação**: O autor não dispõe de verba para a API; o piloto de
+  2026-09-13 mostrou que o 14B sustenta o experimento (o 7B não) e que nada
+  precisa sair do perímetro (P-18 da banca). Modelos da família Qwen2.5-Coder
+  aparecem na literatura fichada em português (Pedroso et al. 2025; Silva et
+  al. 2025) e em SQL médico (Tanković et al. 2025). O digest fixa exatamente
+  quais pesos responderam, o que a API não oferece.
+- **Alternativas descartadas**: `qwen2.5-coder:7b` (22% a 39% no piloto,
+  inventa colunas mesmo com nota explícita); continuar com a API (sem
+  crédito); modelos maiores (não cabem em 16 GB).
+- **Consequência declarada**: a comparação com os Resultados Preliminares
+  passa a ter três diferenças (modelo, Gold minimizada, harness revisto). A
+  célula C0 preserva o mesmo prompt para isolar a troca de modelo; se houver
+  crédito, a ponte fecha com o Sonnet nas células C0 e vencedora.
+- **Status**: IMPLEMENTADO (`src/nl2sql.py:MotorLocal`, `ollama_disponivel`;
+  `src/config.py` seção "Motor local"). Números na execução da Etapa D.
+- **Relacionado**: [piloto](../tcc/etapas/2026-09-13_piloto-modelo-local.md),
+  [RNC-003](03_REGRAS_CRITICAS.md#rnc-003-determinismo-por-seed-e-sim_today)
+  (a estabilidade do modelo é observada por TARa@k, não assumida),
+  [camadas/03](../camadas/03_MOTOR_TEXT2SQL.md).
+
+### DA-NL2SQL-004: Prompt como variável experimental pré-registrada
+
+- **Decisão**: A descrição do schema no prompt é controlada por
+  `VariantePrompt` com três componentes: descrição (simples ou enriquecida
+  com tipos, notas de tabela e unidades de `config.GOLD_NOTAS`), value
+  linking (valores distintos das colunas categóricas com até 12 valores) e
+  schema por perfil (Role-Schema). As combinações medidas são cinco células
+  fixadas em `config.CELULAS` antes da execução: C0 (prompt do preliminar),
+  C1 (base enriquecida), C2 (+value linking), C3 (+Role-Schema), C4 (ambos).
+  A instrução de sistema não varia.
+- **Motivação**: Tratar o prompt como variável, e não como detalhe, é o que a
+  literatura recomenda (Gao et al. 2024). Cada fator cruzado responde a uma
+  pergunta existente: value linking fecha Q12 e a lacuna do caminho 1 (Liu et
+  al. 2026; Tanković et al. 2025); Role-Schema responde à P-10 da banca e à
+  lacuna do caminho 2 (Fei et al. 2026) sob verificador determinista. A
+  descrição enriquecida é base fixa porque o piloto mostrou o prompt simples
+  inutilizável no modelo local e porque a literatura já recomenda schema
+  completo e bem descrito (Maamari et al. 2024); cruzá-la só confirmaria isso.
+- **Alternativa descartada**: matriz 2×2×2 (oito células) com a descrição
+  como terceiro fator: mais tempo de execução e de redação para um fator sem
+  pergunta própria; a célula C0 já dá a comparação com o prompt antigo.
+- **Limitação declarada**: as notas de `GOLD_NOTAS` são fatos genéricos do
+  schema, mas foram motivadas pelos erros do piloto sobre as mesmas 18
+  perguntas; a correção de literal pós-geração
+  ([referencias/10](../referencias/10_CATALOGO_ALGORITMOS.md) §3) ficou fora
+  desta matriz.
+- **Status**: IMPLEMENTADO (`src/nl2sql.py:VariantePrompt`, `descrever_schema`;
+  `src/config.py:CELULAS`, `GOLD_NOTAS`, `VALUE_LINKING_MAX_VALORES`;
+  `src/matriz.py`). Hipóteses e critério de decisão no
+  [registro da Etapa D](../tcc/etapas/2026-09-20_etapa-D.md).
+- **Relacionado**: [referencias/07](../referencias/07_MAPA_LITERATURA_PARA_CAMINHOS.md)
+  caminhos 1 e 2, [DA-AVAL-004](#da-aval-004-desfechos-de-governança-em-dois-níveis).
 
 ---
 

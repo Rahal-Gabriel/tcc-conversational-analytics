@@ -48,13 +48,28 @@ A chave da API nunca entra na imagem; quando precisar do modo LLM, injete-a em
 runtime com `-e ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY"`. Detalhes em
 [docs/avaliacao/02_REPRODUTIBILIDADE_CI.md](docs/avaliacao/02_REPRODUTIBILIDADE_CI.md).
 
-## Configuracao do LLM
+## Configuracao dos motores reais
 
-As credenciais e o modelo sao lidos do ambiente, nunca embutidos no codigo:
+O motor da fase de conclusao e **local**: um modelo aberto servido pelo Ollama
+na propria maquina (sem custo, nada sai do perimetro). O motor via API
+(Anthropic) foi o dos Resultados Preliminares e continua disponivel. Tudo e
+lido do ambiente, nunca embutido no codigo:
 
 ```bash
+# motor local (padrao)
+ollama pull qwen2.5-coder:14b                     # uma vez; depois, servidor ativo
+export MODELO_LOCAL="qwen2.5-coder:14b"           # opcional, este e o padrao
+export OLLAMA_ENDPOINT="http://localhost:11434"   # opcional, este e o padrao
+
+# motor via API (opcional)
 export ANTHROPIC_API_KEY="sua-chave"
-export ANTHROPIC_MODEL="claude-sonnet-4-6"   # opcional, este e o padrao
+export ANTHROPIC_MODEL="claude-sonnet-4-6"        # opcional, este e o padrao
+```
+
+```bash
+python run_all.py oracle                                         # autoteste, sem modelo
+python run_all.py llm --motor local --celula C2 --repeticoes 3   # uma celula de prompt
+python run_all.py llm --motor local --matriz                     # cinco celulas, k=3 (Etapa D)
 ```
 
 Os demais parametros (data de referencia, semente, volumes, perfis de acesso)
@@ -67,23 +82,24 @@ tcc-conversational-analytics/
   GUIA_DESENVOLVIMENTO.md            # orientacoes de desenvolvimento
   README.md
   requirements.txt
-  run_all.py           # orquestrador (a implementar)
+  run_all.py           # orquestrador: oracle (autoteste) e llm (motor local ou API)
   src/
     config.py          # parametros centrais (SIM_TODAY, SEED, volumes, perfis, LLM)
     data_gen.py        # geracao sintetica -> Bronze (a implementar)
     pipeline.py        # Bronze -> Silver -> Gold (a implementar)
     governance.py      # guardrails, validacao de saida e trilha de auditoria
-    nl2sql.py          # motor Text-to-SQL + oraculo (a implementar)
-    questions.py       # conjunto de avaliacao (a implementar)
+    nl2sql.py          # motores Text-to-SQL (local, API) + oraculo; variantes de prompt
+    questions.py       # conjunto de avaliacao (18 perguntas, SQL de referencia)
     evaluate.py        # execution match, desfechos de governanca e Soft F1
+    matriz.py          # matriz de celulas de prompt (Etapa D)
   data/                # lakehouse.duckdb (Bronze/Silver/Gold) e gold_isolada.duckdb (so Gold), nao versionados
   results/             # saidas de avaliacao e log de auditoria (nao versionado)
 ```
 
 ## Estado atual
 
-Etapa inicial: estrutura de pastas e `src/config.py`. Os demais modulos ainda
-nao foram implementados.
+Pipeline, governanca, motores e harness implementados; fase de conclusao do
+TCC em andamento (ver [docs/tcc/etapas/README.md](docs/tcc/etapas/README.md)).
 
 ## Verificacao rapida
 

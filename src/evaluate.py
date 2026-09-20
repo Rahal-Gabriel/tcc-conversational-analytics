@@ -38,6 +38,7 @@ import json
 import math
 from collections import Counter
 from decimal import Decimal
+from pathlib import Path
 
 from src import config, governance, nl2sql, questions
 
@@ -232,8 +233,21 @@ def _indicadores_desfechos(contagem, n_responder, n_recusar, total):
 # Avaliacao
 
 def _obter_motor(motor):
-    """Aceita o nome ('oracle', 'llm') ou um objeto com .nome e .gerar_sql."""
+    """Aceita o nome ('oracle', 'llm', 'local') ou um objeto com .nome e .gerar_sql."""
     return nl2sql.obter_motor(motor) if isinstance(motor, str) else motor
+
+
+def _agora_utc():
+    return datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
+
+
+def _variante_de(motor):
+    """Celula e variante de prompt do motor, quando ele as declara."""
+    v = getattr(motor, "variante", None)
+    if v is None:
+        return None, None
+    d = v.como_dict() if hasattr(v, "como_dict") else dict(v)
+    return d.pop("celula", None), d
 
 
 def avaliar(motor, conjunto=None, trilha=None):
@@ -248,6 +262,7 @@ def avaliar(motor, conjunto=None, trilha=None):
     motor = _obter_motor(motor)
     conjunto = questions.CONJUNTO if conjunto is None else conjunto
     trilha = trilha or config.AUDIT_LOG_PATH
+    inicio_utc = _agora_utc()
     con = governance.conectar_somente_leitura()
 
     detalhes = []
@@ -263,11 +278,15 @@ def avaliar(motor, conjunto=None, trilha=None):
             aprovado = executada = False
             colunas, linhas = None, None
 
-            # 1. Geracao (falha de API ou do motor conta como erro).
+            # 1. Geracao (falha de API ou do motor conta como erro). A telemetria
+            # da chamada (tokens, latencia, horario) vem do motor, quando ha.
+            if hasattr(motor, "ultima_chamada"):
+                motor.ultima_chamada = None
             try:
                 sql = motor.gerar_sql(p.texto, p.perfil)
             except Exception as exc:
                 sql, evento, motivo = "", "erro", f"{type(exc).__name__}: {exc}"
+            chamada = getattr(motor, "ultima_chamada", None) or {}
 
             # 2. Recusa do motor, verificador de entrada, execucao, verificador de saida.
             recusou = evento is None and _e_recusa(sql)
@@ -345,6 +364,10 @@ def avaliar(motor, conjunto=None, trilha=None):
                 "linhas": linhas_norm if aprovado else None,
                 "hash_resultado": governance.hash_resultado(colunas, linhas) if aprovado else None,
                 "n_linhas": len(linhas) if aprovado else None,
+                "momento_utc": chamada.get("momento_utc"),
+                "latencia_ms": chamada.get("latencia_ms"),
+                "tokens_entrada": chamada.get("tokens_entrada"),
+                "tokens_saida": chamada.get("tokens_saida"),
             })
     finally:
         con.close()
@@ -364,9 +387,14 @@ def avaliar(motor, conjunto=None, trilha=None):
     f1s = [d["soft_f1"] for d in detalhes if d["soft_f1"] is not None]
     modelo_c = Counter(d["desfecho_modelo"] for d in detalhes)
     sistema_c = Counter(d["desfecho_sistema"] for d in detalhes)
+    tokens = [d["tokens_entrada"] for d in detalhes if d["tokens_entrada"] is not None]
+    latencias = [d["latencia_ms"] for d in detalhes if d["latencia_ms"] is not None]
+    celula, variante = _variante_de(motor)
 
     metricas = {
         "motor": motor.nome,
+        "celula": celula,
+        "variante": variante,
         "total": total,
         "n_responder": n_responder,
         "n_recusar": n_recusar,
@@ -397,6 +425,11 @@ def avaliar(motor, conjunto=None, trilha=None):
         "modelo": getattr(motor, "modelo", motor.nome),
         "temperatura": 0,
         "execucoes": 1,
+        "inicio_utc": inicio_utc,
+        "fim_utc": _agora_utc(),
+        "tokens_entrada_medio": round(sum(tokens) / len(tokens), 1) if tokens else None,
+        "latencia_ms_media": round(sum(latencias) / len(latencias)) if latencias else None,
+        "ambiente": motor.descrever_ambiente() if hasattr(motor, "descrever_ambiente") else {"motor": motor.nome},
     }
     return {"metricas": metricas, "detalhes": detalhes}
 
@@ -447,12 +480,20 @@ def avaliar_repetido(motor, repeticoes, conjunto=None, trilha=None):
             "concordante": len(assinaturas) == 1,
         })
 
+    tokens = [x["tokens_entrada_medio"] for x in m if x["tokens_entrada_medio"] is not None]
     agregado = {
         "motor": m[0]["motor"],
+        "celula": m[0]["celula"],
+        "variante": m[0]["variante"],
         "repeticoes": repeticoes,
         "total": m[0]["total"],
+        "n_responder": m[0]["n_responder"],
         "modelo": m[0]["modelo"],
         "temperatura": m[0]["temperatura"],
+        "inicio_utc": m[0]["inicio_utc"],
+        "fim_utc": m[-1]["fim_utc"],
+        "tokens_entrada_medio": round(sum(tokens) / len(tokens), 1) if tokens else None,
+        "ambiente": m[0]["ambiente"],
         "AVAL-001_estrito": _agregar([x["AVAL-001_acuracia"] for x in m]),
         "match_conteudo_relaxado": _agregar([x["match_conteudo_relaxado"] for x in m]),
         "soft_f1_medio": _agregar([x["soft_f1_medio"] for x in m]),
@@ -482,7 +523,8 @@ def imprimir_resumo(resultado):
     m = resultado["metricas"]
     ic = m["AVAL-001_ic95_wilson"]
     ind = m["AVAL-002_indicadores"]
-    print(f"avaliacao ({m['motor']}, modelo {m['modelo']}): {m['total']} perguntas "
+    celula = f", celula {m['celula']}" if m.get("celula") else ""
+    print(f"avaliacao ({m['motor']}, modelo {m['modelo']}{celula}): {m['total']} perguntas "
           f"({m['n_responder']} a responder, {m['n_recusar']} a recusar)")
     print(f"  AVAL-001 execution match estrito:   {_pct(m['AVAL-001_acuracia'])}  "
           f"IC95% Wilson [{_pct(ic[0])}; {_pct(ic[1])}]")
@@ -497,6 +539,9 @@ def imprimir_resumo(resultado):
     print(f"  AVAL-003 completude do log (lida do arquivo): {_pct(m['AVAL-003_completude_log'])}; "
           f"trilha integra: {'sim' if m['AVAL-003_trilha_integra'] else 'NAO'}")
     print(f"  execucoes diagnosticas (fora da auditoria): {m['execucoes_diagnosticas']}")
+    if m.get("tokens_entrada_medio") is not None:
+        print(f"  tokens de entrada por pergunta (media): {m['tokens_entrada_medio']}; "
+              f"latencia media: {m['latencia_ms_media']} ms; janela UTC {m['inicio_utc']} a {m['fim_utc']}")
     for d in resultado["detalhes"]:
         extra = f"  ({d['controle']}: {d['motivo']})" if d["controle"] else (
             f"  ({d['motivo']})" if d["motivo"] else "")
@@ -509,8 +554,9 @@ def imprimir_resumo_repetido(resultado):
     """Imprime o resumo agregado de k execucoes e a estabilidade por pergunta."""
     a = resultado["agregado"]
     k = a["repeticoes"]
-    print(f"avaliacao ({a['motor']}, {k} execucoes, modelo {a['modelo']}, temp {a['temperatura']}): "
-          f"{a['total']} perguntas")
+    celula = f", celula {a['celula']}" if a.get("celula") else ""
+    print(f"avaliacao ({a['motor']}, {k} execucoes, modelo {a['modelo']}{celula}, temp {a['temperatura']}): "
+          f"{a['total']} perguntas; janela UTC {a['inicio_utc']} a {a['fim_utc']}")
     for rotulo, chave in (
         ("execution match estrito", "AVAL-001_estrito"),
         ("set match de conteudo", "match_conteudo_relaxado"),
@@ -529,16 +575,20 @@ def imprimir_resumo_repetido(resultado):
               f"{'sim' if s['concordante'] else 'nao'}")
 
 
-def salvar_relatorio(resultado, nome=None):
-    """Grava o relatorio da avaliacao em results/ e devolve o caminho.
+def salvar_relatorio(resultado, nome=None, pasta=None):
+    """Grava o relatorio da avaliacao (padrao: results/) e devolve o caminho.
 
     Aceita o formato de execucao unica (`metricas`) e o agregado de k execucoes
     (`agregado`). O relatorio inclui a SQL gerada e o resultado de cada
     pergunta, o que permite recalcular metricas sem nova chamada ao motor.
+    O nome padrao e `avaliacao_<motor>[_<celula>].json`.
     """
-    motor = (resultado.get("metricas") or resultado.get("agregado"))["motor"]
-    config.RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    caminho = config.RESULTS_DIR / f"avaliacao_{nome or motor}.json"
+    cabecalho = resultado.get("metricas") or resultado.get("agregado")
+    if nome is None:
+        nome = cabecalho["motor"] + (f"_{cabecalho['celula']}" if cabecalho.get("celula") else "")
+    pasta = Path(pasta) if pasta else config.RESULTS_DIR
+    pasta.mkdir(parents=True, exist_ok=True)
+    caminho = pasta / f"avaliacao_{nome}.json"
     with open(caminho, "w", encoding="utf-8") as f:
         json.dump(resultado, f, ensure_ascii=False, indent=2, default=str)
     return caminho
@@ -568,7 +618,6 @@ class _MotorFalhas:
 def _autoteste():
     """Oraculo deve dar 100%; o motor de falhas deve cair em cada desfecho previsto."""
     import tempfile
-    from pathlib import Path
 
     from src import data_gen, pipeline
 
@@ -604,6 +653,23 @@ def _autoteste():
         assert m["AVAL-003_completude_log"] == 1.0 and m["AVAL-003_trilha_integra"]
         assert m["execucoes_diagnosticas"] == 0
         assert all(d["hash_resultado"] and d["sql"] for d in resultado["detalhes"])
+        assert m["inicio_utc"] <= m["fim_utc"] and m["celula"] is None and m["ambiente"]["motor"] == "oracle"
+
+        # 1b. Motor com variante e telemetria: celula, tokens e latencia chegam ao relatorio.
+        class _MotorTelemetria(nl2sql.MotorOraculo):
+            nome = "oracle"
+
+            def gerar_sql(self, pergunta_texto, perfil):
+                self.ultima_chamada = {"momento_utc": "2026-01-01T00:00:00+00:00",
+                                       "latencia_ms": 10, "tokens_entrada": 100, "tokens_saida": 20}
+                return super().gerar_sql(pergunta_texto, perfil)
+
+        trilha.unlink()
+        r_tel = avaliar(_MotorTelemetria(nl2sql.VariantePrompt.da_celula("C2")), trilha=trilha)
+        mt = r_tel["metricas"]
+        assert mt["celula"] == "C2" and mt["variante"]["value_linking"] is True
+        assert mt["tokens_entrada_medio"] == 100.0 and mt["latencia_ms_media"] == 10
+        assert r_tel["detalhes"][0]["tokens_saida"] == 20
 
         # 2. Motor de falhas: um caso por desfecho, mais perguntas a recusar.
         hoje = config.SIM_TODAY_ISO
@@ -681,12 +747,14 @@ def _autoteste():
 
         # 4. Repeticao: motor determinista concorda consigo mesmo (TARa = 1).
         trilha.unlink()
-        rep = avaliar_repetido("oracle", 2, trilha=trilha)
+        rep = avaliar_repetido(nl2sql.obter_motor("oracle", "C3"), 2, trilha=trilha)
         assert rep["agregado"]["TARa"] == 1.0 and rep["agregado"]["AVAL-001_estrito"]["desvio"] == 0.0
+        assert rep["agregado"]["celula"] == "C3" and rep["agregado"]["n_responder"] == 18
 
     print("evaluate: autoteste OK")
     print("  oraculo 100%; motor de falhas cobre os seis desfechos nos dois niveis;")
-    print("  Soft F1, IC de Wilson, execucao diagnostica e integridade da trilha conferidos")
+    print("  Soft F1, IC de Wilson, execucao diagnostica e integridade da trilha conferidos;")
+    print("  celula, variante e telemetria (tokens, latencia, horario) chegam ao relatorio")
 
 
 if __name__ == "__main__":

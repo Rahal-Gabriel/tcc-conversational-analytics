@@ -77,6 +77,8 @@ Gil, A.C. 2017. Como elaborar projetos de pesquisa. 6ed. Atlas, São Paulo, SP, 
 
 Hevner, A.R.; March, S.T.; Park, J.; Ram, S. 2004. Design science in information systems research. MIS Quarterly 28(1): 75-105.
 
+Hui, B.; Yang, J.; Cui, Z.; Yang, J.; Liu, D.; Zhang, L.; Liu, T.; Zhang, J.; Yu, B.; Dang, K.; Yang, A.; Men, R.; Huang, F.; Ren, X.; Ren, X.; Zhou, J.; Lin, J. 2024. Qwen2.5-Coder technical report. arXiv:2409.12186. Disponível em: <https://arxiv.org/abs/2409.12186>. Acesso em: 20 set. 2026. [conferir autores e versão]
+
 Johnson, A.E.W.; Bulgarelli, L.; Shen, L.; Gayles, A.; Shammout, A.; Horng, S.; Pollard, T.J.; Hao, S.; Moody, B.; Gow, B.; Lehman, L.H.; Celi, L.A.; Mark, R.G. 2023. MIMIC-IV, a freely accessible electronic health record dataset. Scientific Data 10(1): 1.
 
 Kent, K.; Souppaya, M. 2006. Guide to computer security log management. NIST Special Publication 800-92. National Institute of Standards and Technology, Gaithersburg, MD, USA.

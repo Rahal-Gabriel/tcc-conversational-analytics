@@ -24,6 +24,13 @@ Resumo da avaliação de cada caminho:
 
 ## 1. Value linking: expor valores categóricos ao modelo
 
+> **Situação (2026-09-20)**: implementado como a célula C2 (e C4) da matriz
+> da Etapa D (`nl2sql.VariantePrompt.value_linking`, teto de 12 valores em
+> `config.VALUE_LINKING_MAX_VALORES`); hipótese H1 pré-registrada em
+> [tcc/etapas/2026-09-20_etapa-D.md](../tcc/etapas/2026-09-20_etapa-D.md)
+> §3.4. Tokens de entrada por pergunta são registrados por célula. Medição
+> pendente (D2).
+
 **O que se sabe.**
 - Expor valores enumerados nos metadados elevou a acurácia de consultas com
   dois campos de 32% para 92,5% e de três campos de 10% para 82% (Liu et al.
@@ -59,7 +66,9 @@ Gao et al. (2024) para tratar prompt como variável experimental.
 
 > **Situação (2026-09-20)**: a classificação nos seis desfechos, em dois níveis
 > (modelo e sistema), está implementada na Etapa C (DA-AVAL-004); o
-> experimento Full-Schema × Role-Schema fica para a Etapa D.
+> experimento Full-Schema × Role-Schema está implementado como as células C3
+> e C4 da Etapa D (`VariantePrompt.schema_por_perfil`, com aviso explícito ao
+> modelo), hipótese H2 pré-registrada. Medição pendente (D2).
 
 **O que se sabe.**
 - Fei et al. (2026) definem seis desfechos (Correct, Wrong, Proper Refusal,

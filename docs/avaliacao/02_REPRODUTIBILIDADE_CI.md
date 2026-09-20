@@ -67,7 +67,10 @@ docker run --rm -e ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY" \
 - Cada etapa vive em branch curto (`feat/`, `fix/`, `docs/`) e entra na `main`
   por Pull Request com squash merge (uma etapa, um commit na `main`).
 - Marcos reprodutíveis são marcados com tag git, em especial o commit que gera
-  os números do TCC (o par código + `SEED`).
+  os números do TCC (o par código + `SEED`). A execução da Etapa D recebe a
+  tag `etapa-D`, e seus artefatos (relatórios por célula, matriz consolidada,
+  SQL geradas e trilha de auditoria encadeada) ficam versionados em
+  `docs/tcc/anexos/etapa-D/`, fora de `results/` (que não é versionado).
 - Commits em português, com prefixo semântico leve.
 
 ## 5. Integração contínua
@@ -75,17 +78,21 @@ docker run --rm -e ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY" \
 O workflow `.github/workflows/ci.yml` roda a cada push e PR na `main`:
 
 1. Configura Python 3.12 e instala dependências.
-2. Executa os testes rápidos dos módulos (hoje `python -m src.config`;
-   acrescentar os demais conforme implementados).
-3. Quando `run_all.py` existir, roda o autoteste com o motor oráculo.
+2. Executa os testes rápidos dos módulos (`config`, `questions`, `governance`,
+   `nl2sql`, `pipeline`, `evaluate`, `matriz`), todos sem modelo.
+3. Roda `python run_all.py oracle`, o autoteste da tubulação com o oráculo.
 
 Um segundo job (`imagem`) constrói a imagem Docker e roda o mesmo teste rápido
 dentro do container. É o que prova, automaticamente e a cada push, que o
 experimento roda igual na CI e na máquina local, sustentando a afirmação de
 reprodutibilidade.
 
-A CI usa **apenas** o motor oráculo, que não precisa de chave nem tem custo. O
-modo LLM nunca roda na CI ([RNC-004](../arquitetura/03_REGRAS_CRITICAS.md#rnc-004-nenhuma-credencial-no-código-ou-no-histórico-do-git)).
+A CI usa **apenas** o motor oráculo, que não precisa de chave nem de servidor
+e não tem custo. Os motores reais (API, que exige chave, e local, que exige o
+Ollama na máquina) nunca rodam na CI
+([RNC-004](../arquitetura/03_REGRAS_CRITICAS.md#rnc-004-nenhuma-credencial-no-código-ou-no-histórico-do-git)).
+Os números do motor local são gerados na máquina do autor e versionados como
+artefato com tag, o que é o que um terceiro confere.
 
 ## 6. Integridade dos resultados
 

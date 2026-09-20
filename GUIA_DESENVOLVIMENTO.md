@@ -103,15 +103,16 @@ tcc-conversational-analytics/
   GUIA_DESENVOLVIMENTO.md             # este hub de navegação
   README.md             # apresentação do protótipo
   docs/                 # documentação modular (ver docs/README.md)
-  run_all.py            # orquestrador: gera dados, constroi pipeline, avalia (oracle/llm)
+  run_all.py            # orquestrador: gera dados, constroi pipeline, avalia (oracle / llm --motor local|llm)
   src/
     config.py           # SIM_TODAY, SEED, volumes, perfis, modelo do LLM
     data_gen.py         # geracao sintetica -> Bronze
     pipeline.py         # Bronze -> Silver -> Gold
     governance.py       # guardrails de entrada/saida e auditoria
-    nl2sql.py           # motor Text-to-SQL (LLM real) + oraculo
+    nl2sql.py           # motores Text-to-SQL (local via Ollama, API) + oraculo; variantes de prompt
     questions.py        # conjunto de avaliacao (pergunta PT + SQL de referencia)
     evaluate.py         # execution match, desfechos de governanca, Soft F1, auditoria
+    matriz.py           # matriz de celulas de prompt (Etapa D): relatorios, resumo e SQL geradas
   data/                 # banco DuckDB gerado (nao versionar)
   results/              # saidas de avaliacao e log de auditoria (nao versionar)
 ```
@@ -140,15 +141,30 @@ tcc-conversational-analytics/
 Ciclo de status dos módulos: `PROJETADO` → `PARCIAL` → `IMPLEMENTADO` →
 `VALIDADO`.
 
-## Configuração do LLM
+## Configuração dos motores reais
 
-Lida do ambiente, nunca embutida no código (`src/config.py:77-80`):
+Lida do ambiente, nunca embutida no código (`src/config.py`, seções
+"Configuração do LLM via API" e "Motor local"). O motor da fase de conclusão é
+o **local** (Ollama na própria máquina, sem custo e sem saída de dados); o
+motor via API foi o dos Resultados Preliminares.
 
 ```bash
+# motor local (padrao): exige o servidor do Ollama ativo e o modelo baixado
+ollama pull qwen2.5-coder:14b
+export OLLAMA_ENDPOINT="http://localhost:11434"   # opcional, padrao
+export MODELO_LOCAL="qwen2.5-coder:14b"           # opcional, padrao
+
+# motor via API (opcional)
 export ANTHROPIC_API_KEY="sua-chave"
-export ANTHROPIC_MODEL="claude-sonnet-4-6"   # opcional, padrão
+export ANTHROPIC_MODEL="claude-sonnet-4-6"        # opcional, padrao
 ```
 
+```bash
+python run_all.py llm --motor local --celula C2 --repeticoes 3   # uma celula de prompt
+python run_all.py llm --motor local --matriz                     # cinco celulas, k=3 (Etapa D)
+```
+
+As células de prompt (C0 a C4) estão pré-registradas em `config.CELULAS`.
 Detalhes do contrato do prompt em
 [docs/camadas/03_MOTOR_TEXT2SQL.md](docs/camadas/03_MOTOR_TEXT2SQL.md).
 
@@ -156,7 +172,7 @@ Detalhes do contrato do prompt em
 
 - O módulo roda isolado sem erro e o teste rápido passa.
 - `run_all.py oracle` completa com autoteste consistente (tubulação correta).
-- Os números de pesquisa só são coletados com `run_all.py llm` e chave válida.
+- Os números de pesquisa só são coletados com `run_all.py llm` e um motor real (local com Ollama ativo, ou API com chave válida).
 - A documentação do módulo afetado foi atualizada (status, código, contagens).
 
 ## Versionamento e CI

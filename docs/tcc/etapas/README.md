@@ -22,7 +22,7 @@ etapa gera para a Discussão. É o insumo direto da redação final.
 | A | Isolamento físico da Gold e guardrails endurecidos | P-09, P-11 | não | concluída (2026-09-13) |
 | B | Minimização da Gold, k-anonimato, idade correta, nomenclatura (pseudonimização) | P-15, P-16, P-17 | não | concluída (2026-09-13) |
 | C | Harness: rotulagem por tipo, Over/Proper Refusal e Safe-EX, Soft F1, auditoria com horário real | P-02, P-04, P-14, P-20 | não | concluída (2026-09-20) |
-| D | Matriz 2×2 de prompt (value linking × schema por perfil), artefatos versionados, tag | P-03, P-08, P-10 | sim | pendente |
+| D | Matriz 2×2 de prompt (value linking × schema por perfil) sobre base enriquecida, motor local, artefatos versionados, tag | P-03, P-08, P-10 | não (motor local) | D1 pré-registro e código concluídos (2026-09-20); D2 execução pendente |
 | E | Conjunto adversarial, abstenção, inventário do que sai para a API | P-12, P-18 | sim (baixo) | pendente |
 | F | Redação: hipótese original, comparação com literatura, escopo, ANVISA/LGPD, manual | P-01, P-05, P-06, P-07, P-13, P-19, P-21, P-22 | não | pendente |
 
@@ -34,3 +34,4 @@ etapa gera para a Discussão. É o insumo direto da redação final.
 | [2026-09-13_etapa-B.md](2026-09-13_etapa-B.md) | B | RES-009, DA-LAKE-006, CTRL-LAKE-001, errata de RES-005 |
 | [2026-09-13_piloto-modelo-local.md](2026-09-13_piloto-modelo-local.md) | piloto | escolha do motor local (Qwen 14B) para as Etapas D e E |
 | [2026-09-20_etapa-C.md](2026-09-20_etapa-C.md) | C | RES-010, DA-AVAL-003/004/005, DA-VALID-003, AVAL-002 e AVAL-003 redefinidos, errata da Tabela 4 em RES-007 |
+| [2026-09-20_etapa-D.md](2026-09-20_etapa-D.md) | D (D1: pré-registro) | DA-NL2SQL-003/004; hipóteses H1 a H4 e critério de decisão datados antes dos números; RES-011 e RES-012 saem no D2 |

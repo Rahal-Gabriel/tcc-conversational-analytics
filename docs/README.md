@@ -25,8 +25,8 @@ A documentação cumpre dois papéis ao mesmo tempo:
 
 | Métrica | Total |
 |---|---|
-| Arquivos de documentação | 27 |
-| Decisões Arquiteturais (DA-*) | 21 |
+| Arquivos de documentação | 28 |
+| Decisões Arquiteturais (DA-*) | 23 |
 | Regras Críticas (RNC-*) | 5 |
 | Requisitos Regulatórios (REG-*) | 11 |
 | Controles de Governança (CTRL-*) | 11 |
@@ -78,7 +78,7 @@ de leitura) fica no [GUIA_DESENVOLVIMENTO.md](../GUIA_DESENVOLVIMENTO.md) na rai
 | Linguagem | Python 3.12 (fixada em `.python-version`) |
 | Lakehouse | DuckDB (schemas `bronze`, `silver`, `gold`) |
 | Geração sintética | Faker (locale `pt_BR`) |
-| Motor de IA | API Anthropic via `urllib` (sem SDK pesado) |
+| Motor de IA | Modelo aberto local via Ollama (`qwen2.5-coder:14b`) ou API Anthropic, ambos via `urllib` (sem SDK) |
 | Avaliação | Execution match estilo EHRSQL 2024 |
 | Integração contínua | GitHub Actions (apenas motor oráculo) |
 
@@ -156,7 +156,7 @@ Lakehouse), `GOV` (governança de entrada), `NL2SQL` (motor Text-to-SQL),
 | `IMPLEMENTADO` | Código pronto e com teste rápido passando |
 | `VALIDADO` | Resultado verificado por execução real (números reprodutíveis) |
 
-## Estado atual (2026-09-13)
+## Estado atual (2026-09-20)
 
 | Módulo | Status |
 |---|---|
@@ -165,10 +165,10 @@ Lakehouse), `GOV` (governança de entrada), `NL2SQL` (motor Text-to-SQL),
 | arquitetura/03_REGRAS_CRITICAS | PARCIAL |
 | camadas/01_PIPELINE_LAKEHOUSE | IMPLEMENTADO (Bronze, Silver pseudonimizada, Gold minimizada e isolada) |
 | camadas/02_GOVERNANCA_ENTRADA | IMPLEMENTADO |
-| camadas/03_MOTOR_TEXT2SQL | IMPLEMENTADO (oráculo e LLM; números do LLM pendentes de execução real) |
+| camadas/03_MOTOR_TEXT2SQL | IMPLEMENTADO (oráculo, API e local; cinco células de prompt pré-registradas; números do motor local na execução da Etapa D) |
 | camadas/04_VALIDACAO_SAIDA | IMPLEMENTADO |
 | governanca/01_CONFORMIDADE_REGULATORIA | PARCIAL (8 de 11 requisitos implementados) |
-| avaliacao/01_METODOLOGIA_AVALIACAO | IMPLEMENTADO (tubulação verde no oráculo; acurácia do LLM pendente) |
+| avaliacao/01_METODOLOGIA_AVALIACAO | IMPLEMENTADO (tubulação verde no oráculo; matriz e telemetria prontas; números do motor local pendentes) |
 | avaliacao/02_REPRODUTIBILIDADE_CI | IMPLEMENTADO |
 | tcc/01_RESULTADOS_PRELIMINARES | documento vivo |
 | tcc/02_MAPA_DOC_PARA_TEMPLATE | referência |

@@ -115,6 +115,6 @@ docs/referencias/
 | Governança e segurança | 15 (3 acrescentadas em 2026-09-20: integridade de logs) |
 | Regulação Brasil | 8 |
 | Método e dados sintéticos | 9 |
-| Português e Brasil | 6 |
+| Português e Brasil | 7 (1 acrescentada em 2026-09-20: modelo local) |
 | Privacidade e minimização (acrescentado em 2026-09-13) | 9 |
-| **Total** | **67** (algumas fontes aparecem em mais de um tema) |
+| **Total** | **68** (algumas fontes aparecem em mais de um tema) |

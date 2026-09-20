@@ -450,10 +450,10 @@ próximas entregas atacam essas frentes:
 
 | Próxima entrega | Onde | Resultado que habilita |
 |---|---|---|
-| Value linking (valores categóricos no prompt ou comparação sem caixa) | `nl2sql.py` / schema | Corrigir erros como Q12 (`'enfermaria'` vs `'Enfermaria'`) |
+| Value linking (valores categóricos no prompt) | Etapa D, célula C2 (`nl2sql.VariantePrompt`) | Corrigir erros como Q12 (`'enfermaria'` vs `'Enfermaria'`); hipótese H1 pré-registrada |
 | Discussão da métrica forma-sensível | `evaluate.py` / `tcc` | Concluída na Etapa C (RES-010): Soft F1 e desfechos nomeados; números na Etapa D |
 | Ampliação e estratificação do conjunto | `questions.py` | Reduzir ruído e medir por tipo de pergunta e por perfil (cruzar tipo × perfil) |
-| Remedição sobre a Gold minimizada com o harness revisto | Etapa D | Números comparáveis com o preliminar, artefatos versionados |
+| Remedição sobre a Gold minimizada com o harness revisto, motor local, matriz de cinco células | Etapa D (D1 entregue em 2026-09-20: código e pré-registro; D2: execução) | RES-011 e RES-012, anexos versionados em `docs/tcc/anexos/etapa-D/`, tag `etapa-D` |
 
 Cada novo ajuste será medido e reportado de forma transparente (bruto × refinado),
 sem iterar sobre o mesmo conjunto a ponto de overfittar (RNC-002).

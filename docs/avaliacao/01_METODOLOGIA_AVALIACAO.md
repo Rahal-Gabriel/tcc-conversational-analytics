@@ -1,6 +1,6 @@
 # AVAL: Metodologia de Avaliação
 
-**Status**: IMPLEMENTADO (harness revisto na Etapa C; números do modelo pendentes de remedição na Etapa D)
+**Status**: IMPLEMENTADO (harness revisto na Etapa C; matriz de prompt e telemetria na Etapa D1; números do motor local pendentes da execução D2)
 **Prioridade**: ALTA
 **Última atualização**: 2026-09-20
 **Alimenta (template TCC)**: Metodologia · Resultados e Discussão
@@ -152,22 +152,43 @@ quantas das k execuções cada pergunta acertou); e o **TARa@k** (Atil et al.
 do resultado) foi idêntica nas k execuções, acertando ou não. Implementado em
 `src/evaluate.py:avaliar_repetido`.
 
+### Matriz de prompt (Etapa D)
+
+O prompt é uma variável experimental com células pré-registradas em
+`config.CELULAS` ([DA-NL2SQL-004](../arquitetura/02_DECISOES_ARQUITETURAIS.md#da-nl2sql-004-prompt-como-variável-experimental-pré-registrada)):
+C0 (prompt do preliminar), C1 (descrição enriquecida, base), C2 (+value
+linking), C3 (+schema por perfil), C4 (ambos). `src/matriz.py` roda cada
+célula k vezes com o mesmo conjunto e a mesma trilha, e consolida: estrito
+(média, desvio e IC de Wilson sobre a média de acertos), set match, Soft F1,
+desfechos médios nos dois níveis, TARa@k, tokens de entrada e duração, mais a
+**comparação pareada por pergunta** de cada célula com a base (quais perguntas
+ganha e perde). A leitura é descritiva: com n=18 os intervalos se sobrepõem e
+nenhuma diferença é apresentada como significativa. Hipóteses e critério de
+decisão estão datados no [registro da Etapa D](../tcc/etapas/2026-09-20_etapa-D.md)
+§3, escrito antes da execução.
+
 ### Artefatos guardados
 
-O relatório (`results/avaliacao_<motor>.json`) guarda, por pergunta, a SQL
-gerada, o controle e o motivo do bloqueio, o resultado normalizado entregue,
-seu hash e os dois desfechos. Com isso qualquer métrica pode ser recalculada
-sem nova chamada ao motor, e a execução pode ser versionada como artefato
-(P-03, Etapa D).
+O relatório (`results/avaliacao_<motor>[_<célula>].json`) guarda, por
+pergunta, a SQL gerada, o controle e o motivo do bloqueio, o resultado
+normalizado entregue, seu hash, os dois desfechos e a telemetria da chamada
+(horário UTC, latência, tokens de entrada e saída). No cabeçalho ficam célula,
+variante, janela de tempo da execução e o ambiente do motor (para o motor
+local: versão do Ollama, digest, tamanho e quantização do modelo). Com isso
+qualquer métrica pode ser recalculada sem nova chamada ao motor, e a execução
+é versionada como artefato em `docs/tcc/anexos/<etapa>/` (relatórios por
+célula, matriz consolidada em JSON e Markdown, SQL geradas legíveis e a trilha
+de auditoria encadeada), com tag git no commit que gerou os números (P-03).
 
 ### Procedência e reprodutibilidade do número do modelo
 
-A acurácia reportada vem de execução real do motor, com **`temperature=0`**,
-modelo registrado no relatório e número de execuções anotado. Diferentemente
-do pipeline e dos dados (deterministas e reprodutíveis), a chamada ao modelo
-não é estritamente reproduzível; o número é uma observação pontual, com
-modelo, temperatura e data fixados e registrados. A CI executa apenas o
-oráculo.
+A acurácia reportada vem de execução real de um motor de verdade, com
+**`temperature=0`**, modelo e número de execuções registrados no relatório.
+Com o motor via API, a chamada não é estritamente reproduzível e o número é
+uma observação pontual, com modelo, temperatura e data fixados. Com o motor
+local, a `SEED` do projeto também semeia a amostragem e o digest identifica
+os pesos exatos; ainda assim a estabilidade é **observada** por TARa@k e pela
+repetição em outro dia (P-08), não assumida. A CI executa apenas o oráculo.
 
 ## 3. Conjunto de avaliação
 

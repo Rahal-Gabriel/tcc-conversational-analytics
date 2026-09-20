@@ -37,6 +37,13 @@ extensão, para a Discussão de escala ou trabalhos futuros.
 
 ## 3. O que entra de fato: correção de valor por similaridade (Etapa D)
 
+> **Situação (2026-09-20)**: **não entrou** na matriz pré-registrada da Etapa D
+> (cinco células, sem correção pós-geração), por ser intervenção do sistema
+> sobre a SQL do modelo, o que exigiria reportar acurácia bruta e corrigida
+> lado a lado e uma sexta célula. A decisão fica para depois da execução: só
+> se justifica se erros de grafia de valor persistirem com value linking (C2 e
+> C4). Registrado em [tcc/etapas/2026-09-20_etapa-D.md](../tcc/etapas/2026-09-20_etapa-D.md) §2.
+
 **Problema.** Q12 falhou porque o modelo escreveu `tipo = 'enfermaria'` e o
 valor real é `'Enfermaria'`. O caminho 1 do mapa de literatura já prevê
 expor os valores distintos das colunas categóricas no prompt (Liu et al.

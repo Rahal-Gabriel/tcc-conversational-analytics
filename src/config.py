@@ -106,12 +106,81 @@ PERFIS = {
     ),
 }
 
-# Configuracao do LLM (lida do ambiente; nunca embutir chave no codigo)
+# Configuracao do LLM via API (lida do ambiente; nunca embutir chave no codigo)
 
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 ANTHROPIC_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-6")
 ANTHROPIC_ENDPOINT = "https://api.anthropic.com/v1/messages"
 ANTHROPIC_VERSION = "2023-06-01"
+
+# Motor local (Etapa D, DA-NL2SQL-003): modelo aberto servido pelo Ollama na
+# propria maquina. Nada sai do perimetro e nao ha custo por chamada. A `SEED`
+# do projeto tambem semeia a amostragem do modelo; com temperatura zero a
+# inferencia local tende a ser estavel, mas isso e observado (TARa@k), nao
+# assumido (RNC-003 cobre dados e pipeline, nao o modelo).
+OLLAMA_ENDPOINT = os.environ.get("OLLAMA_ENDPOINT", "http://localhost:11434")
+MODELO_LOCAL = os.environ.get("MODELO_LOCAL", "qwen2.5-coder:14b")
+OLLAMA_NUM_CTX = 4096        # janela de contexto pedida ao servidor
+OLLAMA_NUM_PREDICT = 1024    # teto de tokens gerados (equivale ao max_tokens da API)
+OLLAMA_TIMEOUT_S = 300       # primeira chamada inclui o carregamento do modelo
+
+# Prompt como variavel experimental (Etapa D, DA-NL2SQL-004)
+
+# Value linking barato (ficha 07, caminho 1): colunas VARCHAR com ate este
+# numero de valores distintos tem os valores listados no prompt, por
+# introspecao da Gold. Acima disso a coluna e tratada como texto livre.
+VALUE_LINKING_MAX_VALORES = 12
+
+# Dicionario de dados da Gold para a descricao enriquecida do schema. Sao
+# metadados (o que cada tabela e, unidade das colunas), nao dados; e o que um
+# catalogo de dados real teria. Os tipos das colunas vem de information_schema
+# e nao ficam aqui. Escrito antes da medicao da Etapa D e congelado com ela.
+GOLD_NOTAS = {
+    "gold.leitos_status": {
+        "tabela": "um leito por linha com a situacao de hoje (snapshot; nao ha coluna de data)",
+        "colunas": {
+            "id_unidade": "chave para gold.ocupacao_unidade.id_unidade",
+            "tipo": "tipo do leito",
+        },
+    },
+    "gold.ocupacao_unidade": {
+        "tabela": "uma linha por unidade com os indicadores de hoje (snapshot; nao ha coluna de data)",
+        "colunas": {"taxa_ocupacao": "percentual, 0 a 100"},
+    },
+    "gold.ocupacao_diaria": {
+        "tabela": "uma linha por dia com os indicadores de todo o hospital (serie historica ate a data de referencia, inclusive)",
+        "colunas": {"taxa_ocupacao": "percentual, 0 a 100"},
+    },
+    "gold.internacoes": {
+        "tabela": "uma internacao por linha, sem identificador de paciente",
+        "colunas": {
+            "tipo": "tipo do leito da internacao",
+            "ativa": "true = internacao em andamento; false = encerrada",
+            "tempo_permanencia": "dias",
+        },
+    },
+}
+
+# Celulas da matriz de prompt (pre-registro da Etapa D). `descricao` e a base
+# fixa (simples = so nomes, o prompt do preliminar; enriquecida = tipos, notas
+# e unidades); os dois fatores cruzados sao value_linking (caminho 1) e
+# schema_por_perfil (Role-Schema, caminho 2). C0 existe so como ponte com o
+# preliminar do Sonnet, medido com o mesmo prompt.
+CELULAS = (
+    {"celula": "C0", "descricao": "simples", "value_linking": False, "schema_por_perfil": False,
+     "papel": "prompt do preliminar (ponte)"},
+    {"celula": "C1", "descricao": "enriquecida", "value_linking": False, "schema_por_perfil": False,
+     "papel": "base da matriz"},
+    {"celula": "C2", "descricao": "enriquecida", "value_linking": True, "schema_por_perfil": False,
+     "papel": "+ value linking"},
+    {"celula": "C3", "descricao": "enriquecida", "value_linking": False, "schema_por_perfil": True,
+     "papel": "+ schema por perfil"},
+    {"celula": "C4", "descricao": "enriquecida", "value_linking": True, "schema_por_perfil": True,
+     "papel": "+ ambos"},
+)
+CELULA_PADRAO = "C1"
+REPETICOES_MATRIZ = 3
+MATRIZ_DIR = RESULTS_DIR / "matriz"
 
 
 def _autoteste():
@@ -126,6 +195,14 @@ def _autoteste():
         assert tabelas, f"perfil sem tabelas: {perfil}"
         for t in tabelas:
             assert t in GOLD_TABLES, f"tabela desconhecida no perfil {perfil}: {t}"
+    # Dicionario de dados e celulas coerentes com a Gold declarada.
+    assert set(GOLD_NOTAS) == set(GOLD_TABLES)
+    assert VALUE_LINKING_MAX_VALORES >= 2 and REPETICOES_MATRIZ >= 1
+    nomes = [c["celula"] for c in CELULAS]
+    assert len(nomes) == len(set(nomes)) and CELULA_PADRAO in nomes
+    for c in CELULAS:
+        assert c["descricao"] in ("simples", "enriquecida"), c
+        assert isinstance(c["value_linking"], bool) and isinstance(c["schema_por_perfil"], bool)
     print("config: autoteste OK")
     print(f"  SIM_TODAY={SIM_TODAY_ISO}  HIST_DAYS={HIST_DAYS}  SEED={SEED}")
     print(
@@ -133,8 +210,9 @@ def _autoteste():
         f"{VOL_PACIENTES} pacientes, ~{VOL_INTERNACOES} internacoes"
     )
     print(f"  perfis: {', '.join(PERFIS)}")
-    print(f"  modelo LLM: {ANTHROPIC_MODEL}")
-    print(f"  chave no ambiente: {'sim' if ANTHROPIC_API_KEY else 'nao'}")
+    print(f"  modelo via API: {ANTHROPIC_MODEL}; chave no ambiente: {'sim' if ANTHROPIC_API_KEY else 'nao'}")
+    print(f"  modelo local: {MODELO_LOCAL} em {OLLAMA_ENDPOINT}")
+    print(f"  matriz de prompt: {len(CELULAS)} celulas ({', '.join(nomes)}), k={REPETICOES_MATRIZ}")
     print(f"  pseudonimizacao: HMAC-SHA256, chave {'do ambiente' if 'PSEUDO_KEY' in os.environ else 'padrao (dado sintetico)'}")
     print(f"  k-anonimato Gold: k >= {K_MINIMO} sobre {QUASE_IDENTIFICADORES_INTERNACOES}")
 
