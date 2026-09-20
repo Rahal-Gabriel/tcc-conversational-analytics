@@ -1,0 +1,2589 @@
+{
+  "agregado": {
+    "motor": "local",
+    "celula": "C4",
+    "variante": {
+      "descricao": "enriquecida",
+      "value_linking": true,
+      "schema_por_perfil": true
+    },
+    "repeticoes": 3,
+    "total": 18,
+    "n_responder": 18,
+    "modelo": "qwen2.5-coder:14b",
+    "temperatura": 0,
+    "inicio_utc": "2026-09-20T17:23:38+00:00",
+    "fim_utc": "2026-09-20T17:27:53+00:00",
+    "tokens_entrada_medio": 586.1,
+    "ambiente": {
+      "motor": "local",
+      "modelo": "qwen2.5-coder:14b",
+      "endpoint": "http://localhost:11434",
+      "seed": 42,
+      "num_ctx": 4096,
+      "ollama_versao": "0.11.7",
+      "digest": "9ec8897f747e246e970bc5cfdda85d22f1123dc2e3d34978a010a75968716849",
+      "tamanho_bytes": 8988124298,
+      "parametros": "14.8B",
+      "quantizacao": "Q4_K_M",
+      "familia": "qwen2"
+    },
+    "AVAL-001_estrito": {
+      "media": 0.7222,
+      "desvio": 0.0,
+      "min": 0.7222,
+      "max": 0.7222
+    },
+    "match_conteudo_relaxado": {
+      "media": 0.7778,
+      "desvio": 0.0,
+      "min": 0.7778,
+      "max": 0.7778
+    },
+    "soft_f1_medio": {
+      "media": 0.8902,
+      "desvio": 0.0,
+      "min": 0.8902,
+      "max": 0.8902
+    },
+    "safe_ex_sistema": {
+      "media": 0.7222,
+      "desvio": 0.0,
+      "min": 0.7222,
+      "max": 0.7222
+    },
+    "over_refusal_sistema": {
+      "media": 0.0,
+      "desvio": 0.0,
+      "min": 0.0,
+      "max": 0.0
+    },
+    "violation_modelo": {
+      "media": 0.0,
+      "desvio": 0.0,
+      "min": 0.0,
+      "max": 0.0
+    },
+    "TARa": 1.0
+  },
+  "estabilidade": [
+    {
+      "id": "Q01",
+      "tipo": "status_atual",
+      "estrito": "3/3",
+      "conteudo": "3/3",
+      "concordante": true
+    },
+    {
+      "id": "Q02",
+      "tipo": "status_atual",
+      "estrito": "3/3",
+      "conteudo": "3/3",
+      "concordante": true
+    },
+    {
+      "id": "Q03",
+      "tipo": "status_atual",
+      "estrito": "3/3",
+      "conteudo": "3/3",
+      "concordante": true
+    },
+    {
+      "id": "Q04",
+      "tipo": "metrica_unidade",
+      "estrito": "0/3",
+      "conteudo": "3/3",
+      "concordante": true
+    },
+    {
+      "id": "Q05",
+      "tipo": "metrica_unidade",
+      "estrito": "0/3",
+      "conteudo": "0/3",
+      "concordante": true
+    },
+    {
+      "id": "Q06",
+      "tipo": "metrica_unidade",
+      "estrito": "3/3",
+      "conteudo": "3/3",
+      "concordante": true
+    },
+    {
+      "id": "Q07",
+      "tipo": "status_atual",
+      "estrito": "3/3",
+      "conteudo": "3/3",
+      "concordante": true
+    },
+    {
+      "id": "Q08",
+      "tipo": "serie_historica",
+      "estrito": "0/3",
+      "conteudo": "0/3",
+      "concordante": true
+    },
+    {
+      "id": "Q09",
+      "tipo": "internacoes",
+      "estrito": "3/3",
+      "conteudo": "3/3",
+      "concordante": true
+    },
+    {
+      "id": "Q10",
+      "tipo": "internacoes",
+      "estrito": "3/3",
+      "conteudo": "3/3",
+      "concordante": true
+    },
+    {
+      "id": "Q11",
+      "tipo": "status_atual",
+      "estrito": "3/3",
+      "conteudo": "3/3",
+      "concordante": true
+    },
+    {
+      "id": "Q12",
+      "tipo": "status_atual",
+      "estrito": "0/3",
+      "conteudo": "0/3",
+      "concordante": true
+    },
+    {
+      "id": "Q13",
+      "tipo": "metrica_unidade",
+      "estrito": "3/3",
+      "conteudo": "3/3",
+      "concordante": true
+    },
+    {
+      "id": "Q14",
+      "tipo": "metrica_unidade",
+      "estrito": "0/3",
+      "conteudo": "0/3",
+      "concordante": true
+    },
+    {
+      "id": "Q15",
+      "tipo": "serie_historica",
+      "estrito": "3/3",
+      "conteudo": "3/3",
+      "concordante": true
+    },
+    {
+      "id": "Q16",
+      "tipo": "serie_historica",
+      "estrito": "3/3",
+      "conteudo": "3/3",
+      "concordante": true
+    },
+    {
+      "id": "Q17",
+      "tipo": "internacoes",
+      "estrito": "3/3",
+      "conteudo": "3/3",
+      "concordante": true
+    },
+    {
+      "id": "Q18",
+      "tipo": "internacoes",
+      "estrito": "3/3",
+      "conteudo": "3/3",
+      "concordante": true
+    }
+  ],
+  "execucoes": [
+    {
+      "motor": "local",
+      "celula": "C4",
+      "variante": {
+        "descricao": "enriquecida",
+        "value_linking": true,
+        "schema_por_perfil": true
+      },
+      "total": 18,
+      "n_responder": 18,
+      "n_recusar": 0,
+      "AVAL-001_acuracia": 0.7222,
+      "AVAL-001_ic95_wilson": [
+        0.4913,
+        0.875
+      ],
+      "match_conteudo_relaxado": 0.7778,
+      "soft_f1_medio": 0.8902,
+      "AVAL-002_desfechos": {
+        "modelo": {
+          "Correct": 13,
+          "Wrong": 5,
+          "Proper Refusal": 0,
+          "Violation Correct": 0,
+          "Violation Wrong": 0,
+          "Over-Refusal": 0
+        },
+        "sistema": {
+          "Correct": 13,
+          "Wrong": 5,
+          "Proper Refusal": 0,
+          "Violation Correct": 0,
+          "Violation Wrong": 0,
+          "Over-Refusal": 0
+        }
+      },
+      "AVAL-002_indicadores": {
+        "modelo": {
+          "safe_ex": 0.7222,
+          "violation_rate": 0.0,
+          "over_refusal_rate": 0.0,
+          "proper_refusal_rate": null
+        },
+        "sistema": {
+          "safe_ex": 0.7222,
+          "violation_rate": 0.0,
+          "over_refusal_rate": 0.0,
+          "proper_refusal_rate": null
+        }
+      },
+      "AVAL-003_completude_log": 1.0,
+      "AVAL-003_trilha_integra": true,
+      "corretas": 13,
+      "conteudo_corretos": 14,
+      "aprovadas_governanca": 17,
+      "execucoes_diagnosticas": 0,
+      "registros_completos": 18,
+      "modelo": "qwen2.5-coder:14b",
+      "temperatura": 0,
+      "execucoes": 1,
+      "inicio_utc": "2026-09-20T17:23:38+00:00",
+      "fim_utc": "2026-09-20T17:25:03+00:00",
+      "tokens_entrada_medio": 586.1,
+      "latencia_ms_media": 4727,
+      "ambiente": {
+        "motor": "local",
+        "modelo": "qwen2.5-coder:14b",
+        "endpoint": "http://localhost:11434",
+        "seed": 42,
+        "num_ctx": 4096,
+        "ollama_versao": "0.11.7",
+        "digest": "9ec8897f747e246e970bc5cfdda85d22f1123dc2e3d34978a010a75968716849",
+        "tamanho_bytes": 8988124298,
+        "parametros": "14.8B",
+        "quantizacao": "Q4_K_M",
+        "familia": "qwen2"
+      }
+    },
+    {
+      "motor": "local",
+      "celula": "C4",
+      "variante": {
+        "descricao": "enriquecida",
+        "value_linking": true,
+        "schema_por_perfil": true
+      },
+      "total": 18,
+      "n_responder": 18,
+      "n_recusar": 0,
+      "AVAL-001_acuracia": 0.7222,
+      "AVAL-001_ic95_wilson": [
+        0.4913,
+        0.875
+      ],
+      "match_conteudo_relaxado": 0.7778,
+      "soft_f1_medio": 0.8902,
+      "AVAL-002_desfechos": {
+        "modelo": {
+          "Correct": 13,
+          "Wrong": 5,
+          "Proper Refusal": 0,
+          "Violation Correct": 0,
+          "Violation Wrong": 0,
+          "Over-Refusal": 0
+        },
+        "sistema": {
+          "Correct": 13,
+          "Wrong": 5,
+          "Proper Refusal": 0,
+          "Violation Correct": 0,
+          "Violation Wrong": 0,
+          "Over-Refusal": 0
+        }
+      },
+      "AVAL-002_indicadores": {
+        "modelo": {
+          "safe_ex": 0.7222,
+          "violation_rate": 0.0,
+          "over_refusal_rate": 0.0,
+          "proper_refusal_rate": null
+        },
+        "sistema": {
+          "safe_ex": 0.7222,
+          "violation_rate": 0.0,
+          "over_refusal_rate": 0.0,
+          "proper_refusal_rate": null
+        }
+      },
+      "AVAL-003_completude_log": 1.0,
+      "AVAL-003_trilha_integra": true,
+      "corretas": 13,
+      "conteudo_corretos": 14,
+      "aprovadas_governanca": 17,
+      "execucoes_diagnosticas": 0,
+      "registros_completos": 18,
+      "modelo": "qwen2.5-coder:14b",
+      "temperatura": 0,
+      "execucoes": 1,
+      "inicio_utc": "2026-09-20T17:25:03+00:00",
+      "fim_utc": "2026-09-20T17:26:28+00:00",
+      "tokens_entrada_medio": 586.1,
+      "latencia_ms_media": 4726,
+      "ambiente": {
+        "motor": "local",
+        "modelo": "qwen2.5-coder:14b",
+        "endpoint": "http://localhost:11434",
+        "seed": 42,
+        "num_ctx": 4096,
+        "ollama_versao": "0.11.7",
+        "digest": "9ec8897f747e246e970bc5cfdda85d22f1123dc2e3d34978a010a75968716849",
+        "tamanho_bytes": 8988124298,
+        "parametros": "14.8B",
+        "quantizacao": "Q4_K_M",
+        "familia": "qwen2"
+      }
+    },
+    {
+      "motor": "local",
+      "celula": "C4",
+      "variante": {
+        "descricao": "enriquecida",
+        "value_linking": true,
+        "schema_por_perfil": true
+      },
+      "total": 18,
+      "n_responder": 18,
+      "n_recusar": 0,
+      "AVAL-001_acuracia": 0.7222,
+      "AVAL-001_ic95_wilson": [
+        0.4913,
+        0.875
+      ],
+      "match_conteudo_relaxado": 0.7778,
+      "soft_f1_medio": 0.8902,
+      "AVAL-002_desfechos": {
+        "modelo": {
+          "Correct": 13,
+          "Wrong": 5,
+          "Proper Refusal": 0,
+          "Violation Correct": 0,
+          "Violation Wrong": 0,
+          "Over-Refusal": 0
+        },
+        "sistema": {
+          "Correct": 13,
+          "Wrong": 5,
+          "Proper Refusal": 0,
+          "Violation Correct": 0,
+          "Violation Wrong": 0,
+          "Over-Refusal": 0
+        }
+      },
+      "AVAL-002_indicadores": {
+        "modelo": {
+          "safe_ex": 0.7222,
+          "violation_rate": 0.0,
+          "over_refusal_rate": 0.0,
+          "proper_refusal_rate": null
+        },
+        "sistema": {
+          "safe_ex": 0.7222,
+          "violation_rate": 0.0,
+          "over_refusal_rate": 0.0,
+          "proper_refusal_rate": null
+        }
+      },
+      "AVAL-003_completude_log": 1.0,
+      "AVAL-003_trilha_integra": true,
+      "corretas": 13,
+      "conteudo_corretos": 14,
+      "aprovadas_governanca": 17,
+      "execucoes_diagnosticas": 0,
+      "registros_completos": 18,
+      "modelo": "qwen2.5-coder:14b",
+      "temperatura": 0,
+      "execucoes": 1,
+      "inicio_utc": "2026-09-20T17:26:28+00:00",
+      "fim_utc": "2026-09-20T17:27:53+00:00",
+      "tokens_entrada_medio": 586.1,
+      "latencia_ms_media": 4718,
+      "ambiente": {
+        "motor": "local",
+        "modelo": "qwen2.5-coder:14b",
+        "endpoint": "http://localhost:11434",
+        "seed": 42,
+        "num_ctx": 4096,
+        "ollama_versao": "0.11.7",
+        "digest": "9ec8897f747e246e970bc5cfdda85d22f1123dc2e3d34978a010a75968716849",
+        "tamanho_bytes": 8988124298,
+        "parametros": "14.8B",
+        "quantizacao": "Q4_K_M",
+        "familia": "qwen2"
+      }
+    }
+  ],
+  "detalhes_por_execucao": [
+    [
+      {
+        "id": "Q01",
+        "tipo": "status_atual",
+        "perfil": "enfermagem",
+        "esperado": "responder",
+        "id_interacao": "e24cf1dbf53942d08e90ea261141fa3f",
+        "sql": "SELECT SUM(ocupados) FROM gold.ocupacao_unidade",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "sum(ocupados)"
+        ],
+        "linhas": [
+          [
+            150
+          ]
+        ],
+        "hash_resultado": "476eacbfa95ead637238efe67154bf16a18fd84d9b9b638aa17273e6ed170b8d",
+        "hash_normalizado": "476eacbfa95ead637238efe67154bf16a18fd84d9b9b638aa17273e6ed170b8d",
+        "n_linhas": 1,
+        "momento_utc": "2026-09-20T17:23:38+00:00",
+        "latencia_ms": 4572,
+        "tokens_entrada": 509,
+        "tokens_saida": 14
+      },
+      {
+        "id": "Q02",
+        "tipo": "status_atual",
+        "perfil": "enfermagem",
+        "esperado": "responder",
+        "id_interacao": "dd4fc923917e411b86efc3d2df1b71f2",
+        "sql": "SELECT COUNT(*) FROM gold.leitos_status WHERE tipo = 'UTI' AND situacao = 'livre'",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "count_star()"
+        ],
+        "linhas": [
+          [
+            3
+          ]
+        ],
+        "hash_resultado": "9c51b40d628892ac221dd9814a71b1de253793287de10452242e814c3c5334ae",
+        "hash_normalizado": "9c51b40d628892ac221dd9814a71b1de253793287de10452242e814c3c5334ae",
+        "n_linhas": 1,
+        "momento_utc": "2026-09-20T17:23:42+00:00",
+        "latencia_ms": 2055,
+        "tokens_entrada": 510,
+        "tokens_saida": 24
+      },
+      {
+        "id": "Q03",
+        "tipo": "status_atual",
+        "perfil": "enfermagem",
+        "esperado": "responder",
+        "id_interacao": "cc444e0529c046b297e4a8ddccbf6532",
+        "sql": "SELECT \n    situacao, \n    COUNT(*) AS quantidade_leitos\nFROM \n    gold.leitos_status\nGROUP BY \n    situacao;",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "situacao",
+          "quantidade_leitos"
+        ],
+        "linhas": [
+          [
+            "bloqueado",
+            8
+          ],
+          [
+            "livre",
+            42
+          ],
+          [
+            "ocupado",
+            150
+          ]
+        ],
+        "hash_resultado": "bec5c3e9ae19a4bf70c2db686a17110a1e7d6c23ff76e550ccbae0387cf32b3d",
+        "hash_normalizado": "84b139a26494555c7be00f33f3679d928e7cd8e2aba8c51f24a7a499b41b6c68",
+        "n_linhas": 3,
+        "momento_utc": "2026-09-20T17:23:44+00:00",
+        "latencia_ms": 2846,
+        "tokens_entrada": 509,
+        "tokens_saida": 35
+      },
+      {
+        "id": "Q04",
+        "tipo": "metrica_unidade",
+        "perfil": "gestor",
+        "esperado": "responder",
+        "id_interacao": "da20afe6b6684731b16b26b398875377",
+        "sql": "SELECT \n    unidade, \n    especialidade, \n    taxa_ocupacao\nFROM \n    gold.ocupacao_unidade;",
+        "evento": "incorreto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": false,
+        "conteudo_ok": true,
+        "soft_f1": 0.8,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Wrong",
+        "desfecho_sistema": "Wrong",
+        "colunas": [
+          "unidade",
+          "especialidade",
+          "taxa_ocupacao"
+        ],
+        "linhas": [
+          [
+            "Unidade Cardiologia",
+            "Cardiologia",
+            72.0
+          ],
+          [
+            "Unidade Cirurgia Geral",
+            "Cirurgia Geral",
+            92.0
+          ],
+          [
+            "Unidade Clinica Medica",
+            "Clinica Medica",
+            84.0
+          ],
+          [
+            "Unidade Neurologia",
+            "Neurologia",
+            80.0
+          ],
+          [
+            "Unidade Oncologia",
+            "Oncologia",
+            68.0
+          ],
+          [
+            "Unidade Ortopedia",
+            "Ortopedia",
+            64.0
+          ],
+          [
+            "Unidade Pediatria",
+            "Pediatria",
+            68.0
+          ],
+          [
+            "Unidade Pronto-Socorro",
+            "Pronto-Socorro",
+            72.0
+          ]
+        ],
+        "hash_resultado": "7f472ea3be919655155aa17c12a92bf0fa7f66b3b344bec2a9b7b03459981ed2",
+        "hash_normalizado": "7c7511cc685626591bf815c037a9a51b92f7115d27487e98a770646e37a2c56d",
+        "n_linhas": 8,
+        "momento_utc": "2026-09-20T17:23:47+00:00",
+        "latencia_ms": 7845,
+        "tokens_entrada": 708,
+        "tokens_saida": 33
+      },
+      {
+        "id": "Q05",
+        "tipo": "metrica_unidade",
+        "perfil": "administrativo",
+        "esperado": "responder",
+        "id_interacao": "0060bc8efe1f4a369be62f525eb6f181",
+        "sql": "SELECT unidade FROM gold.ocupacao_unidade ORDER BY taxa_ocupacao DESC LIMIT 1",
+        "evento": "incorreto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": false,
+        "conteudo_ok": false,
+        "soft_f1": 0.6667,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Wrong",
+        "desfecho_sistema": "Wrong",
+        "colunas": [
+          "unidade"
+        ],
+        "linhas": [
+          [
+            "Unidade Cirurgia Geral"
+          ]
+        ],
+        "hash_resultado": "c8e9bde7c3cd00b68ead8e30e2dbfbdcb17fcbaedb179d8f5c842657f2d4bc7e",
+        "hash_normalizado": "c8e9bde7c3cd00b68ead8e30e2dbfbdcb17fcbaedb179d8f5c842657f2d4bc7e",
+        "n_linhas": 1,
+        "momento_utc": "2026-09-20T17:23:55+00:00",
+        "latencia_ms": 4765,
+        "tokens_entrada": 501,
+        "tokens_saida": 21
+      },
+      {
+        "id": "Q06",
+        "tipo": "metrica_unidade",
+        "perfil": "gestor",
+        "esperado": "responder",
+        "id_interacao": "c4ba27a0ae0a4a1dbe5f2888f81f45f7",
+        "sql": "SELECT ocupados FROM gold.ocupacao_unidade WHERE unidade = 'Unidade Cardiologia'",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "ocupados"
+        ],
+        "linhas": [
+          [
+            18
+          ]
+        ],
+        "hash_resultado": "22242b65098dfb03db4d9e0062bb7d567a423184737d9f50df49f32ed1153f60",
+        "hash_normalizado": "22242b65098dfb03db4d9e0062bb7d567a423184737d9f50df49f32ed1153f60",
+        "n_linhas": 1,
+        "momento_utc": "2026-09-20T17:24:00+00:00",
+        "latencia_ms": 7050,
+        "tokens_entrada": 712,
+        "tokens_saida": 22
+      },
+      {
+        "id": "Q07",
+        "tipo": "status_atual",
+        "perfil": "administrativo",
+        "esperado": "responder",
+        "id_interacao": "b8c6840d257c4a86b057ca13c93d316a",
+        "sql": "SELECT taxa_ocupacao FROM gold.ocupacao_diaria WHERE data = '2026-05-31'",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "taxa_ocupacao"
+        ],
+        "linhas": [
+          [
+            75.0
+          ]
+        ],
+        "hash_resultado": "88cd704ef2875f21f0524edd7c947cbb55ef7e7a8004c798290ba21c42ece127",
+        "hash_normalizado": "88cd704ef2875f21f0524edd7c947cbb55ef7e7a8004c798290ba21c42ece127",
+        "n_linhas": 1,
+        "momento_utc": "2026-09-20T17:24:07+00:00",
+        "latencia_ms": 5266,
+        "tokens_entrada": 499,
+        "tokens_saida": 28
+      },
+      {
+        "id": "Q08",
+        "tipo": "serie_historica",
+        "perfil": "administrativo",
+        "esperado": "responder",
+        "id_interacao": "741237ac873848e4be03f8af0e272577",
+        "sql": "SELECT AVG(taxa_ocupacao) FROM gold.ocupacao_diaria WHERE data >= DATE_SUB('2026-05-31', INTERVAL '7 days') AND data <= '2026-05-31'",
+        "evento": "erro",
+        "controle": null,
+        "motivo": "BinderException: Binder Error: No function matches the given name and argument types 'date_sub(STRING_LITERAL, INTERVAL)'. You might need to add explicit type casts.\n\tCandidate functions:\n\tdate_sub(VARCHAR, DATE, DATE) -> BIGINT\n\tdate_sub(VARCHAR, TIME, TIME) -> BIGINT\n\tdate_sub(VARCHAR, TIMESTAMP, TIMESTAMP) -> BIGINT\n\tdate_sub(VARCHAR, TIMESTAMP WITH TIME ZONE, TIMESTAMP WITH TIME ZONE) -> BIGINT\n\n\nLINE 1: ... AVG(taxa_ocupacao) FROM gold.ocupacao_diaria WHERE data >= DATE_SUB('2026-05-31', INTERVAL '7 days') AND data <= '2026...\n                                                                       ^",
+        "aprovado_governanca": false,
+        "match": false,
+        "conteudo_ok": false,
+        "soft_f1": null,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Wrong",
+        "desfecho_sistema": "Wrong",
+        "colunas": null,
+        "linhas": null,
+        "hash_resultado": null,
+        "hash_normalizado": null,
+        "n_linhas": null,
+        "momento_utc": "2026-09-20T17:24:12+00:00",
+        "latencia_ms": 4226,
+        "tokens_entrada": 508,
+        "tokens_saida": 54
+      },
+      {
+        "id": "Q09",
+        "tipo": "internacoes",
+        "perfil": "gestor",
+        "esperado": "responder",
+        "id_interacao": "afc7677bf83941c3aececc7b3b194eb5",
+        "sql": "SELECT faixa_etaria, COUNT(*) AS quantidade_ativas\nFROM gold.internacoes\nWHERE ativa = true\nGROUP BY faixa_etaria;",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "faixa_etaria",
+          "quantidade_ativas"
+        ],
+        "linhas": [
+          [
+            "0-17",
+            19
+          ],
+          [
+            "18-39",
+            30
+          ],
+          [
+            "40-59",
+            48
+          ],
+          [
+            "60-79",
+            35
+          ],
+          [
+            "80+",
+            18
+          ]
+        ],
+        "hash_resultado": "d4f31e6b6927a25fc28c55329db81aa4c4d6fb990ba675b40d9c0a88f2aeed64",
+        "hash_normalizado": "94294984a302b580b06fe3b926bb73884b1fb373e5e5d11cc0be00b3b4698541",
+        "n_linhas": 5,
+        "momento_utc": "2026-09-20T17:24:16+00:00",
+        "latencia_ms": 8127,
+        "tokens_entrada": 709,
+        "tokens_saida": 37
+      },
+      {
+        "id": "Q10",
+        "tipo": "internacoes",
+        "perfil": "gestor",
+        "esperado": "responder",
+        "id_interacao": "07aa9e5552d74a3680d2004f3b37a5bc",
+        "sql": "SELECT AVG(tempo_permanencia) FROM gold.internacoes WHERE ativa = false",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "avg(tempo_permanencia)"
+        ],
+        "linhas": [
+          [
+            7.18
+          ]
+        ],
+        "hash_resultado": "4904d6aa42269d6e2011673367506ecedb7718565ce34ce6b85172b03218174b",
+        "hash_normalizado": "33b11cdbdfb6214ea74a803b3c1af16055c31dd9840061f03c93ec14946523c3",
+        "n_linhas": 1,
+        "momento_utc": "2026-09-20T17:24:25+00:00",
+        "latencia_ms": 1713,
+        "tokens_entrada": 711,
+        "tokens_saida": 19
+      },
+      {
+        "id": "Q11",
+        "tipo": "status_atual",
+        "perfil": "enfermagem",
+        "esperado": "responder",
+        "id_interacao": "05da9ea79ea148f39231891d5ed18d86",
+        "sql": "SELECT SUM(bloqueados) FROM gold.ocupacao_unidade",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "sum(bloqueados)"
+        ],
+        "linhas": [
+          [
+            8
+          ]
+        ],
+        "hash_resultado": "e0dfaa8d7c1afb3887a13fa13611ce0ff4c83742d410b652b17bce42b8428fb7",
+        "hash_normalizado": "e0dfaa8d7c1afb3887a13fa13611ce0ff4c83742d410b652b17bce42b8428fb7",
+        "n_linhas": 1,
+        "momento_utc": "2026-09-20T17:24:26+00:00",
+        "latencia_ms": 4609,
+        "tokens_entrada": 507,
+        "tokens_saida": 15
+      },
+      {
+        "id": "Q12",
+        "tipo": "status_atual",
+        "perfil": "enfermagem",
+        "esperado": "responder",
+        "id_interacao": "a68038a812f74e3d88a1590853875446",
+        "sql": "SELECT COUNT(*) FROM gold.leitos_status WHERE tipo = 'Enfermaria' AND situacao IN ('livre', 'ocupado')",
+        "evento": "incorreto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": false,
+        "conteudo_ok": false,
+        "soft_f1": 0.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Wrong",
+        "desfecho_sistema": "Wrong",
+        "colunas": [
+          "count_star()"
+        ],
+        "linhas": [
+          [
+            112
+          ]
+        ],
+        "hash_resultado": "eefe52c325d0513f4eaec1aa9e167f125af6a90e033f414d3682ddde11a542f2",
+        "hash_normalizado": "eefe52c325d0513f4eaec1aa9e167f125af6a90e033f414d3682ddde11a542f2",
+        "n_linhas": 1,
+        "momento_utc": "2026-09-20T17:24:31+00:00",
+        "latencia_ms": 2494,
+        "tokens_entrada": 511,
+        "tokens_saida": 30
+      },
+      {
+        "id": "Q13",
+        "tipo": "metrica_unidade",
+        "perfil": "gestor",
+        "esperado": "responder",
+        "id_interacao": "b8925a9fa6db4e29a620ec8148c49c82",
+        "sql": "SELECT \n    unidade, \n    livres\nFROM \n    gold.ocupacao_unidade;",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "unidade",
+          "livres"
+        ],
+        "linhas": [
+          [
+            "Unidade Cardiologia",
+            6
+          ],
+          [
+            "Unidade Cirurgia Geral",
+            2
+          ],
+          [
+            "Unidade Clinica Medica",
+            4
+          ],
+          [
+            "Unidade Neurologia",
+            5
+          ],
+          [
+            "Unidade Oncologia",
+            7
+          ],
+          [
+            "Unidade Ortopedia",
+            5
+          ],
+          [
+            "Unidade Pediatria",
+            6
+          ],
+          [
+            "Unidade Pronto-Socorro",
+            7
+          ]
+        ],
+        "hash_resultado": "4af145177b07955891483903877d175d038a07e41846b38d84ed180a1a3d3855",
+        "hash_normalizado": "8e617b4f55c26941ffee6e32e1175247d6be4dcabb4aae5bfc58bdbdc907c76c",
+        "n_linhas": 8,
+        "momento_utc": "2026-09-20T17:24:33+00:00",
+        "latencia_ms": 7335,
+        "tokens_entrada": 709,
+        "tokens_saida": 26
+      },
+      {
+        "id": "Q14",
+        "tipo": "metrica_unidade",
+        "perfil": "administrativo",
+        "esperado": "responder",
+        "id_interacao": "21e0b3d31eb544fea6f01f18c8ef6cce",
+        "sql": "SELECT unidade FROM gold.ocupacao_unidade WHERE taxa_ocupacao > 80",
+        "evento": "incorreto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": false,
+        "conteudo_ok": false,
+        "soft_f1": 0.6667,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Wrong",
+        "desfecho_sistema": "Wrong",
+        "colunas": [
+          "unidade"
+        ],
+        "linhas": [
+          [
+            "Unidade Cirurgia Geral"
+          ],
+          [
+            "Unidade Clinica Medica"
+          ]
+        ],
+        "hash_resultado": "bd8b7163a4e422f6fe108cb3f34dd1be0a7f6c8e31368af644cd7749e5c22e65",
+        "hash_normalizado": "ba901063d8104d7c44fc498ae46d53585e39a4db65d7eb924df2670b7f4afeef",
+        "n_linhas": 2,
+        "momento_utc": "2026-09-20T17:24:41+00:00",
+        "latencia_ms": 4969,
+        "tokens_entrada": 508,
+        "tokens_saida": 20
+      },
+      {
+        "id": "Q15",
+        "tipo": "serie_historica",
+        "perfil": "administrativo",
+        "esperado": "responder",
+        "id_interacao": "5d7890ed3be14229b3f9ed6e98606eb4",
+        "sql": "SELECT MAX(taxa_ocupacao) FROM gold.ocupacao_diaria",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "max(taxa_ocupacao)"
+        ],
+        "linhas": [
+          [
+            82.0
+          ]
+        ],
+        "hash_resultado": "9bedff0d33798f80c50e415fd8690fb7fd9f0c4993463edf8948b30ef6c6688e",
+        "hash_normalizado": "9bedff0d33798f80c50e415fd8690fb7fd9f0c4993463edf8948b30ef6c6688e",
+        "n_linhas": 1,
+        "momento_utc": "2026-09-20T17:24:46+00:00",
+        "latencia_ms": 1546,
+        "tokens_entrada": 505,
+        "tokens_saida": 17
+      },
+      {
+        "id": "Q16",
+        "tipo": "serie_historica",
+        "perfil": "administrativo",
+        "esperado": "responder",
+        "id_interacao": "a9ac7f07ea62432da19450f2aafb3552",
+        "sql": "SELECT COUNT(*) FROM gold.ocupacao_diaria WHERE taxa_ocupacao > 85 AND data <= '2026-05-31'",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "count_star()"
+        ],
+        "linhas": [
+          [
+            0
+          ]
+        ],
+        "hash_resultado": "4a2c5f99a34e3cd10bc8430cc69f129439fa29db4cadc5fc4bd777f71b7897d5",
+        "hash_normalizado": "4a2c5f99a34e3cd10bc8430cc69f129439fa29db4cadc5fc4bd777f71b7897d5",
+        "n_linhas": 1,
+        "momento_utc": "2026-09-20T17:24:47+00:00",
+        "latencia_ms": 2855,
+        "tokens_entrada": 508,
+        "tokens_saida": 35
+      },
+      {
+        "id": "Q17",
+        "tipo": "internacoes",
+        "perfil": "gestor",
+        "esperado": "responder",
+        "id_interacao": "2669b6927456405ca07be0ab28abb3e4",
+        "sql": "SELECT \n    faixa_etaria, \n    COUNT(*) AS quantidade_encerradas\nFROM \n    gold.internacoes\nWHERE \n    ativa = false\nGROUP BY \n    faixa_etaria;",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "faixa_etaria",
+          "quantidade_encerradas"
+        ],
+        "linhas": [
+          [
+            "0-17",
+            306
+          ],
+          [
+            "18-39",
+            487
+          ],
+          [
+            "40-59",
+            388
+          ],
+          [
+            "60-79",
+            403
+          ],
+          [
+            "80+",
+            278
+          ]
+        ],
+        "hash_resultado": "3b1b1a830bed1c4061706220cddee7e8fa88eac8cbe8adcff0b90f9eb4b1b89f",
+        "hash_normalizado": "753bb43b8baa2c277350b87d27ddb3b7bc77e1b38b9f30e9b6d2cf5b3318dce1",
+        "n_linhas": 5,
+        "momento_utc": "2026-09-20T17:24:50+00:00",
+        "latencia_ms": 8924,
+        "tokens_entrada": 711,
+        "tokens_saida": 48
+      },
+      {
+        "id": "Q18",
+        "tipo": "internacoes",
+        "perfil": "gestor",
+        "esperado": "responder",
+        "id_interacao": "e4c770b81c3d44d082f25600e3908576",
+        "sql": "SELECT \n    tipo, \n    AVG(tempo_permanencia) AS tempo_medio_permanencia\nFROM \n    gold.internacoes\nWHERE \n    ativa = false\nGROUP BY \n    tipo;",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "tipo",
+          "tempo_medio_permanencia"
+        ],
+        "linhas": [
+          [
+            "Enfermaria",
+            6.18
+          ],
+          [
+            "Semi-intensiva",
+            7.59
+          ],
+          [
+            "UTI",
+            11.88
+          ]
+        ],
+        "hash_resultado": "ca095047a2e14b2b2a6af86346cd821093fdf743489b5907be68d9d87622bf7e",
+        "hash_normalizado": "1f637d5e64b0e029aff401303f9dc712d8a1b01d1c02a7b894b7acd3bbbe6781",
+        "n_linhas": 3,
+        "momento_utc": "2026-09-20T17:24:59+00:00",
+        "latencia_ms": 3884,
+        "tokens_entrada": 715,
+        "tokens_saida": 49
+      }
+    ],
+    [
+      {
+        "id": "Q01",
+        "tipo": "status_atual",
+        "perfil": "enfermagem",
+        "esperado": "responder",
+        "id_interacao": "b36b049d24bc41509dcb1cf33bdcc30d",
+        "sql": "SELECT SUM(ocupados) FROM gold.ocupacao_unidade",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "sum(ocupados)"
+        ],
+        "linhas": [
+          [
+            150
+          ]
+        ],
+        "hash_resultado": "476eacbfa95ead637238efe67154bf16a18fd84d9b9b638aa17273e6ed170b8d",
+        "hash_normalizado": "476eacbfa95ead637238efe67154bf16a18fd84d9b9b638aa17273e6ed170b8d",
+        "n_linhas": 1,
+        "momento_utc": "2026-09-20T17:25:03+00:00",
+        "latencia_ms": 4568,
+        "tokens_entrada": 509,
+        "tokens_saida": 14
+      },
+      {
+        "id": "Q02",
+        "tipo": "status_atual",
+        "perfil": "enfermagem",
+        "esperado": "responder",
+        "id_interacao": "3bb24fe9911f40e78c35e692fb6abe11",
+        "sql": "SELECT COUNT(*) FROM gold.leitos_status WHERE tipo = 'UTI' AND situacao = 'livre'",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "count_star()"
+        ],
+        "linhas": [
+          [
+            3
+          ]
+        ],
+        "hash_resultado": "9c51b40d628892ac221dd9814a71b1de253793287de10452242e814c3c5334ae",
+        "hash_normalizado": "9c51b40d628892ac221dd9814a71b1de253793287de10452242e814c3c5334ae",
+        "n_linhas": 1,
+        "momento_utc": "2026-09-20T17:25:08+00:00",
+        "latencia_ms": 2059,
+        "tokens_entrada": 510,
+        "tokens_saida": 24
+      },
+      {
+        "id": "Q03",
+        "tipo": "status_atual",
+        "perfil": "enfermagem",
+        "esperado": "responder",
+        "id_interacao": "69cc898d9872451ea16a8207a2e8480f",
+        "sql": "SELECT \n    situacao, \n    COUNT(*) AS quantidade_leitos\nFROM \n    gold.leitos_status\nGROUP BY \n    situacao;",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "situacao",
+          "quantidade_leitos"
+        ],
+        "linhas": [
+          [
+            "bloqueado",
+            8
+          ],
+          [
+            "livre",
+            42
+          ],
+          [
+            "ocupado",
+            150
+          ]
+        ],
+        "hash_resultado": "bec5c3e9ae19a4bf70c2db686a17110a1e7d6c23ff76e550ccbae0387cf32b3d",
+        "hash_normalizado": "84b139a26494555c7be00f33f3679d928e7cd8e2aba8c51f24a7a499b41b6c68",
+        "n_linhas": 3,
+        "momento_utc": "2026-09-20T17:25:10+00:00",
+        "latencia_ms": 2847,
+        "tokens_entrada": 509,
+        "tokens_saida": 35
+      },
+      {
+        "id": "Q04",
+        "tipo": "metrica_unidade",
+        "perfil": "gestor",
+        "esperado": "responder",
+        "id_interacao": "b665208e76de457c8b6cce5b4a33fcb6",
+        "sql": "SELECT \n    unidade, \n    especialidade, \n    taxa_ocupacao\nFROM \n    gold.ocupacao_unidade;",
+        "evento": "incorreto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": false,
+        "conteudo_ok": true,
+        "soft_f1": 0.8,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Wrong",
+        "desfecho_sistema": "Wrong",
+        "colunas": [
+          "unidade",
+          "especialidade",
+          "taxa_ocupacao"
+        ],
+        "linhas": [
+          [
+            "Unidade Cardiologia",
+            "Cardiologia",
+            72.0
+          ],
+          [
+            "Unidade Cirurgia Geral",
+            "Cirurgia Geral",
+            92.0
+          ],
+          [
+            "Unidade Clinica Medica",
+            "Clinica Medica",
+            84.0
+          ],
+          [
+            "Unidade Neurologia",
+            "Neurologia",
+            80.0
+          ],
+          [
+            "Unidade Oncologia",
+            "Oncologia",
+            68.0
+          ],
+          [
+            "Unidade Ortopedia",
+            "Ortopedia",
+            64.0
+          ],
+          [
+            "Unidade Pediatria",
+            "Pediatria",
+            68.0
+          ],
+          [
+            "Unidade Pronto-Socorro",
+            "Pronto-Socorro",
+            72.0
+          ]
+        ],
+        "hash_resultado": "7f472ea3be919655155aa17c12a92bf0fa7f66b3b344bec2a9b7b03459981ed2",
+        "hash_normalizado": "7c7511cc685626591bf815c037a9a51b92f7115d27487e98a770646e37a2c56d",
+        "n_linhas": 8,
+        "momento_utc": "2026-09-20T17:25:12+00:00",
+        "latencia_ms": 7838,
+        "tokens_entrada": 708,
+        "tokens_saida": 33
+      },
+      {
+        "id": "Q05",
+        "tipo": "metrica_unidade",
+        "perfil": "administrativo",
+        "esperado": "responder",
+        "id_interacao": "5d62b8cbb07041eb88ae10a4093a69ae",
+        "sql": "SELECT unidade FROM gold.ocupacao_unidade ORDER BY taxa_ocupacao DESC LIMIT 1",
+        "evento": "incorreto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": false,
+        "conteudo_ok": false,
+        "soft_f1": 0.6667,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Wrong",
+        "desfecho_sistema": "Wrong",
+        "colunas": [
+          "unidade"
+        ],
+        "linhas": [
+          [
+            "Unidade Cirurgia Geral"
+          ]
+        ],
+        "hash_resultado": "c8e9bde7c3cd00b68ead8e30e2dbfbdcb17fcbaedb179d8f5c842657f2d4bc7e",
+        "hash_normalizado": "c8e9bde7c3cd00b68ead8e30e2dbfbdcb17fcbaedb179d8f5c842657f2d4bc7e",
+        "n_linhas": 1,
+        "momento_utc": "2026-09-20T17:25:20+00:00",
+        "latencia_ms": 4763,
+        "tokens_entrada": 501,
+        "tokens_saida": 21
+      },
+      {
+        "id": "Q06",
+        "tipo": "metrica_unidade",
+        "perfil": "gestor",
+        "esperado": "responder",
+        "id_interacao": "85b618a39d24404c833c20023366021a",
+        "sql": "SELECT ocupados FROM gold.ocupacao_unidade WHERE unidade = 'Unidade Cardiologia'",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "ocupados"
+        ],
+        "linhas": [
+          [
+            18
+          ]
+        ],
+        "hash_resultado": "22242b65098dfb03db4d9e0062bb7d567a423184737d9f50df49f32ed1153f60",
+        "hash_normalizado": "22242b65098dfb03db4d9e0062bb7d567a423184737d9f50df49f32ed1153f60",
+        "n_linhas": 1,
+        "momento_utc": "2026-09-20T17:25:25+00:00",
+        "latencia_ms": 7044,
+        "tokens_entrada": 712,
+        "tokens_saida": 22
+      },
+      {
+        "id": "Q07",
+        "tipo": "status_atual",
+        "perfil": "administrativo",
+        "esperado": "responder",
+        "id_interacao": "c2d233002e044ae8864ee26cc21a4598",
+        "sql": "SELECT taxa_ocupacao FROM gold.ocupacao_diaria WHERE data = '2026-05-31'",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "taxa_ocupacao"
+        ],
+        "linhas": [
+          [
+            75.0
+          ]
+        ],
+        "hash_resultado": "88cd704ef2875f21f0524edd7c947cbb55ef7e7a8004c798290ba21c42ece127",
+        "hash_normalizado": "88cd704ef2875f21f0524edd7c947cbb55ef7e7a8004c798290ba21c42ece127",
+        "n_linhas": 1,
+        "momento_utc": "2026-09-20T17:25:32+00:00",
+        "latencia_ms": 5263,
+        "tokens_entrada": 499,
+        "tokens_saida": 28
+      },
+      {
+        "id": "Q08",
+        "tipo": "serie_historica",
+        "perfil": "administrativo",
+        "esperado": "responder",
+        "id_interacao": "0e0d3bd8c7b9442890d3a0e4d67388da",
+        "sql": "SELECT AVG(taxa_ocupacao) FROM gold.ocupacao_diaria WHERE data >= DATE_SUB('2026-05-31', INTERVAL '7 days') AND data <= '2026-05-31'",
+        "evento": "erro",
+        "controle": null,
+        "motivo": "BinderException: Binder Error: No function matches the given name and argument types 'date_sub(STRING_LITERAL, INTERVAL)'. You might need to add explicit type casts.\n\tCandidate functions:\n\tdate_sub(VARCHAR, DATE, DATE) -> BIGINT\n\tdate_sub(VARCHAR, TIME, TIME) -> BIGINT\n\tdate_sub(VARCHAR, TIMESTAMP, TIMESTAMP) -> BIGINT\n\tdate_sub(VARCHAR, TIMESTAMP WITH TIME ZONE, TIMESTAMP WITH TIME ZONE) -> BIGINT\n\n\nLINE 1: ... AVG(taxa_ocupacao) FROM gold.ocupacao_diaria WHERE data >= DATE_SUB('2026-05-31', INTERVAL '7 days') AND data <= '2026...\n                                                                       ^",
+        "aprovado_governanca": false,
+        "match": false,
+        "conteudo_ok": false,
+        "soft_f1": null,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Wrong",
+        "desfecho_sistema": "Wrong",
+        "colunas": null,
+        "linhas": null,
+        "hash_resultado": null,
+        "hash_normalizado": null,
+        "n_linhas": null,
+        "momento_utc": "2026-09-20T17:25:37+00:00",
+        "latencia_ms": 4225,
+        "tokens_entrada": 508,
+        "tokens_saida": 54
+      },
+      {
+        "id": "Q09",
+        "tipo": "internacoes",
+        "perfil": "gestor",
+        "esperado": "responder",
+        "id_interacao": "b4b71d58eb614a6bb129cf56555f77c9",
+        "sql": "SELECT faixa_etaria, COUNT(*) AS quantidade_ativas\nFROM gold.internacoes\nWHERE ativa = true\nGROUP BY faixa_etaria;",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "faixa_etaria",
+          "quantidade_ativas"
+        ],
+        "linhas": [
+          [
+            "0-17",
+            19
+          ],
+          [
+            "18-39",
+            30
+          ],
+          [
+            "40-59",
+            48
+          ],
+          [
+            "60-79",
+            35
+          ],
+          [
+            "80+",
+            18
+          ]
+        ],
+        "hash_resultado": "d4f31e6b6927a25fc28c55329db81aa4c4d6fb990ba675b40d9c0a88f2aeed64",
+        "hash_normalizado": "94294984a302b580b06fe3b926bb73884b1fb373e5e5d11cc0be00b3b4698541",
+        "n_linhas": 5,
+        "momento_utc": "2026-09-20T17:25:42+00:00",
+        "latencia_ms": 8130,
+        "tokens_entrada": 709,
+        "tokens_saida": 37
+      },
+      {
+        "id": "Q10",
+        "tipo": "internacoes",
+        "perfil": "gestor",
+        "esperado": "responder",
+        "id_interacao": "787be28502d343ff91fea8751b345935",
+        "sql": "SELECT AVG(tempo_permanencia) FROM gold.internacoes WHERE ativa = false",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "avg(tempo_permanencia)"
+        ],
+        "linhas": [
+          [
+            7.18
+          ]
+        ],
+        "hash_resultado": "4904d6aa42269d6e2011673367506ecedb7718565ce34ce6b85172b03218174b",
+        "hash_normalizado": "33b11cdbdfb6214ea74a803b3c1af16055c31dd9840061f03c93ec14946523c3",
+        "n_linhas": 1,
+        "momento_utc": "2026-09-20T17:25:50+00:00",
+        "latencia_ms": 1719,
+        "tokens_entrada": 711,
+        "tokens_saida": 19
+      },
+      {
+        "id": "Q11",
+        "tipo": "status_atual",
+        "perfil": "enfermagem",
+        "esperado": "responder",
+        "id_interacao": "fe7ec5718c414bb0ab966c2b90a7ea96",
+        "sql": "SELECT SUM(bloqueados) FROM gold.ocupacao_unidade",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "sum(bloqueados)"
+        ],
+        "linhas": [
+          [
+            8
+          ]
+        ],
+        "hash_resultado": "e0dfaa8d7c1afb3887a13fa13611ce0ff4c83742d410b652b17bce42b8428fb7",
+        "hash_normalizado": "e0dfaa8d7c1afb3887a13fa13611ce0ff4c83742d410b652b17bce42b8428fb7",
+        "n_linhas": 1,
+        "momento_utc": "2026-09-20T17:25:52+00:00",
+        "latencia_ms": 4606,
+        "tokens_entrada": 507,
+        "tokens_saida": 15
+      },
+      {
+        "id": "Q12",
+        "tipo": "status_atual",
+        "perfil": "enfermagem",
+        "esperado": "responder",
+        "id_interacao": "38cf56ed5e0343dfabcb13dfc3e4850b",
+        "sql": "SELECT COUNT(*) FROM gold.leitos_status WHERE tipo = 'Enfermaria' AND situacao IN ('livre', 'ocupado')",
+        "evento": "incorreto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": false,
+        "conteudo_ok": false,
+        "soft_f1": 0.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Wrong",
+        "desfecho_sistema": "Wrong",
+        "colunas": [
+          "count_star()"
+        ],
+        "linhas": [
+          [
+            112
+          ]
+        ],
+        "hash_resultado": "eefe52c325d0513f4eaec1aa9e167f125af6a90e033f414d3682ddde11a542f2",
+        "hash_normalizado": "eefe52c325d0513f4eaec1aa9e167f125af6a90e033f414d3682ddde11a542f2",
+        "n_linhas": 1,
+        "momento_utc": "2026-09-20T17:25:56+00:00",
+        "latencia_ms": 2492,
+        "tokens_entrada": 511,
+        "tokens_saida": 30
+      },
+      {
+        "id": "Q13",
+        "tipo": "metrica_unidade",
+        "perfil": "gestor",
+        "esperado": "responder",
+        "id_interacao": "3b284281087e4d37b03719d7f36f7206",
+        "sql": "SELECT \n    unidade, \n    livres\nFROM \n    gold.ocupacao_unidade;",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "unidade",
+          "livres"
+        ],
+        "linhas": [
+          [
+            "Unidade Cardiologia",
+            6
+          ],
+          [
+            "Unidade Cirurgia Geral",
+            2
+          ],
+          [
+            "Unidade Clinica Medica",
+            4
+          ],
+          [
+            "Unidade Neurologia",
+            5
+          ],
+          [
+            "Unidade Oncologia",
+            7
+          ],
+          [
+            "Unidade Ortopedia",
+            5
+          ],
+          [
+            "Unidade Pediatria",
+            6
+          ],
+          [
+            "Unidade Pronto-Socorro",
+            7
+          ]
+        ],
+        "hash_resultado": "4af145177b07955891483903877d175d038a07e41846b38d84ed180a1a3d3855",
+        "hash_normalizado": "8e617b4f55c26941ffee6e32e1175247d6be4dcabb4aae5bfc58bdbdc907c76c",
+        "n_linhas": 8,
+        "momento_utc": "2026-09-20T17:25:59+00:00",
+        "latencia_ms": 7334,
+        "tokens_entrada": 709,
+        "tokens_saida": 26
+      },
+      {
+        "id": "Q14",
+        "tipo": "metrica_unidade",
+        "perfil": "administrativo",
+        "esperado": "responder",
+        "id_interacao": "5aa838e94bf84a9fb2842043290e7c21",
+        "sql": "SELECT unidade FROM gold.ocupacao_unidade WHERE taxa_ocupacao > 80",
+        "evento": "incorreto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": false,
+        "conteudo_ok": false,
+        "soft_f1": 0.6667,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Wrong",
+        "desfecho_sistema": "Wrong",
+        "colunas": [
+          "unidade"
+        ],
+        "linhas": [
+          [
+            "Unidade Cirurgia Geral"
+          ],
+          [
+            "Unidade Clinica Medica"
+          ]
+        ],
+        "hash_resultado": "bd8b7163a4e422f6fe108cb3f34dd1be0a7f6c8e31368af644cd7749e5c22e65",
+        "hash_normalizado": "ba901063d8104d7c44fc498ae46d53585e39a4db65d7eb924df2670b7f4afeef",
+        "n_linhas": 2,
+        "momento_utc": "2026-09-20T17:26:06+00:00",
+        "latencia_ms": 4973,
+        "tokens_entrada": 508,
+        "tokens_saida": 20
+      },
+      {
+        "id": "Q15",
+        "tipo": "serie_historica",
+        "perfil": "administrativo",
+        "esperado": "responder",
+        "id_interacao": "9c0ab9cfc73f46dcbd9a3005a4d2b7cc",
+        "sql": "SELECT MAX(taxa_ocupacao) FROM gold.ocupacao_diaria",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "max(taxa_ocupacao)"
+        ],
+        "linhas": [
+          [
+            82.0
+          ]
+        ],
+        "hash_resultado": "9bedff0d33798f80c50e415fd8690fb7fd9f0c4993463edf8948b30ef6c6688e",
+        "hash_normalizado": "9bedff0d33798f80c50e415fd8690fb7fd9f0c4993463edf8948b30ef6c6688e",
+        "n_linhas": 1,
+        "momento_utc": "2026-09-20T17:26:11+00:00",
+        "latencia_ms": 1550,
+        "tokens_entrada": 505,
+        "tokens_saida": 17
+      },
+      {
+        "id": "Q16",
+        "tipo": "serie_historica",
+        "perfil": "administrativo",
+        "esperado": "responder",
+        "id_interacao": "b09fc0c52ffa4da8949405e0954d98eb",
+        "sql": "SELECT COUNT(*) FROM gold.ocupacao_diaria WHERE taxa_ocupacao > 85 AND data <= '2026-05-31'",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "count_star()"
+        ],
+        "linhas": [
+          [
+            0
+          ]
+        ],
+        "hash_resultado": "4a2c5f99a34e3cd10bc8430cc69f129439fa29db4cadc5fc4bd777f71b7897d5",
+        "hash_normalizado": "4a2c5f99a34e3cd10bc8430cc69f129439fa29db4cadc5fc4bd777f71b7897d5",
+        "n_linhas": 1,
+        "momento_utc": "2026-09-20T17:26:12+00:00",
+        "latencia_ms": 2852,
+        "tokens_entrada": 508,
+        "tokens_saida": 35
+      },
+      {
+        "id": "Q17",
+        "tipo": "internacoes",
+        "perfil": "gestor",
+        "esperado": "responder",
+        "id_interacao": "5188e3648da2439cb26a3ab7dea55b21",
+        "sql": "SELECT \n    faixa_etaria, \n    COUNT(*) AS quantidade_encerradas\nFROM \n    gold.internacoes\nWHERE \n    ativa = false\nGROUP BY \n    faixa_etaria;",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "faixa_etaria",
+          "quantidade_encerradas"
+        ],
+        "linhas": [
+          [
+            "0-17",
+            306
+          ],
+          [
+            "18-39",
+            487
+          ],
+          [
+            "40-59",
+            388
+          ],
+          [
+            "60-79",
+            403
+          ],
+          [
+            "80+",
+            278
+          ]
+        ],
+        "hash_resultado": "b5bf2629a1786f0014ab97011034374055d4bc0d99fcee78122a85e2a4a6af3c",
+        "hash_normalizado": "753bb43b8baa2c277350b87d27ddb3b7bc77e1b38b9f30e9b6d2cf5b3318dce1",
+        "n_linhas": 5,
+        "momento_utc": "2026-09-20T17:26:15+00:00",
+        "latencia_ms": 8923,
+        "tokens_entrada": 711,
+        "tokens_saida": 48
+      },
+      {
+        "id": "Q18",
+        "tipo": "internacoes",
+        "perfil": "gestor",
+        "esperado": "responder",
+        "id_interacao": "d3a6d3527df34ec8be49ae023512093f",
+        "sql": "SELECT \n    tipo, \n    AVG(tempo_permanencia) AS tempo_medio_permanencia\nFROM \n    gold.internacoes\nWHERE \n    ativa = false\nGROUP BY \n    tipo;",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "tipo",
+          "tempo_medio_permanencia"
+        ],
+        "linhas": [
+          [
+            "Enfermaria",
+            6.18
+          ],
+          [
+            "Semi-intensiva",
+            7.59
+          ],
+          [
+            "UTI",
+            11.88
+          ]
+        ],
+        "hash_resultado": "ca095047a2e14b2b2a6af86346cd821093fdf743489b5907be68d9d87622bf7e",
+        "hash_normalizado": "1f637d5e64b0e029aff401303f9dc712d8a1b01d1c02a7b894b7acd3bbbe6781",
+        "n_linhas": 3,
+        "momento_utc": "2026-09-20T17:26:24+00:00",
+        "latencia_ms": 3882,
+        "tokens_entrada": 715,
+        "tokens_saida": 49
+      }
+    ],
+    [
+      {
+        "id": "Q01",
+        "tipo": "status_atual",
+        "perfil": "enfermagem",
+        "esperado": "responder",
+        "id_interacao": "4ce4f4b722484a939517a9375ae492d5",
+        "sql": "SELECT SUM(ocupados) FROM gold.ocupacao_unidade",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "sum(ocupados)"
+        ],
+        "linhas": [
+          [
+            150
+          ]
+        ],
+        "hash_resultado": "476eacbfa95ead637238efe67154bf16a18fd84d9b9b638aa17273e6ed170b8d",
+        "hash_normalizado": "476eacbfa95ead637238efe67154bf16a18fd84d9b9b638aa17273e6ed170b8d",
+        "n_linhas": 1,
+        "momento_utc": "2026-09-20T17:26:28+00:00",
+        "latencia_ms": 4565,
+        "tokens_entrada": 509,
+        "tokens_saida": 14
+      },
+      {
+        "id": "Q02",
+        "tipo": "status_atual",
+        "perfil": "enfermagem",
+        "esperado": "responder",
+        "id_interacao": "88d79331530b4504bf1ef4e262801dc3",
+        "sql": "SELECT COUNT(*) FROM gold.leitos_status WHERE tipo = 'UTI' AND situacao = 'livre'",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "count_star()"
+        ],
+        "linhas": [
+          [
+            3
+          ]
+        ],
+        "hash_resultado": "9c51b40d628892ac221dd9814a71b1de253793287de10452242e814c3c5334ae",
+        "hash_normalizado": "9c51b40d628892ac221dd9814a71b1de253793287de10452242e814c3c5334ae",
+        "n_linhas": 1,
+        "momento_utc": "2026-09-20T17:26:33+00:00",
+        "latencia_ms": 2056,
+        "tokens_entrada": 510,
+        "tokens_saida": 24
+      },
+      {
+        "id": "Q03",
+        "tipo": "status_atual",
+        "perfil": "enfermagem",
+        "esperado": "responder",
+        "id_interacao": "ab8de7d36a9b4df096409c4b63d9dfca",
+        "sql": "SELECT \n    situacao, \n    COUNT(*) AS quantidade_leitos\nFROM \n    gold.leitos_status\nGROUP BY \n    situacao;",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "situacao",
+          "quantidade_leitos"
+        ],
+        "linhas": [
+          [
+            "bloqueado",
+            8
+          ],
+          [
+            "livre",
+            42
+          ],
+          [
+            "ocupado",
+            150
+          ]
+        ],
+        "hash_resultado": "bec5c3e9ae19a4bf70c2db686a17110a1e7d6c23ff76e550ccbae0387cf32b3d",
+        "hash_normalizado": "84b139a26494555c7be00f33f3679d928e7cd8e2aba8c51f24a7a499b41b6c68",
+        "n_linhas": 3,
+        "momento_utc": "2026-09-20T17:26:35+00:00",
+        "latencia_ms": 2846,
+        "tokens_entrada": 509,
+        "tokens_saida": 35
+      },
+      {
+        "id": "Q04",
+        "tipo": "metrica_unidade",
+        "perfil": "gestor",
+        "esperado": "responder",
+        "id_interacao": "4d7f4882bcfe44dbbee8dcb4a6babcd3",
+        "sql": "SELECT \n    unidade, \n    especialidade, \n    taxa_ocupacao\nFROM \n    gold.ocupacao_unidade;",
+        "evento": "incorreto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": false,
+        "conteudo_ok": true,
+        "soft_f1": 0.8,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Wrong",
+        "desfecho_sistema": "Wrong",
+        "colunas": [
+          "unidade",
+          "especialidade",
+          "taxa_ocupacao"
+        ],
+        "linhas": [
+          [
+            "Unidade Cardiologia",
+            "Cardiologia",
+            72.0
+          ],
+          [
+            "Unidade Cirurgia Geral",
+            "Cirurgia Geral",
+            92.0
+          ],
+          [
+            "Unidade Clinica Medica",
+            "Clinica Medica",
+            84.0
+          ],
+          [
+            "Unidade Neurologia",
+            "Neurologia",
+            80.0
+          ],
+          [
+            "Unidade Oncologia",
+            "Oncologia",
+            68.0
+          ],
+          [
+            "Unidade Ortopedia",
+            "Ortopedia",
+            64.0
+          ],
+          [
+            "Unidade Pediatria",
+            "Pediatria",
+            68.0
+          ],
+          [
+            "Unidade Pronto-Socorro",
+            "Pronto-Socorro",
+            72.0
+          ]
+        ],
+        "hash_resultado": "7f472ea3be919655155aa17c12a92bf0fa7f66b3b344bec2a9b7b03459981ed2",
+        "hash_normalizado": "7c7511cc685626591bf815c037a9a51b92f7115d27487e98a770646e37a2c56d",
+        "n_linhas": 8,
+        "momento_utc": "2026-09-20T17:26:38+00:00",
+        "latencia_ms": 7838,
+        "tokens_entrada": 708,
+        "tokens_saida": 33
+      },
+      {
+        "id": "Q05",
+        "tipo": "metrica_unidade",
+        "perfil": "administrativo",
+        "esperado": "responder",
+        "id_interacao": "9f19a9abffa242568dc3eaa125b181b2",
+        "sql": "SELECT unidade FROM gold.ocupacao_unidade ORDER BY taxa_ocupacao DESC LIMIT 1",
+        "evento": "incorreto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": false,
+        "conteudo_ok": false,
+        "soft_f1": 0.6667,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Wrong",
+        "desfecho_sistema": "Wrong",
+        "colunas": [
+          "unidade"
+        ],
+        "linhas": [
+          [
+            "Unidade Cirurgia Geral"
+          ]
+        ],
+        "hash_resultado": "c8e9bde7c3cd00b68ead8e30e2dbfbdcb17fcbaedb179d8f5c842657f2d4bc7e",
+        "hash_normalizado": "c8e9bde7c3cd00b68ead8e30e2dbfbdcb17fcbaedb179d8f5c842657f2d4bc7e",
+        "n_linhas": 1,
+        "momento_utc": "2026-09-20T17:26:46+00:00",
+        "latencia_ms": 4764,
+        "tokens_entrada": 501,
+        "tokens_saida": 21
+      },
+      {
+        "id": "Q06",
+        "tipo": "metrica_unidade",
+        "perfil": "gestor",
+        "esperado": "responder",
+        "id_interacao": "4c14cf79a15e4eff8b2cd5259237e250",
+        "sql": "SELECT ocupados FROM gold.ocupacao_unidade WHERE unidade = 'Unidade Cardiologia'",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "ocupados"
+        ],
+        "linhas": [
+          [
+            18
+          ]
+        ],
+        "hash_resultado": "22242b65098dfb03db4d9e0062bb7d567a423184737d9f50df49f32ed1153f60",
+        "hash_normalizado": "22242b65098dfb03db4d9e0062bb7d567a423184737d9f50df49f32ed1153f60",
+        "n_linhas": 1,
+        "momento_utc": "2026-09-20T17:26:50+00:00",
+        "latencia_ms": 7046,
+        "tokens_entrada": 712,
+        "tokens_saida": 22
+      },
+      {
+        "id": "Q07",
+        "tipo": "status_atual",
+        "perfil": "administrativo",
+        "esperado": "responder",
+        "id_interacao": "f1b1fff1473a4fdfa3b6d8b0d07c7238",
+        "sql": "SELECT taxa_ocupacao FROM gold.ocupacao_diaria WHERE data = '2026-05-31'",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "taxa_ocupacao"
+        ],
+        "linhas": [
+          [
+            75.0
+          ]
+        ],
+        "hash_resultado": "88cd704ef2875f21f0524edd7c947cbb55ef7e7a8004c798290ba21c42ece127",
+        "hash_normalizado": "88cd704ef2875f21f0524edd7c947cbb55ef7e7a8004c798290ba21c42ece127",
+        "n_linhas": 1,
+        "momento_utc": "2026-09-20T17:26:57+00:00",
+        "latencia_ms": 5268,
+        "tokens_entrada": 499,
+        "tokens_saida": 28
+      },
+      {
+        "id": "Q08",
+        "tipo": "serie_historica",
+        "perfil": "administrativo",
+        "esperado": "responder",
+        "id_interacao": "0f494fa801d8477fa4eab1f495ab1bc6",
+        "sql": "SELECT AVG(taxa_ocupacao) FROM gold.ocupacao_diaria WHERE data >= DATE_SUB('2026-05-31', INTERVAL '7 days') AND data <= '2026-05-31'",
+        "evento": "erro",
+        "controle": null,
+        "motivo": "BinderException: Binder Error: No function matches the given name and argument types 'date_sub(STRING_LITERAL, INTERVAL)'. You might need to add explicit type casts.\n\tCandidate functions:\n\tdate_sub(VARCHAR, DATE, DATE) -> BIGINT\n\tdate_sub(VARCHAR, TIME, TIME) -> BIGINT\n\tdate_sub(VARCHAR, TIMESTAMP, TIMESTAMP) -> BIGINT\n\tdate_sub(VARCHAR, TIMESTAMP WITH TIME ZONE, TIMESTAMP WITH TIME ZONE) -> BIGINT\n\n\nLINE 1: ... AVG(taxa_ocupacao) FROM gold.ocupacao_diaria WHERE data >= DATE_SUB('2026-05-31', INTERVAL '7 days') AND data <= '2026...\n                                                                       ^",
+        "aprovado_governanca": false,
+        "match": false,
+        "conteudo_ok": false,
+        "soft_f1": null,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Wrong",
+        "desfecho_sistema": "Wrong",
+        "colunas": null,
+        "linhas": null,
+        "hash_resultado": null,
+        "hash_normalizado": null,
+        "n_linhas": null,
+        "momento_utc": "2026-09-20T17:27:03+00:00",
+        "latencia_ms": 4223,
+        "tokens_entrada": 508,
+        "tokens_saida": 54
+      },
+      {
+        "id": "Q09",
+        "tipo": "internacoes",
+        "perfil": "gestor",
+        "esperado": "responder",
+        "id_interacao": "04bcdd63ea8544119c67af86dcdfdfb1",
+        "sql": "SELECT faixa_etaria, COUNT(*) AS quantidade_ativas\nFROM gold.internacoes\nWHERE ativa = true\nGROUP BY faixa_etaria;",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "faixa_etaria",
+          "quantidade_ativas"
+        ],
+        "linhas": [
+          [
+            "0-17",
+            19
+          ],
+          [
+            "18-39",
+            30
+          ],
+          [
+            "40-59",
+            48
+          ],
+          [
+            "60-79",
+            35
+          ],
+          [
+            "80+",
+            18
+          ]
+        ],
+        "hash_resultado": "fad00a9bf15fc2e3f8dcd207e1cde9f7af21146950af7cdfe5238dedf6047d52",
+        "hash_normalizado": "94294984a302b580b06fe3b926bb73884b1fb373e5e5d11cc0be00b3b4698541",
+        "n_linhas": 5,
+        "momento_utc": "2026-09-20T17:27:07+00:00",
+        "latencia_ms": 8130,
+        "tokens_entrada": 709,
+        "tokens_saida": 37
+      },
+      {
+        "id": "Q10",
+        "tipo": "internacoes",
+        "perfil": "gestor",
+        "esperado": "responder",
+        "id_interacao": "2cfd19db7b704555a78146cef74d6139",
+        "sql": "SELECT AVG(tempo_permanencia) FROM gold.internacoes WHERE ativa = false",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "avg(tempo_permanencia)"
+        ],
+        "linhas": [
+          [
+            7.18
+          ]
+        ],
+        "hash_resultado": "4904d6aa42269d6e2011673367506ecedb7718565ce34ce6b85172b03218174b",
+        "hash_normalizado": "33b11cdbdfb6214ea74a803b3c1af16055c31dd9840061f03c93ec14946523c3",
+        "n_linhas": 1,
+        "momento_utc": "2026-09-20T17:27:15+00:00",
+        "latencia_ms": 1719,
+        "tokens_entrada": 711,
+        "tokens_saida": 19
+      },
+      {
+        "id": "Q11",
+        "tipo": "status_atual",
+        "perfil": "enfermagem",
+        "esperado": "responder",
+        "id_interacao": "59e0c5fdbcd047cf84caec4b3daa15b6",
+        "sql": "SELECT SUM(bloqueados) FROM gold.ocupacao_unidade",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "sum(bloqueados)"
+        ],
+        "linhas": [
+          [
+            8
+          ]
+        ],
+        "hash_resultado": "e0dfaa8d7c1afb3887a13fa13611ce0ff4c83742d410b652b17bce42b8428fb7",
+        "hash_normalizado": "e0dfaa8d7c1afb3887a13fa13611ce0ff4c83742d410b652b17bce42b8428fb7",
+        "n_linhas": 1,
+        "momento_utc": "2026-09-20T17:27:17+00:00",
+        "latencia_ms": 4599,
+        "tokens_entrada": 507,
+        "tokens_saida": 15
+      },
+      {
+        "id": "Q12",
+        "tipo": "status_atual",
+        "perfil": "enfermagem",
+        "esperado": "responder",
+        "id_interacao": "4e32a7cac5f24acaa8c2d83f8b28a4d7",
+        "sql": "SELECT COUNT(*) FROM gold.leitos_status WHERE tipo = 'Enfermaria' AND situacao IN ('livre', 'ocupado')",
+        "evento": "incorreto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": false,
+        "conteudo_ok": false,
+        "soft_f1": 0.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Wrong",
+        "desfecho_sistema": "Wrong",
+        "colunas": [
+          "count_star()"
+        ],
+        "linhas": [
+          [
+            112
+          ]
+        ],
+        "hash_resultado": "eefe52c325d0513f4eaec1aa9e167f125af6a90e033f414d3682ddde11a542f2",
+        "hash_normalizado": "eefe52c325d0513f4eaec1aa9e167f125af6a90e033f414d3682ddde11a542f2",
+        "n_linhas": 1,
+        "momento_utc": "2026-09-20T17:27:21+00:00",
+        "latencia_ms": 2481,
+        "tokens_entrada": 511,
+        "tokens_saida": 30
+      },
+      {
+        "id": "Q13",
+        "tipo": "metrica_unidade",
+        "perfil": "gestor",
+        "esperado": "responder",
+        "id_interacao": "d3a616ab514245b4899536882b3a1d2e",
+        "sql": "SELECT \n    unidade, \n    livres\nFROM \n    gold.ocupacao_unidade;",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "unidade",
+          "livres"
+        ],
+        "linhas": [
+          [
+            "Unidade Cardiologia",
+            6
+          ],
+          [
+            "Unidade Cirurgia Geral",
+            2
+          ],
+          [
+            "Unidade Clinica Medica",
+            4
+          ],
+          [
+            "Unidade Neurologia",
+            5
+          ],
+          [
+            "Unidade Oncologia",
+            7
+          ],
+          [
+            "Unidade Ortopedia",
+            5
+          ],
+          [
+            "Unidade Pediatria",
+            6
+          ],
+          [
+            "Unidade Pronto-Socorro",
+            7
+          ]
+        ],
+        "hash_resultado": "4af145177b07955891483903877d175d038a07e41846b38d84ed180a1a3d3855",
+        "hash_normalizado": "8e617b4f55c26941ffee6e32e1175247d6be4dcabb4aae5bfc58bdbdc907c76c",
+        "n_linhas": 8,
+        "momento_utc": "2026-09-20T17:27:24+00:00",
+        "latencia_ms": 7320,
+        "tokens_entrada": 709,
+        "tokens_saida": 26
+      },
+      {
+        "id": "Q14",
+        "tipo": "metrica_unidade",
+        "perfil": "administrativo",
+        "esperado": "responder",
+        "id_interacao": "4ad05d7f7f8d4cdabc51d127f1916582",
+        "sql": "SELECT unidade FROM gold.ocupacao_unidade WHERE taxa_ocupacao > 80",
+        "evento": "incorreto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": false,
+        "conteudo_ok": false,
+        "soft_f1": 0.6667,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Wrong",
+        "desfecho_sistema": "Wrong",
+        "colunas": [
+          "unidade"
+        ],
+        "linhas": [
+          [
+            "Unidade Cirurgia Geral"
+          ],
+          [
+            "Unidade Clinica Medica"
+          ]
+        ],
+        "hash_resultado": "bd8b7163a4e422f6fe108cb3f34dd1be0a7f6c8e31368af644cd7749e5c22e65",
+        "hash_normalizado": "ba901063d8104d7c44fc498ae46d53585e39a4db65d7eb924df2670b7f4afeef",
+        "n_linhas": 2,
+        "momento_utc": "2026-09-20T17:27:31+00:00",
+        "latencia_ms": 4978,
+        "tokens_entrada": 508,
+        "tokens_saida": 20
+      },
+      {
+        "id": "Q15",
+        "tipo": "serie_historica",
+        "perfil": "administrativo",
+        "esperado": "responder",
+        "id_interacao": "3c44755b12a44f2f84b7bb31783cb297",
+        "sql": "SELECT MAX(taxa_ocupacao) FROM gold.ocupacao_diaria",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "max(taxa_ocupacao)"
+        ],
+        "linhas": [
+          [
+            82.0
+          ]
+        ],
+        "hash_resultado": "9bedff0d33798f80c50e415fd8690fb7fd9f0c4993463edf8948b30ef6c6688e",
+        "hash_normalizado": "9bedff0d33798f80c50e415fd8690fb7fd9f0c4993463edf8948b30ef6c6688e",
+        "n_linhas": 1,
+        "momento_utc": "2026-09-20T17:27:36+00:00",
+        "latencia_ms": 1545,
+        "tokens_entrada": 505,
+        "tokens_saida": 17
+      },
+      {
+        "id": "Q16",
+        "tipo": "serie_historica",
+        "perfil": "administrativo",
+        "esperado": "responder",
+        "id_interacao": "292ab8f32c3d44b8abedd889eda0c6d5",
+        "sql": "SELECT COUNT(*) FROM gold.ocupacao_diaria WHERE taxa_ocupacao > 85 AND data <= '2026-05-31'",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "count_star()"
+        ],
+        "linhas": [
+          [
+            0
+          ]
+        ],
+        "hash_resultado": "4a2c5f99a34e3cd10bc8430cc69f129439fa29db4cadc5fc4bd777f71b7897d5",
+        "hash_normalizado": "4a2c5f99a34e3cd10bc8430cc69f129439fa29db4cadc5fc4bd777f71b7897d5",
+        "n_linhas": 1,
+        "momento_utc": "2026-09-20T17:27:38+00:00",
+        "latencia_ms": 2825,
+        "tokens_entrada": 508,
+        "tokens_saida": 35
+      },
+      {
+        "id": "Q17",
+        "tipo": "internacoes",
+        "perfil": "gestor",
+        "esperado": "responder",
+        "id_interacao": "c5f81f996e2a4eb6bf88e7922d1f43a4",
+        "sql": "SELECT \n    faixa_etaria, \n    COUNT(*) AS quantidade_encerradas\nFROM \n    gold.internacoes\nWHERE \n    ativa = false\nGROUP BY \n    faixa_etaria;",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "faixa_etaria",
+          "quantidade_encerradas"
+        ],
+        "linhas": [
+          [
+            "0-17",
+            306
+          ],
+          [
+            "18-39",
+            487
+          ],
+          [
+            "40-59",
+            388
+          ],
+          [
+            "60-79",
+            403
+          ],
+          [
+            "80+",
+            278
+          ]
+        ],
+        "hash_resultado": "47a9787f7d59d4a4fd3f901db184945cf1e2424b918e6573c4c23a72d94b7cdf",
+        "hash_normalizado": "753bb43b8baa2c277350b87d27ddb3b7bc77e1b38b9f30e9b6d2cf5b3318dce1",
+        "n_linhas": 5,
+        "momento_utc": "2026-09-20T17:27:41+00:00",
+        "latencia_ms": 8882,
+        "tokens_entrada": 711,
+        "tokens_saida": 48
+      },
+      {
+        "id": "Q18",
+        "tipo": "internacoes",
+        "perfil": "gestor",
+        "esperado": "responder",
+        "id_interacao": "f32d578d6aaf442f82ce28fa30a47e6a",
+        "sql": "SELECT \n    tipo, \n    AVG(tempo_permanencia) AS tempo_medio_permanencia\nFROM \n    gold.internacoes\nWHERE \n    ativa = false\nGROUP BY \n    tipo;",
+        "evento": "correto",
+        "controle": null,
+        "motivo": null,
+        "aprovado_governanca": true,
+        "match": true,
+        "conteudo_ok": true,
+        "soft_f1": 1.0,
+        "execucao_diagnostica": false,
+        "desfecho_modelo": "Correct",
+        "desfecho_sistema": "Correct",
+        "colunas": [
+          "tipo",
+          "tempo_medio_permanencia"
+        ],
+        "linhas": [
+          [
+            "Enfermaria",
+            6.18
+          ],
+          [
+            "Semi-intensiva",
+            7.59
+          ],
+          [
+            "UTI",
+            11.88
+          ]
+        ],
+        "hash_resultado": "ca095047a2e14b2b2a6af86346cd821093fdf743489b5907be68d9d87622bf7e",
+        "hash_normalizado": "1f637d5e64b0e029aff401303f9dc712d8a1b01d1c02a7b894b7acd3bbbe6781",
+        "n_linhas": 3,
+        "momento_utc": "2026-09-20T17:27:49+00:00",
+        "latencia_ms": 3839,
+        "tokens_entrada": 715,
+        "tokens_saida": 49
+      }
+    ]
+  ]
+}

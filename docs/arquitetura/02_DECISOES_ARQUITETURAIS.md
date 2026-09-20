@@ -276,8 +276,9 @@ estável `DA-[MOD]-[NUM]` citável pelos demais módulos e pela redação do TCC
   passa a ter três diferenças (modelo, Gold minimizada, harness revisto). A
   célula C0 preserva o mesmo prompt para isolar a troca de modelo; se houver
   crédito, a ponte fecha com o Sonnet nas células C0 e vencedora.
-- **Status**: IMPLEMENTADO (`src/nl2sql.py:MotorLocal`, `ollama_disponivel`;
-  `src/config.py` seção "Motor local"). Números na execução da Etapa D.
+- **Status**: VALIDADO (`src/nl2sql.py:MotorLocal`, `ollama_disponivel`;
+  `src/config.py` seção "Motor local"). Números em RES-011 e RES-012: 22,2%
+  estrito com o prompt do preliminar, 72,2% na melhor célula; TARa@3 100%.
 - **Relacionado**: [piloto](../tcc/etapas/2026-09-13_piloto-modelo-local.md),
   [RNC-003](03_REGRAS_CRITICAS.md#rnc-003-determinismo-por-seed-e-sim_today)
   (a estabilidade do modelo é observada por TARa@k, não assumida),
@@ -309,10 +310,12 @@ estável `DA-[MOD]-[NUM]` citável pelos demais módulos e pela redação do TCC
   perguntas; a correção de literal pós-geração
   ([referencias/10](../referencias/10_CATALOGO_ALGORITMOS.md) §3) ficou fora
   desta matriz.
-- **Status**: IMPLEMENTADO (`src/nl2sql.py:VariantePrompt`, `descrever_schema`;
+- **Status**: VALIDADO (`src/nl2sql.py:VariantePrompt`, `descrever_schema`;
   `src/config.py:CELULAS`, `GOLD_NOTAS`, `VALUE_LINKING_MAX_VALORES`;
   `src/matriz.py`). Hipóteses e critério de decisão no
-  [registro da Etapa D](../tcc/etapas/2026-09-20_etapa-D.md).
+  [registro da Etapa D](../tcc/etapas/2026-09-20_etapa-D.md) §3; resultado
+  em §8 e RES-011: H2 e H3 confirmadas, H1 parcial (regressão em Q04 e
+  Q11), H4 confirmada; célula padrão C3 (`config.CELULA_PADRAO`).
 - **Relacionado**: [referencias/07](../referencias/07_MAPA_LITERATURA_PARA_CAMINHOS.md)
   caminhos 1 e 2, [DA-AVAL-004](#da-aval-004-desfechos-de-governança-em-dois-níveis).
 

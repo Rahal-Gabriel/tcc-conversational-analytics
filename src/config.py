@@ -178,7 +178,10 @@ CELULAS = (
     {"celula": "C4", "descricao": "enriquecida", "value_linking": True, "schema_por_perfil": True,
      "papel": "+ ambos"},
 )
-CELULA_PADRAO = "C1"
+# Celula vencedora da Etapa D pelo criterio pre-registrado (maior Safe-EX no
+# sistema; empate por menor Violation Rate no modelo e depois por menos tokens):
+# C3 e C4 empataram em Safe-EX (72,2%) e Violation (0); C3 venceu pelos tokens.
+CELULA_PADRAO = "C3"
 REPETICOES_MATRIZ = 3
 MATRIZ_DIR = RESULTS_DIR / "matriz"
 

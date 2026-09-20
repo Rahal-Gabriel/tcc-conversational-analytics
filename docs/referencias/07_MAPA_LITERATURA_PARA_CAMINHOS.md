@@ -28,8 +28,11 @@ Resumo da avaliação de cada caminho:
 > da Etapa D (`nl2sql.VariantePrompt.value_linking`, teto de 12 valores em
 > `config.VALUE_LINKING_MAX_VALORES`); hipótese H1 pré-registrada em
 > [tcc/etapas/2026-09-20_etapa-D.md](../tcc/etapas/2026-09-20_etapa-D.md)
-> §3.4. Tokens de entrada por pergunta são registrados por célula. Medição
-> pendente (D2).
+> §3.4. **Medido (RES-011)**: C2 vs C1 ganha Q06, Q12 e Q16 e perde Q04
+> (coluna a mais) e Q11 (coluna inventada); estrito 55,6% para 61,1%, Soft
+> F1 72,5% para 94,2%, tokens 529 para 687 por pergunta. H1 parcialmente
+> confirmada: a lacuna (value linking barato, só valores distintos) tem
+> resposta com regressão declarada.
 
 **O que se sabe.**
 - Expor valores enumerados nos metadados elevou a acurácia de consultas com
@@ -68,7 +71,11 @@ Gao et al. (2024) para tratar prompt como variável experimental.
 > (modelo e sistema), está implementada na Etapa C (DA-AVAL-004); o
 > experimento Full-Schema × Role-Schema está implementado como as células C3
 > e C4 da Etapa D (`VariantePrompt.schema_por_perfil`, com aviso explícito ao
-> modelo), hipótese H2 pré-registrada. Medição pendente (D2).
+> modelo), hipótese H2 pré-registrada. **Medido (RES-011)**: C3 vs C1 ganha
+> Q01, Q02 e Q16 sem perder nenhuma; Violation Correct 1 para 0, Violation
+> Wrong 0 para 0, Wrong 7 para 5; a alucinação de tabela prevista por Fei et
+> al. (2026) não ocorreu sob verificador determinista e aviso explícito. É
+> a célula padrão (`config.CELULA_PADRAO = "C3"`) e a resposta à P-10.
 
 **O que se sabe.**
 - Fei et al. (2026) definem seis desfechos (Correct, Wrong, Proper Refusal,

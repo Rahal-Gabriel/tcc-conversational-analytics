@@ -106,6 +106,18 @@ def normalizar(linhas):
     return sorted(normalizadas, key=lambda linha: tuple(str(c) for c in linha))
 
 
+def hash_normalizado(colunas, linhas_norm):
+    """Hash do resultado normalizado (insensivel a ordem das linhas).
+
+    E a assinatura usada pelo TARa@k. O hash da auditoria (`governance.hash_resultado`)
+    cobre o resultado como foi entregue, na ordem devolvida pelo banco; em SQL
+    com GROUP BY sem ORDER BY essa ordem nao e deterministica no DuckDB, e uma
+    assinatura sobre ela marcaria como discordantes respostas identicas. A
+    normalizacao e a mesma do execution match.
+    """
+    return governance.hash_resultado(colunas, linhas_norm)
+
+
 def executar(con, sql):
     """Executa uma SQL e devolve (colunas, linhas)."""
     cur = con.execute(sql)
@@ -363,6 +375,7 @@ def avaliar(motor, conjunto=None, trilha=None):
                 "colunas": colunas if aprovado else None,
                 "linhas": linhas_norm if aprovado else None,
                 "hash_resultado": governance.hash_resultado(colunas, linhas) if aprovado else None,
+                "hash_normalizado": hash_normalizado(colunas, linhas_norm) if aprovado else None,
                 "n_linhas": len(linhas) if aprovado else None,
                 "momento_utc": chamada.get("momento_utc"),
                 "latencia_ms": chamada.get("latencia_ms"),
@@ -458,8 +471,8 @@ def avaliar_repetido(motor, repeticoes, conjunto=None, trilha=None):
     rodada (mesmo a temperatura zero, um LLM nao e estritamente deterministico).
     Para cada pergunta, conta em quantas das k execucoes ela acertou (estrito e
     conteudo) e reporta o TARa@k (Atil et al. 2025): fracao das perguntas cuja
-    resposta entregue (desfecho do sistema e hash do resultado) foi identica
-    nas k execucoes, acertando ou nao.
+    resposta entregue (desfecho do sistema e hash do resultado normalizado,
+    insensivel a ordem das linhas) foi identica nas k execucoes, acertando ou nao.
     """
     execucoes = [avaliar(motor, conjunto, trilha) for _ in range(repeticoes)]
     m = [e["metricas"] for e in execucoes]
@@ -469,7 +482,7 @@ def avaliar_repetido(motor, repeticoes, conjunto=None, trilha=None):
     concordantes = 0
     for i, d in enumerate(base):
         por_exec = [e["detalhes"][i] for e in execucoes]
-        assinaturas = {(x["desfecho_sistema"], x["hash_resultado"]) for x in por_exec}
+        assinaturas = {(x["desfecho_sistema"], x["hash_normalizado"]) for x in por_exec}
         if len(assinaturas) == 1:
             concordantes += 1
         estabilidade.append({
@@ -745,7 +758,15 @@ def _autoteste():
         v = governance.verificar_trilha(trilha)
         assert not v["integra"] and v["quebra"] == alvo + 1
 
-        # 4. Repeticao: motor determinista concorda consigo mesmo (TARa = 1).
+        # 4. Repeticao: motor determinista concorda consigo mesmo (TARa = 1), e a
+        # assinatura do TARa ignora a ordem em que o banco devolveu as linhas
+        # (o hash da auditoria, sobre o resultado entregue, nao ignora).
+        linhas_a = [("livre", 42), ("ocupado", 150), ("bloqueado", 8)]
+        linhas_b = list(reversed(linhas_a))
+        assert hash_normalizado(["situacao", "n"], normalizar(linhas_a)) == \
+            hash_normalizado(["situacao", "n"], normalizar(linhas_b))
+        assert governance.hash_resultado(["situacao", "n"], linhas_a) != \
+            governance.hash_resultado(["situacao", "n"], linhas_b)
         trilha.unlink()
         rep = avaliar_repetido(nl2sql.obter_motor("oracle", "C3"), 2, trilha=trilha)
         assert rep["agregado"]["TARa"] == 1.0 and rep["agregado"]["AVAL-001_estrito"]["desvio"] == 0.0

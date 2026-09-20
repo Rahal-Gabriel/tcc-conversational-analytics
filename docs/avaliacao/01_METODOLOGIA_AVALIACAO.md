@@ -149,8 +149,13 @@ do execution match estrito, do set match, do Soft F1, do Safe-EX, do
 Over-Refusal Rate e do Violation Rate; a **estabilidade por pergunta** (em
 quantas das k execuções cada pergunta acertou); e o **TARa@k** (Atil et al.
 2025): fração das perguntas cuja resposta entregue (desfecho do sistema e hash
-do resultado) foi idêntica nas k execuções, acertando ou não. Implementado em
-`src/evaluate.py:avaliar_repetido`.
+do resultado **normalizado**, insensível à ordem das linhas) foi idêntica nas k
+execuções, acertando ou não. Implementado em `src/evaluate.py:avaliar_repetido`.
+A assinatura usa o resultado normalizado, e não o hash da auditoria, porque
+este cobre o resultado na ordem em que o banco o devolveu, que em GROUP BY sem
+ORDER BY não é determinística no DuckDB; a primeira execução da Etapa D marcou
+como discordantes respostas com SQL e conjunto de linhas idênticos por esse
+motivo (registrado em [tcc/etapas/2026-09-20_etapa-D.md](../tcc/etapas/2026-09-20_etapa-D.md) §8).
 
 ### Matriz de prompt (Etapa D)
 

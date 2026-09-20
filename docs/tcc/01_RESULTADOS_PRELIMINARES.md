@@ -440,20 +440,116 @@ minimizada.
   (`registrar_pergunta`, `registrar_resposta`, `verificar_trilha`),
   `src/questions.py:tipo_por_sql`, `src/config.py`.
 
+### RES-011: Matriz de prompt com motor local: value linking e Role-Schema medidos sob verificador determinista
+
+Execução da Etapa D ([tcc/etapas/2026-09-20_etapa-D.md](etapas/2026-09-20_etapa-D.md)
+§8), com hipóteses e critério de decisão datados antes dos números (§3 do
+mesmo registro). Motor local `qwen2.5-coder:14b` (Ollama, Q4_K_M, seed 42,
+temperatura 0), 18 perguntas × 5 células × k=3 = 270 chamadas, Gold
+minimizada e harness da Etapa C. Anexos versionados em
+`docs/tcc/anexos/etapa-D/` e tag git `etapa-D` (P-03).
+
+| Célula | Estrito (AVAL-001) | IC95% Wilson | Set match | Soft F1 | Safe-EX (sist.) | Violation (modelo) | Over-Refusal (sist.) | TARa@3 | Tokens/pergunta |
+|---|---|---|---|---|---|---|---|---|---|
+| C0 prompt do preliminar | 22,2% (4/18) | [9,0%; 45,2%] | 38,9% | 70,0% | 22,2% | 22,2% | 22,2% | 100% | 288 |
+| C1 descrição enriquecida (base) | 55,6% (10/18) | [33,7%; 75,4%] | 61,1% | 72,5% | 55,6% | 5,6% | 5,6% | 100% | 529 |
+| C2 + value linking | 61,1% (11/18) | [38,6%; 79,7%] | 72,2% | 94,2% | 61,1% | 5,6% | 5,6% | 100% | 687 |
+| C3 + schema por perfil | **72,2% (13/18)** | [49,1%; 87,5%] | 72,2% | 84,3% | **72,2%** | **0** | **0** | 100% | **463** |
+| C4 + ambos | **72,2% (13/18)** | [49,1%; 87,5%] | 77,8% | 89,0% | **72,2%** | **0** | **0** | 100% | 586 |
+
+Desvio zero em todas as métricas nas três execuções de cada célula. Os
+intervalos se sobrepõem (n=18) e nenhuma diferença é apresentada como
+significativa; a leitura é pareada por pergunta:
+
+| Hipótese | Comparação | Ganha | Perde | Resultado |
+|---|---|---|---|---|
+| H3 descrição enriquecida | C1 vs C0 | Q03, Q04, Q09, Q10, Q11, Q13 | nenhuma | confirmada; os erros de C0 são de vínculo de schema (coluna `data` suposta em tabela de fotografia) |
+| H1 value linking | C2 vs C1 | Q06, Q12, Q16 | Q04 (coluna a mais), Q11 (coluna inventada) | parcial: Q12 fecha, mas houve regressão |
+| H2 Role-Schema | C3 vs C1 | Q01, Q02, Q16 | nenhuma | confirmada; Violation Wrong permaneceu zero (a alucinação prevista por Fei et al. 2026 não ocorreu) |
+| ambos | C4 vs C1 | Q01, Q02, Q06, Q16 | Q04 | soma dos dois efeitos, menos a regressão de projeção |
+| H4 estabilidade | k=3 | | | confirmada: mesma SQL nas três chamadas para as 90 combinações pergunta × célula |
+
+**Célula vencedora**: pelo critério pré-registrado (Safe-EX, depois Violation
+Rate, depois tokens), C3 e C4 empatam nos dois primeiros e **C3 vence por
+tokens**; `config.CELULA_PADRAO = "C3"`. C4 é melhor nas secundárias (set
+match e Soft F1) e isso fica declarado; o critério foi mantido por ter sido
+fixado antes dos números.
+
+**Erros residuais** (C3): Q05 e Q14 (projeção incompleta, só a unidade sem
+a taxa; Soft F1 0,67), Q08 (dialeto: `DATE_SUB` do MySQL em DuckDB), Q06 e
+Q12 (literal: `'Cardiologia'` em vez de `'Unidade Cardiologia'`;
+`'enfermaria'` e um valor de situação inexistente). Em C4 sobram Q04
+(projeção em excesso), Q05, Q14, Q08 e Q12 (filtro extra de situação).
+Nenhum erro de cálculo.
+
+**P-10 respondida**: o "custo da governança" do preliminar (11,1 pontos, dois
+Violation Correct barrados) cai a 5,6 pontos com a descrição enriquecida (C1)
+e a **zero** quando o prompt informa o escopo do perfil (C3, C4), sem
+regressão. Era artefato do desenho do prompt. O verificador segue
+necessário: Violation Rate no nível do sistema é zero em todas as células,
+inclusive em C0, onde o modelo violou a política em 4 de 18.
+
+**Defeito de medição corrigido antes de reportar**: a primeira execução do
+dia marcou como discordantes (TARa@3 de 77,8% a 83,3%) perguntas com SQL e
+resultado idênticos, porque a assinatura usava o hash do resultado na ordem
+em que o DuckDB o devolveu (não determinística em GROUP BY sem ORDER BY). A
+assinatura passou a usar o resultado normalizado, a matriz foi re-executada,
+e todas as outras métricas ficaram iguais entre as duas execuções (registro
+em §8.2 e §8.6 da etapa).
+
+- **Status**: VALIDADO (execução real, 270 chamadas, trilha íntegra com 540
+  registros, anexos versionados, tag). Pendente para P-08: repetir C3 em
+  outro dia antes do depósito.
+- **Evidência**: `docs/tcc/anexos/etapa-D/` (`matriz_local.md`,
+  `avaliacao_local_C0..C4.json`, `sql_geradas_local.md`, `auditoria.log`);
+  `src/matriz.py`; `src/evaluate.py:hash_normalizado`.
+
+### RES-012: Comparação com os Resultados Preliminares pela célula C0
+
+A única comparação legítima com o preliminar (RES-007) é pela célula C0, que
+preserva o prompt daquela execução. Três diferenças são declaradas: o modelo
+(`claude-sonnet-4-6` via API antes; `qwen2.5-coder:14b` local agora), a Gold
+(minimizada na Etapa B, com k-anonimato) e o harness (tipos re-rotulados,
+Soft F1, desfechos em dois níveis, Etapa C).
+
+| | Preliminar (Sonnet, RES-007) | C0 (Qwen 14B local) | Melhor célula local (C3/C4) |
+|---|---|---|---|
+| Execution match estrito | 61,1% (11/18) | 22,2% (4/18) | 72,2% (13/18) |
+| Set match de conteúdo | 94,4% | 38,9% | 72,2% / 77,8% |
+| Soft F1 | não calculável (SQL não guardadas) | 70,0% | 84,3% / 89,0% |
+| Over-Refusal (sistema) | 2 (Q01, Q11) | 4 (Q01, Q03, Q11, Q12) | 0 |
+| Violation Wrong (modelo) | não classificável | 1 (Q12) | 0 |
+| Estabilidade | 3 execuções contíguas, desvio nulo, sem horário | TARa@3 100%, horário UTC por chamada | idem |
+
+Leitura: com o prompt do preliminar, o modelo local fica muito abaixo do
+Sonnet (22,2% contra 61,1%); com a descrição enriquecida e o schema do
+perfil, alcança e supera o número do preliminar (72,2%). Como modelo, Gold e
+harness mudaram ao mesmo tempo, **nenhuma afirmação de superioridade** entre
+modelos é feita; o que a matriz sustenta é que o desenho do prompt pesou
+mais do que a troca de modelo, e que a hipótese original de acurácia acima
+de 80% continua **não confirmada** sob execution match estrito (72,2%, IC
+[49,1%; 87,5%]). A ponte com o Sonnet nas células C0 e C3 só será feita se
+houver crédito de API.
+
+- **Status**: VALIDADO (mesmos anexos de RES-011).
+- **Evidência**: `docs/tcc/anexos/etapa-D/avaliacao_local_C0.json`;
+  RES-007 para os números do preliminar.
+
 ## 5. O que ainda falta
 
-Os primeiros números reais já foram coletados (RES-007: 61,1% de execution match
-estrito em 18 perguntas). A hipótese de acurácia superior a 80% **ainda não se
-confirma** sob execution match estrito; a análise de erros indica que o teto é
-puxado pela forma do resultado e pela governança, não por erro de cálculo. As
-próximas entregas atacam essas frentes:
+Os números do motor local já foram coletados (RES-011: 72,2% de execution
+match estrito na melhor célula, 18 perguntas, k=3). A hipótese de acurácia
+superior a 80% **ainda não se confirma** sob execution match estrito; os erros
+residuais são de projeção, dialeto e literal, não de cálculo, e o custo da
+governança caiu a zero com o schema por perfil. As próximas entregas:
 
 | Próxima entrega | Onde | Resultado que habilita |
 |---|---|---|
-| Value linking (valores categóricos no prompt) | Etapa D, célula C2 (`nl2sql.VariantePrompt`) | Corrigir erros como Q12 (`'enfermaria'` vs `'Enfermaria'`); hipótese H1 pré-registrada |
-| Discussão da métrica forma-sensível | `evaluate.py` / `tcc` | Concluída na Etapa C (RES-010): Soft F1 e desfechos nomeados; números na Etapa D |
-| Ampliação e estratificação do conjunto | `questions.py` | Reduzir ruído e medir por tipo de pergunta e por perfil (cruzar tipo × perfil) |
-| Remedição sobre a Gold minimizada com o harness revisto, motor local, matriz de cinco células | Etapa D (D1 entregue em 2026-09-20: código e pré-registro; D2: execução) | RES-011 e RES-012, anexos versionados em `docs/tcc/anexos/etapa-D/`, tag `etapa-D` |
+| Value linking (valores categóricos no prompt) | Concluído na Etapa D, célula C2 (RES-011) | Q12 fechou; houve regressão em Q04 e Q11, declarada |
+| Discussão da métrica forma-sensível | Concluída na Etapa C (RES-010); números na Etapa D (RES-011) | Soft F1 por célula; erros residuais de projeção nomeados |
+| Repetição da célula vencedora em outro dia (P-08) | `run_all.py llm --motor local --celula C3 --repeticoes 3`, antes do depósito | TARa entre dias ao lado do TARa@3 de cada dia |
+| Conjunto adversarial e abstenção | Etapa E | Proper Refusal medido; inventário do que sai para a API |
+| Ampliação e estratificação do conjunto | `questions.py` | Reduzir ruído e medir por tipo de pergunta e por perfil (cruzar tipo × perfil); fica como limitação se não couber no prazo |
 
 Cada novo ajuste será medido e reportado de forma transparente (bruto × refinado),
 sem iterar sobre o mesmo conjunto a ponto de overfittar (RNC-002).
@@ -465,7 +561,8 @@ Ver o índice reverso em [02_MAPA_DOC_PARA_TEMPLATE.md](02_MAPA_DOC_PARA_TEMPLAT
 - **Metodologia**: determinismo, ambiente versionado e harness de avaliação
   descrevem o material e os métodos de forma reprodutível.
 - **Resultados Preliminares**: RES-001 a RES-007 são os resultados parciais
-  apresentáveis; RES-008 em diante são os resultados da fase de conclusão.
+  apresentáveis; RES-008 em diante são os resultados da fase de conclusão
+  (RES-011 e RES-012 trazem os números do motor local, com anexos e tag).
 - **Integridade**: os números do modelo (RES-007: 60,0% e 61,1%) vêm de execução
   real, com a metodologia decidida antes de re-rodar e os valores bruto e refinado
   reportados lado a lado; o 100% do oráculo (RES-006) é autoteste da tubulação, não

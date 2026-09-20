@@ -1,6 +1,6 @@
 # NL2SQL: Camada 3 - Motor Text-to-SQL
 
-**Status**: IMPLEMENTADO (três motores e as cinco células de prompt; os números do motor local saem na execução da Etapa D, RNC-002)
+**Status**: VALIDADO (três motores; as cinco células de prompt medidas com o motor local na Etapa D, RES-011: C3 é a célula padrão, 72,2% estrito, Violation e Over-Refusal zero)
 **Prioridade**: ALTA
 **Última atualização**: 2026-09-20
 **Alimenta (template TCC)**: Metodologia · Resultados e Discussão
