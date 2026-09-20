@@ -12,7 +12,7 @@ para ela (fonte única de verdade, sem duplicação).
 ## Propósito
 
 Protótipo funcional de uma arquitetura de referência para consulta em linguagem
-natural sobre dados clínicos, com governança integrada e aderente à LGPD, às
+natural sobre dados clínicos, com governança integrada e projetada para atender à LGPD, às
 normas da ANVISA e às diretrizes da ANPD. O domínio é a **ocupação de leitos
 hospitalares**. Toda a pesquisa usa dados **100% sintéticos**.
 
@@ -113,6 +113,7 @@ tcc-conversational-analytics/
     questions.py        # conjunto de avaliacao (pergunta PT + SQL de referencia)
     evaluate.py         # execution match, desfechos de governanca, Soft F1, auditoria
     matriz.py           # matriz de celulas de prompt (Etapa D): relatorios, resumo e SQL geradas
+    adversarial.py      # conjunto adversarial e abstencao (Etapa E): celulas E0/E1, RS(c), familias
   data/                 # banco DuckDB gerado (nao versionar)
   results/              # saidas de avaliacao e log de auditoria (nao versionar)
 ```
@@ -162,6 +163,7 @@ export ANTHROPIC_MODEL="claude-sonnet-4-6"        # opcional, padrao
 ```bash
 python run_all.py llm --motor local --celula C2 --repeticoes 3   # uma celula de prompt
 python run_all.py llm --motor local --matriz                     # cinco celulas, k=3 (Etapa D)
+python run_all.py llm --motor local --adversarial                # E0 e E1 sobre 18 legitimas + 25 adversariais (Etapa E)
 ```
 
 As células de prompt (C0 a C4) estão pré-registradas em `config.CELULAS`.

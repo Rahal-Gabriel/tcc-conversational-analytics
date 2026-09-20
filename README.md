@@ -1,7 +1,7 @@
 # Conversational Analytics em saude (prototipo de TCC)
 
 Prototipo funcional de uma arquitetura de referencia para consulta em linguagem
-natural sobre dados clinicos, com governanca integrada e aderente a LGPD, as
+natural sobre dados clinicos, com governanca integrada e projetada para atender a LGPD, as
 normas da ANVISA e as diretrizes da ANPD. O dominio de avaliacao e a **ocupacao
 de leitos hospitalares**, e toda a pesquisa usa dados **100% sinteticos**.
 
@@ -70,6 +70,7 @@ export ANTHROPIC_MODEL="claude-sonnet-4-6"        # opcional, este e o padrao
 python run_all.py oracle                                         # autoteste, sem modelo
 python run_all.py llm --motor local --celula C2 --repeticoes 3   # uma celula de prompt
 python run_all.py llm --motor local --matriz                     # cinco celulas, k=3 (Etapa D)
+python run_all.py llm --motor local --adversarial                # E0 e E1 sobre 18 legitimas + 25 adversariais (Etapa E)
 ```
 
 Os demais parametros (data de referencia, semente, volumes, perfis de acesso)
@@ -92,6 +93,7 @@ tcc-conversational-analytics/
     questions.py       # conjunto de avaliacao (18 perguntas, SQL de referencia)
     evaluate.py        # execution match, desfechos de governanca e Soft F1
     matriz.py          # matriz de celulas de prompt (Etapa D)
+    adversarial.py     # conjunto adversarial e abstencao (Etapa E)
   data/                # lakehouse.duckdb (Bronze/Silver/Gold) e gold_isolada.duckdb (so Gold), nao versionados
   results/             # saidas de avaliacao e log de auditoria (nao versionado)
 ```

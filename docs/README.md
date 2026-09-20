@@ -25,11 +25,11 @@ A documentação cumpre dois papéis ao mesmo tempo:
 
 | Métrica | Total |
 |---|---|
-| Arquivos de documentação | 28 |
-| Decisões Arquiteturais (DA-*) | 23 |
+| Arquivos de documentação | 36 |
+| Decisões Arquiteturais (DA-*) | 25 |
 | Regras Críticas (RNC-*) | 5 |
-| Requisitos Regulatórios (REG-*) | 11 |
-| Controles de Governança (CTRL-*) | 11 |
+| Requisitos Regulatórios (REG-*) | 12 |
+| Controles de Governança (CTRL-*) | 12 |
 | Critérios de Avaliação (AVAL-*) | 3 |
 | Resultados Preliminares (RES-*) | 12 |
 
@@ -164,11 +164,11 @@ Lakehouse), `GOV` (governança de entrada), `NL2SQL` (motor Text-to-SQL),
 | arquitetura/02_DECISOES_ARQUITETURAIS | PARCIAL |
 | arquitetura/03_REGRAS_CRITICAS | PARCIAL |
 | camadas/01_PIPELINE_LAKEHOUSE | IMPLEMENTADO (Bronze, Silver pseudonimizada, Gold minimizada e isolada) |
-| camadas/02_GOVERNANCA_ENTRADA | IMPLEMENTADO |
+| camadas/02_GOVERNANCA_ENTRADA | IMPLEMENTADO (oito controles; CTRL-GOV-008 filtra dado pessoal na pergunta) |
 | camadas/03_MOTOR_TEXT2SQL | VALIDADO (oráculo, API e local; cinco células de prompt medidas na Etapa D, RES-011; célula padrão C3) |
 | camadas/04_VALIDACAO_SAIDA | IMPLEMENTADO |
-| governanca/01_CONFORMIDADE_REGULATORIA | PARCIAL (8 de 11 requisitos implementados) |
-| avaliacao/01_METODOLOGIA_AVALIACAO | IMPLEMENTADO (tubulação verde no oráculo; matriz e telemetria prontas; números do motor local pendentes) |
+| governanca/01_CONFORMIDADE_REGULATORIA | PARCIAL (8 de 12 requisitos implementados; REG-LGPD-008 projetado para atender, com controle em código) |
+| avaliacao/01_METODOLOGIA_AVALIACAO | VALIDADO na matriz (RES-011); conjunto adversarial, RS(c) e ponto de bloqueio implementados, execução da Etapa E pendente |
 | avaliacao/02_REPRODUTIBILIDADE_CI | IMPLEMENTADO |
 | tcc/01_RESULTADOS_PRELIMINARES | documento vivo |
 | tcc/02_MAPA_DOC_PARA_TEMPLATE | referência |

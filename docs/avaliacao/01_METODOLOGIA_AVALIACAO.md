@@ -92,7 +92,7 @@ verificador por LLM). Indicadores, por nível:
 | Safe-EX | Correct / perguntas a responder |
 | Violation Rate | (Violation Correct + Violation Wrong) / total. Esperado 0 no nível do sistema. |
 | Over-Refusal Rate | Over-Refusal / perguntas a responder |
-| Proper Refusal Rate | Proper Refusal / perguntas a recusar (`n/a` até o conjunto adversarial da Etapa E) |
+| Proper Refusal Rate | Proper Refusal / perguntas a recusar (só existe no conjunto combinado da Etapa E) |
 
 - **Status**: IMPLEMENTADO (`src/evaluate.py:classificar_desfechos`,
   `_indicadores_desfechos`); autoteste com motor de falhas sintético que cobre
@@ -172,6 +172,26 @@ nenhuma diferença é apresentada como significativa. Hipóteses e critério de
 decisão estão datados no [registro da Etapa D](../tcc/etapas/2026-09-20_etapa-D.md)
 §3, escrito antes da execução.
 
+### Conjunto adversarial, abstenção e Reliability Score (Etapa E)
+
+A metade "recusa devida" do AVAL-002 é medida com o conjunto combinado
+(`questions.CONJUNTO_COMBINADO`: 18 legítimas e 25 adversariais em cinco
+famílias, [DA-AVAL-006](../arquitetura/02_DECISOES_ARQUITETURAIS.md#da-aval-006-recusa-devida-ponto-de-bloqueio-e-reliability-score)),
+em duas células que só diferem pela instrução de recusa (E0 sem, E1 com;
+`config.CELULAS_E`). O relatório passa a trazer, por pergunta, o **ponto de
+bloqueio** (`modelo`, `entrada:<CTRL>`, `saida:<CTRL>`, `execucao`,
+`entregue`) e a família; por execução, os desfechos por família, os pontos
+de bloqueio, o **Reliability Score** RS(c) de Lee et al. (2024) com c em
+{0, 10, N} nos dois níveis (`evaluate.reliability_score`) e a **regra
+contrafactual do resultado vazio** (`evaluate.contrafactual_vazio`). O
+CTRL-GOV-008 roda antes do motor: pergunta com dado pessoal é barrada na
+entrada e, nos dois níveis, é recusa do sistema (o modelo não chegou a
+agir). `src/adversarial.py` consolida as duas células (`adversarial_<motor>.json`
+e `.md`): custo da instrução nas legítimas (estrito, Over-Refusal), recusa
+devida por família e por nível, RS, contrafactual, TARa@k e a comparação
+pareada E1 contra E0 pelo desfecho do sistema. Pré-registro em
+[tcc/etapas/2026-09-20_etapa-E.md](../tcc/etapas/2026-09-20_etapa-E.md).
+
 ### Artefatos guardados
 
 O relatório (`results/avaliacao_<motor>[_<célula>].json`) guarda, por
@@ -199,9 +219,14 @@ repetição em outro dia (P-08), não assumida. A CI executa apenas o oráculo.
 
 Implementado em `src/questions.py`: cada item liga uma pergunta em português a
 uma SQL de referência sobre a Gold, com perfil, tipo e desfecho esperado. O
-conjunto tem **18 perguntas**, todas a responder. Toda SQL de referência é
-determinista (ancorada em `SIM_TODAY`), não pré-arredonda valores agregados e
-passa pelos guardrails de entrada no escopo do próprio perfil.
+conjunto legítimo tem **18 perguntas**, todas a responder. Toda SQL de
+referência é determinista (ancorada em `SIM_TODAY`), não pré-arredonda
+valores agregados e passa pelos guardrails de entrada no escopo do próprio
+perfil. O conjunto adversarial (Etapa E) tem **25 perguntas** a recusar, sem
+SQL de referência, em cinco famílias de cinco (`config.FAMILIAS_ADVERSARIAIS`):
+dado pessoal, camada interna, fora do perfil, injeção em linguagem natural e
+não respondível pelo schema; a lista completa, com a barreira esperada por
+pergunta, está no pré-registro da etapa.
 
 ### Critério de tipo (DA-AVAL-003)
 
@@ -250,6 +275,9 @@ Gold isolada ([CTRL-GOV-006 e 007](../camadas/02_GOVERNANCA_ENTRADA.md)).
 | Item | Local | Status |
 |---|---|---|
 | Conjunto pergunta → SQL de referência, tipo por SQL, desfecho esperado | `src/questions.py`, `tipo_por_sql` | IMPLEMENTADO (18 perguntas) |
+| Conjunto adversarial e combinado | `src/questions.py:ADVERSARIAL`, `CONJUNTO_COMBINADO`; `config.FAMILIAS_ADVERSARIAIS` | IMPLEMENTADO (25 perguntas) |
+| Ponto de bloqueio, RS(c), famílias e contrafactual do vazio | `src/evaluate.py:ponto_bloqueio`, `reliability_score`, `contrafactual_vazio` | IMPLEMENTADO |
+| Execução das células E0 e E1 | `src/adversarial.py`; `run_all.py llm --motor local --adversarial` | IMPLEMENTADO (execução real pendente) |
 | Normalização dos resultados (tolerância 2 casas) | `src/evaluate.py:normalizar`, `CASAS_DECIMAIS` | IMPLEMENTADO |
 | Set match de conteúdo | `src/evaluate.py:conteudo_coberto` | IMPLEMENTADO |
 | Soft F1 (BIRD) | `src/evaluate.py:soft_f1` | IMPLEMENTADO |
@@ -257,11 +285,11 @@ Gold isolada ([CTRL-GOV-006 e 007](../camadas/02_GOVERNANCA_ENTRADA.md)).
 | Desfechos em dois níveis e indicadores (AVAL-002) | `src/evaluate.py:classificar_desfechos`, `CONTROLES_POLITICA`, `config.MARCADOR_RECUSA` | IMPLEMENTADO |
 | Completude e integridade da trilha (AVAL-003) | `src/governance.py:verificar_trilha`, lida em `src/evaluate.py:avaliar` | IMPLEMENTADO |
 | Múltiplas execuções, estabilidade e TARa@k | `src/evaluate.py:avaliar_repetido`, `run_all.py --repeticoes` | IMPLEMENTADO |
-| Orquestração (`oracle` / `llm`) | `run_all.py` | IMPLEMENTADO |
+| Orquestração (`oracle` / `llm`, `--matriz`, `--adversarial`) | `run_all.py` | IMPLEMENTADO |
 
 ## 6. Definição de pronto da avaliação
 
 Os números de pesquisa só são coletados com um motor real. A CI roda
-`python -m src.evaluate` (oráculo e motor de falhas) e `run_all.py oracle`
-(autoteste, sem custo). Ver
+`python -m src.evaluate` (oráculo e motor de falhas), `python -m src.matriz`,
+`python -m src.adversarial` e `run_all.py oracle` (autotestes, sem custo). Ver
 [avaliacao/02_REPRODUTIBILIDADE_CI.md](02_REPRODUTIBILIDADE_CI.md).

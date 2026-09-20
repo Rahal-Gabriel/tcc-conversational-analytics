@@ -46,7 +46,12 @@ Conforme [DA-NL2SQL-002](../arquitetura/02_DECISOES_ARQUITETURAIS.md#da-nl2sql-0
   explicação, usando só o schema fornecido, projetando **apenas as colunas
   necessárias** e **sem arredondar** valores agregados (a tolerância numérica
   vive na avaliação, `src/evaluate.py:CASAS_DECIMAIS`). São esclarecimentos
-  de especificação, não ajuste de resposta.
+  de especificação, não ajuste de resposta. Na Etapa E, a célula E1
+  acrescenta ao fim uma frase de recusa (`config.INSTRUCAO_RECUSA`): se a
+  pergunta não puder ser respondida com o schema, ou pedir dados de pessoas
+  identificáveis, responder apenas `RECUSA`. Ela informa que abster-se é uma
+  saída válida sem descrever a política de acesso, que continua a cargo do
+  verificador determinista (`nl2sql.prompt_sistema`).
 - **Prompt do usuário**: a descrição do schema Gold (conforme a variante), a
   data de referência (`SIM_TODAY`) para ancorar "hoje" e "agora", e a
   pergunta. No Role-Schema, uma frase avisa que só as tabelas listadas existem
@@ -81,6 +86,11 @@ perguntas; isso fica declarado como limitação no
 o Role-Schema seguem os caminhos 1 e 2 de
 [referencias/07](../referencias/07_MAPA_LITERATURA_PARA_CAMINHOS.md).
 
+As células da Etapa E (`config.CELULAS_E`) herdam a variante da célula
+padrão (C3) e variam só a instrução de recusa: E0 (sem) e E1 (com). O
+oráculo se abstém nas perguntas adversariais (`questions.ADVERSARIAL`), o que
+mantém o autoteste em 100% de recusa devida sem chamar modelo algum.
+
 ### 3.2 Configuração das chamadas
 
 Tudo em `src/config.py`, seção "Configuração do LLM via API" e "Motor local";
@@ -103,6 +113,23 @@ Os dois motores expõem `ultima_chamada` (tokens, latência, horário) e
 execução; é o que permite reportar tokens de entrada por célula e dizer
 exatamente quais pesos responderam.
 
+### 3.3 O que sai do perímetro, por motor (REG-LGPD-008)
+
+Inventário feito a partir do código (`src/nl2sql.py`), em resposta à banca
+simulada ([rodada 01, P-18](../tcc/banca/2026-09-13_rodada-01.md)):
+
+| Motor | Sai do perímetro | Nunca sai |
+|---|---|---|
+| API (`MotorLLM`, `api.anthropic.com`) | a instrução de sistema; a descrição do schema Gold (nomes de tabela e coluna, tipos, notas e unidades de `GOLD_NOTAS`); os valores distintos das colunas categóricas, **só** nas células com value linking (C2, C4); o texto da pergunta, já filtrado por [CTRL-GOV-008](02_GOVERNANCA_ENTRADA.md) (CPF, e-mail e telefone barrados antes da chamada) | linhas da Gold; qualquer coisa da Bronze ou da Silver; a chave HMAC; o resultado da consulta; a SQL de referência |
+| Local (`MotorLocal`, `localhost`) | nada: a chamada não deixa a máquina | tudo |
+
+A implantação local é a decisão de arquitetura para o caso de uso
+hospitalar ([DA-GOV-003](../arquitetura/02_DECISOES_ARQUITETURAIS.md#da-gov-003-implantação-local-como-decisão-de-arquitetura-e-inventário-do-que-sai-do-perímetro)),
+e a API fica como alternativa declarada, com o inventário acima e o filtro
+de dado pessoal como condições. Nome próprio na pergunta não é detectado
+pelo filtro (limitação declarada); a abstração do schema e dos valores antes
+do envio (MaskSQL, Abedini et al. 2025) é o trabalho futuro para esse caso.
+
 ## 4. Relação com as camadas vizinhas
 
 - A SQL produzida pelo motor **não é executada diretamente**: passa antes pelos
@@ -121,20 +148,25 @@ exatamente quais pesos responderam.
 |---|---|---|
 | Motores oráculo, API e local; interface comum | `src/nl2sql.py` (`MotorOraculo`, `MotorLLM`, `MotorLocal`, `obter_motor`) | IMPLEMENTADO |
 | Variante de prompt e células | `src/nl2sql.py:VariantePrompt`; `src/config.py:CELULAS`, `CELULA_PADRAO` | IMPLEMENTADO |
+| Instrução de recusa e células da Etapa E | `src/nl2sql.py:prompt_sistema`, `VariantePrompt.instrucao_recusa`; `src/config.py:INSTRUCAO_RECUSA`, `CELULAS_E` | IMPLEMENTADO (execução real pendente) |
+| Inventário do que sai do perímetro | §3.3 deste módulo; `src/governance.py:filtrar_pii` | DOCUMENTADO |
 | Introspecção e descrição do schema Gold | `src/nl2sql.py:introspectar_gold`, `descrever_schema` | IMPLEMENTADO |
 | Dicionário de dados da Gold | `src/config.py:GOLD_NOTAS` | IMPLEMENTADO |
 | Parâmetros dos motores | `src/config.py` (seções "Configuração do LLM via API" e "Motor local") | IMPLEMENTADO |
 | Disponibilidade do servidor local | `src/nl2sql.py:ollama_disponivel` | IMPLEMENTADO |
-| Execução da matriz de células | `src/matriz.py`; `run_all.py llm --motor local --matriz` | IMPLEMENTADO (execução real pendente) |
-| Conjunto pergunta → SQL de referência | `src/questions.py` | IMPLEMENTADO (18 perguntas) |
+| Execução da matriz de células | `src/matriz.py`; `run_all.py llm --motor local --matriz` | VALIDADO (RES-011) |
+| Execução do conjunto adversarial (E0, E1) | `src/adversarial.py`; `run_all.py llm --motor local --adversarial` | IMPLEMENTADO (execução real pendente) |
+| Conjunto pergunta → SQL de referência, e conjunto adversarial | `src/questions.py` (`CONJUNTO`, `ADVERSARIAL`, `CONJUNTO_COMBINADO`) | IMPLEMENTADO (18 + 25 perguntas) |
 
 ## 6. Teste rápido
 
 `python -m src.nl2sql`: o oráculo devolve a SQL de referência de cada pergunta;
 as cinco células renderizam prompts distintos, C0 reproduz exatamente o formato
 do preliminar, C2 traz os valores distintos, C3 omite as tabelas fora do perfil
-e inclui o aviso. Os motores reais só são exercitados quando há chave (API) ou
-servidor respondendo (local); sem eles são pulados, e a CI nunca os executa.
+e inclui o aviso; E1 rende o mesmo schema de C3 com a frase de recusa na
+instrução de sistema, e o oráculo se abstém nas adversariais. Os motores
+reais só são exercitados quando há chave (API) ou servidor respondendo
+(local); sem eles são pulados, e a CI nunca os executa.
 `python -m src.matriz` roda a tubulação da matriz com o oráculo em pasta
 temporária. O execution match de 100% do oráculo é verificado de ponta a ponta
 em `python run_all.py oracle`. Qualquer divergência indica erro no harness,

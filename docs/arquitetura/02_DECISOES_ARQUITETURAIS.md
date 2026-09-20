@@ -224,6 +224,35 @@ estável `DA-[MOD]-[NUM]` citável pelos demais módulos e pela redação do TCC
 
 ---
 
+### DA-GOV-003: Implantação local como decisão de arquitetura e inventário do que sai do perímetro
+
+- **Decisão**: O motor de referência para o caso de uso hospitalar é o local
+  (`MotorLocal`, Ollama em `localhost`), em que nada sai do perímetro. O motor
+  via API permanece como alternativa declarada, sob duas condições: o
+  inventário do que sai, mantido em [camadas/03](../camadas/03_MOTOR_TEXT2SQL.md)
+  §3.3 (instrução, descrição do schema, valores categóricos só com value
+  linking, e a pergunta), e o filtro de dado pessoal na pergunta antes da
+  chamada (CTRL-GOV-008: CPF, e-mail e telefone barrados e mascarados; nome
+  próprio é limitação declarada).
+- **Motivação**: a banca simulada (rodada 01, P-18) observou que a pergunta
+  saía em claro para `api.anthropic.com` e ficava na auditoria com o eventual
+  dado pessoal dentro, o que numa implantação real seria transferência de
+  dado a terceiro (LGPD art. 33). A literatura mais próxima do protótipo usa
+  implantação local (Al Attrach et al. 2025); a abstração do schema e dos
+  valores antes do envio (Abedini et al. 2025, MaskSQL) é a alternativa para
+  quem precisa da API, e fica como trabalho futuro. A Etapa D já havia
+  escolhido o motor local por custo e procedência (DA-NL2SQL-003); esta
+  decisão o torna também a resposta de governança.
+- **Alternativas descartadas**: MaskSQL como implementação (custo de
+  acurácia de 13 a 20 pontos no BIRD e fora do prazo); filtro de nome próprio
+  por lista ou por modelo (falso positivo alto em português e sem garantia).
+- **Status**: IMPLEMENTADO (`src/governance.py:filtrar_pii`,
+  `src/config.py:PADROES_PII`; inventário em camadas/03 §3.3;
+  REG-LGPD-008). Etapa E, 2026-09-20.
+- **Relacionado**: [DA-NL2SQL-003](#da-nl2sql-003-motor-local-com-modelo-aberto-via-ollama),
+  [RNC-004](03_REGRAS_CRITICAS.md#rnc-004-nenhuma-credencial-no-código-ou-no-histórico-do-git),
+  [referencias/09](../referencias/09_PRIVACIDADE_E_MINIMIZACAO.md).
+
 ## Motor Text-to-SQL (NL2SQL)
 
 ### DA-NL2SQL-001: Motores intercambiáveis (oráculo, API e local)
@@ -462,3 +491,36 @@ estável `DA-[MOD]-[NUM]` citável pelos demais módulos e pela redação do TCC
 - **Status**: IMPLEMENTADO (`src/evaluate.py:soft_f1`).
 - **Relacionado**: [AVAL, secundárias](../avaliacao/01_METODOLOGIA_AVALIACAO.md),
   ficha do BIRD em [referencias/02](../referencias/02_METRICAS_E_AVALIACAO.md).
+
+### DA-AVAL-006: Recusa devida, ponto de bloqueio e Reliability Score
+
+- **Decisão**: O conjunto de avaliação ganha 25 perguntas adversariais em
+  cinco famílias (`questions.ADVERSARIAL`, `esperado="recusar"`), e o harness
+  passa a reportar, além dos desfechos de Fei et al. (2026): o **ponto de
+  bloqueio** de cada pergunta (`modelo`, `entrada:<CTRL>`, `saida:<CTRL>`,
+  `execucao`, `entregue`), os desfechos **por família**, o **Reliability
+  Score** RS(c) de Lee et al. (2024, EHRSQL 2024) com c em {0, 10, N} em
+  dois níveis (sistema: o que o usuário recebeu, nada entregue conta como
+  abstenção; modelo: o que o modelo tentou, qualquer SQL para pergunta a
+  recusar vale −c) e a **regra contrafactual do resultado vazio** (o que
+  mudaria se todo resultado aprovado com zero linhas virasse abstenção),
+  calculada sobre os relatórios sem nova chamada. A abstenção pelo modelo é
+  variável pré-registrada (células E0 e E1, `config.CELULAS_E`).
+- **Motivação**: o AVAL-002 media só a metade "recusa indevida"; sem
+  perguntas a recusar, o Proper Refusal Rate não existia e a parte "em
+  conformidade" da hipótese se apoiava em teste unitário (banca, rodada 01,
+  P-12). O EHRSQL 2024, referência de avaliação do projeto, é centralmente
+  sobre abstenção; o ponto de bloqueio responde "onde o sistema parou" e é o
+  dado comparável com Fei et al. (2026) e Miyamoto et al. (2026).
+- **Alternativas descartadas**: limiar de probabilidade (ProbGate, EHRSQL
+  2024), inviável pela API do Ollama; fine-tuning para recusa (Klisura et
+  al. 2025), fora do escopo; sexta família de perguntas ambíguas (TrustSQL
+  trata "inviável" como incompatível com o schema ou além do SQL).
+- **Status**: IMPLEMENTADO (`src/evaluate.py:ponto_bloqueio`,
+  `reliability_score`, `contrafactual_vazio`, `_por_familia`;
+  `src/adversarial.py`; `src/questions.py:ADVERSARIAL`). Hipóteses H5 a H8
+  e critério de decisão no [registro da Etapa E](../tcc/etapas/2026-09-20_etapa-E.md)
+  §3; números na execução (RES-013).
+- **Relacionado**: [DA-AVAL-004](#da-aval-004-desfechos-de-governança-em-dois-níveis),
+  [DA-GOV-003](#da-gov-003-implantação-local-como-decisão-de-arquitetura-e-inventário-do-que-sai-do-perímetro),
+  [referencias/07](../referencias/07_MAPA_LITERATURA_PARA_CAMINHOS.md) caminho 5.

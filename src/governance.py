@@ -29,6 +29,14 @@ Determinismo (RNC-003): dados e metricas continuam deterministas; o horario
 real do log fica explicitamente fora dessa exigencia, porque um registro sem
 tempo real nao sustenta responsabilizacao (banca, rodada 01, P-20).
 
+Dado pessoal na pergunta (CTRL-GOV-008, Etapa E): antes de qualquer chamada ao
+motor e antes do registro na trilha, o texto da pergunta e verificado contra
+padroes de CPF, e-mail e telefone (config.PADROES_PII). Se houver ocorrencia,
+a pergunta e recusada na entrada e o trecho e mascarado; o texto original
+nunca chega ao motor (que pode ser uma API externa) nem ao log. Nome proprio
+nao e detectavel por padrao e fica declarado como limitacao (banca, rodada
+01, P-18; mitigacao: implantacao local, DA-GOV-003).
+
 Autenticacao: `usuario` e `perfil` sao recebidos do chamador. No prototipo nao
 ha provedor de identidade; o ponto de integracao e a assinatura de
 registrar_pergunta, que numa implantacao receberia a identidade verificada
@@ -87,6 +95,13 @@ _RE_CAMADA_INTERNA = re.compile(r"\b(bronze|silver)\b", re.IGNORECASE)
 # CTRL-GOV-005: extrai cada tabela referenciada no schema gold.
 _RE_TABELA_GOLD = re.compile(r"\bgold\s*\.\s*(\w+)", re.IGNORECASE)
 
+# CTRL-GOV-008: padroes de dado pessoal no texto da pergunta (config.PADROES_PII).
+_RE_PII = {nome: re.compile(padrao) for nome, padrao in config.PADROES_PII.items()}
+
+# Resultado do filtro de dado pessoal: `texto` e a pergunta mascarada (igual a
+# original quando nada foi encontrado) e `achados` lista os tipos detectados.
+ResultadoPII = namedtuple("ResultadoPII", "aprovado controle motivo texto achados")
+
 
 def _limpar(sql):
     """Devolve a SQL pronta para inspecao: sem comentarios, strings nem aspas.
@@ -101,6 +116,29 @@ def _limpar(sql):
     s = re.sub(r"'[^']*'", "''", s)                        # literais de texto
     s = s.replace('"', "")                                  # aspas de identificador
     return s
+
+
+def filtrar_pii(pergunta):
+    """CTRL-GOV-008: barra e mascara dado pessoal no texto da pergunta.
+
+    Roda antes do motor e antes da trilha. Devolve o texto com cada ocorrencia
+    substituida por config.MASCARA_PII; a pergunta so segue quando nenhum
+    padrao casa. E um filtro por padrao (CPF, e-mail, telefone): nao reconhece
+    nomes, e essa limitacao e declarada.
+    """
+    texto = pergunta or ""
+    achados = []
+    for nome, padrao in _RE_PII.items():
+        if padrao.search(texto):
+            achados.append(nome)
+            texto = padrao.sub(config.MASCARA_PII, texto)
+    if achados:
+        return ResultadoPII(
+            False, "CTRL-GOV-008",
+            f"dado pessoal no texto da pergunta ({', '.join(achados)}); nada foi enviado ao motor",
+            texto, achados,
+        )
+    return ResultadoPII(True, None, None, texto, achados)
 
 
 def validar_sql(sql, perfil):
@@ -241,8 +279,10 @@ def registrar_pergunta(usuario, perfil, pergunta, id_interacao=None, caminho=Non
     """Anexa o registro de entrada de uma pergunta a trilha de auditoria.
 
     Gera (ou recebe) o `id_interacao` que liga esta entrada a resposta, grava o
-    horario real e a data de simulacao, o usuario, o perfil e a pergunta
-    original. Retorna o dicionario registrado (com o id, para a resposta).
+    horario real e a data de simulacao, o usuario, o perfil e a pergunta.
+    A pergunta e sempre gravada mascarada (CTRL-GOV-008): mesmo que o chamador
+    esqueca o filtro, dado pessoal nao entra na trilha. Retorna o dicionario
+    registrado (com o id, para a resposta).
     """
     registro = {
         "id_interacao": id_interacao or uuid.uuid4().hex,
@@ -251,7 +291,7 @@ def registrar_pergunta(usuario, perfil, pergunta, id_interacao=None, caminho=Non
         "evento": "entrada",
         "usuario": usuario,
         "perfil": perfil,
-        "pergunta": pergunta,
+        "pergunta": filtrar_pii(pergunta).texto,
     }
     return _gravar(registro, caminho or config.AUDIT_LOG_PATH)
 
@@ -306,7 +346,7 @@ def registrar_resposta(
         "evento": evento,
         "usuario": usuario,
         "perfil": perfil,
-        "pergunta": pergunta,
+        "pergunta": filtrar_pii(pergunta).texto,
         "sql": sql,
         "motor": motor,
         "controle": controle,
@@ -418,6 +458,32 @@ def _autoteste():
             f"controle errado para [{perfil}] {sql!r}: esperado {esperado}, veio {r.controle}"
         )
 
+    # CTRL-GOV-008: dado pessoal no texto da pergunta e barrado e mascarado;
+    # numeros que nao sao CPF nem telefone e datas nao geram falso positivo.
+    com_pii = [
+        ("cpf", "O paciente de CPF 123.456.789-09 esta internado hoje?"),
+        ("cpf", "o cpf 12345678909 esta internado?"),
+        ("email", "Confirme se o e-mail maria.silva@example.com pertence a algum paciente internado."),
+        ("telefone", "Ligue para (11) 98765-4321 e confirme a alta."),
+        ("telefone", "o telefone 3456-7890 e de qual paciente?"),
+    ]
+    for tipo, texto in com_pii:
+        r = filtrar_pii(texto)
+        assert not r.aprovado and r.controle == "CTRL-GOV-008" and tipo in r.achados, (texto, r)
+        assert config.MASCARA_PII in r.texto and not any(
+            _RE_PII[t].search(r.texto) for t in config.PADROES_PII), r.texto
+    sem_pii = [
+        "Quantos leitos estao ocupados no hospital hoje?",
+        "Qual foi a taxa de ocupacao em 15/05/2026?",
+        "Quantos leitos existem nas unidades 101, 205 e 310?",
+        "Quantas internacoes duraram mais de 30 dias em 2026?",
+        "Qual o diagnostico do paciente que esta no leito 12?",
+    ]
+    for texto in sem_pii:
+        r = filtrar_pii(texto)
+        assert r.aprovado and r.texto == texto and r.achados == [], (texto, r)
+    assert filtrar_pii("").aprovado and filtrar_pii(None).texto == ""
+
     # Auditoria (CTRL-AUD-001): exercitada num arquivo temporario, para nao
     # misturar o autoteste com a trilha real.
     import tempfile
@@ -447,10 +513,15 @@ def _autoteste():
         )
         # entrada sem saida: interacao incompleta, cadeia integra.
         registrar_pergunta("caio", "gestor", "sem resposta", caminho=trilha)
+        # dado pessoal na pergunta nunca chega ao arquivo, mesmo sem o filtro
+        # explicito no chamador (CTRL-GOV-008).
+        reg4 = registrar_pergunta("dora", "gestor", "o CPF 123.456.789-09 esta internado?", caminho=trilha)
+        assert "123.456.789-09" not in reg4["pergunta"] and config.MASCARA_PII in reg4["pergunta"]
+        assert "123.456.789-09" not in trilha.read_text(encoding="utf-8")
         v = verificar_trilha(trilha)
-        assert v["integra"] and v["quebra"] is None and v["registros"] == 5
+        assert v["integra"] and v["quebra"] is None and v["registros"] == 6
         completas = [i for i in v["interacoes"].values() if i["completa"]]
-        assert len(v["interacoes"]) == 3 and len(completas) == 2
+        assert len(v["interacoes"]) == 4 and len(completas) == 2
         # adulteracao: trocar um caractere da SQL do segundo registro quebra a
         # cadeia exatamente nele, e os registros seguintes continuam avaliaveis.
         linhas = trilha.read_text(encoding="utf-8").splitlines()
@@ -482,6 +553,8 @@ def _autoteste():
     # src.pipeline, que gera os dados; aqui a analise roda sem banco.
     print("governance: autoteste OK")
     print(f"  {len(validos)} casos validos aprovados, {len(bloqueados)} casos bloqueados")
+    print(f"  CTRL-GOV-008: {len(com_pii)} perguntas com dado pessoal barradas e mascaradas, "
+          f"{len(sem_pii)} sem falso positivo; a trilha nunca guarda o dado")
     print("  validacao de saida: aterramento e filtro sensivel barram; saida limpa passa")
     print("  trilha de auditoria: horario real + data de simulacao, encadeada por hash;")
     print("    adulteracao e remocao de registro detectadas por verificar_trilha")

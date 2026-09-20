@@ -170,6 +170,14 @@ Al Attrach et al. (2025); Atil et al. (2025).
 
 ## 5. Conjunto adversarial de governança
 
+> **Situação (2026-09-20)**: implementado na Etapa E (pré-registro em
+> [tcc/etapas/2026-09-20_etapa-E.md](../tcc/etapas/2026-09-20_etapa-E.md)):
+> 25 perguntas em cinco famílias (`questions.ADVERSARIAL`), abstenção pelo
+> modelo como variável (células E0 e E1), ponto de bloqueio, RS(c) de Lee et
+> al. (2024) nos dois níveis e regra contrafactual do resultado vazio
+> (`src/evaluate.py`, `src/adversarial.py`); CTRL-GOV-008 barra dado pessoal
+> na pergunta. Hipóteses H5 a H8 datadas antes dos números. Medição pendente.
+
 **O que se sabe.**
 - Injeção de prompt em linguagem natural vira injeção de SQL em aplicações
   reais (Pedro et al. 2025); é o risco nº 1 do OWASP para LLMs; a taxonomia

@@ -67,7 +67,8 @@ A serem implementados em `src/governance.py`.
 - **Descrição**: Registrar em log toda pergunta recebida e toda resposta.
   Cada interação gera dois registros JSON ligados por `id_interacao`:
   - **entrada**: `momento_real` (UTC, relógio do sistema), `data_simulacao`
-    (`SIM_TODAY`), `usuario`, `perfil`, `pergunta`;
+    (`SIM_TODAY`), `usuario`, `perfil`, `pergunta` (com dado pessoal já
+    mascarado por [CTRL-GOV-008](02_GOVERNANCA_ENTRADA.md), Etapa E);
   - **saída**: os mesmos campos mais `sql`, `motor`, `evento`, `controle` e
     `motivo` (quando bloqueada), `hash_resultado` e `n_linhas` (quando algo foi
     entregue; o resultado em si nunca é copiado para o log).

@@ -15,8 +15,9 @@ referencia (DA-NL2SQL-002), exigem uma unica SQL somente leitura e geram os
 numeros reportados no TCC. O prompt e uma variavel experimental
 (DA-NL2SQL-004): a `VariantePrompt` controla a descricao do schema (simples ou
 enriquecida), o value linking (valores distintos das colunas categoricas) e o
-schema por perfil (so as tabelas autorizadas ao usuario). As celulas da matriz
-da Etapa D estao pre-registradas em `config.CELULAS`.
+schema por perfil (so as tabelas autorizadas ao usuario) e, na Etapa E, a
+instrucao de recusa (abstencao pelo modelo). As celulas da matriz da Etapa D
+estao pre-registradas em `config.CELULAS`; as da Etapa E, em `config.CELULAS_E`.
 
 As chamadas HTTP usam apenas a biblioteca padrao (`urllib`, DA-ARQ-003). A SQL
 produzida ainda passa pelos guardrails de entrada e pela validacao de saida; o
@@ -49,13 +50,16 @@ class VariantePrompt:
     - value_linking: lista os valores distintos das colunas VARCHAR com ate
       config.VALUE_LINKING_MAX_VALORES valores (ficha 07, caminho 1);
     - schema_por_perfil: mostra so as tabelas de config.PERFIS[perfil] e avisa
-      que nenhuma outra existe para o usuario (Role-Schema, caminho 2).
+      que nenhuma outra existe para o usuario (Role-Schema, caminho 2);
+    - instrucao_recusa: acrescenta config.INSTRUCAO_RECUSA a instrucao de
+      sistema, informando que responder RECUSA e uma saida valida (Etapa E).
     """
 
     descricao: str = "simples"
     value_linking: bool = False
     schema_por_perfil: bool = False
     celula: str = None
+    instrucao_recusa: bool = False
 
     def __post_init__(self):
         if self.descricao not in ("simples", "enriquecida"):
@@ -63,11 +67,21 @@ class VariantePrompt:
 
     @classmethod
     def da_celula(cls, nome):
-        """Constroi a variante da celula pre-registrada `nome` (ex.: 'C2')."""
+        """Constroi a variante da celula pre-registrada `nome` ('C2', 'E1', ...).
+
+        As celulas da Etapa E (config.CELULAS_E) herdam a variante da celula
+        base da Etapa D e so acrescentam a instrucao de recusa.
+        """
         for c in config.CELULAS:
             if c["celula"] == nome:
                 return cls(c["descricao"], c["value_linking"], c["schema_por_perfil"], nome)
-        raise ValueError(f"celula desconhecida: {nome!r} (use uma de {[c['celula'] for c in config.CELULAS]})")
+        for c in config.CELULAS_E:
+            if c["celula"] == nome:
+                base = cls.da_celula(c["base"])
+                return cls(base.descricao, base.value_linking, base.schema_por_perfil, nome,
+                           c["instrucao_recusa"])
+        conhecidas = [c["celula"] for c in config.CELULAS] + [c["celula"] for c in config.CELULAS_E]
+        raise ValueError(f"celula desconhecida: {nome!r} (use uma de {conhecidas})")
 
     def como_dict(self):
         return asdict(self)
@@ -184,6 +198,13 @@ _AVISO_PERFIL = (
 )
 
 
+def prompt_sistema(variante=None):
+    """Instrucao de sistema da variante: a base fixa e, na Etapa E, a recusa."""
+    if variante is not None and variante.instrucao_recusa:
+        return f"{_PROMPT_SISTEMA} {config.INSTRUCAO_RECUSA}"
+    return _PROMPT_SISTEMA
+
+
 def montar_prompt_usuario(pergunta_texto, schema_texto, schema_por_perfil=False):
     """Monta o prompt do usuario com o schema Gold e a data de referencia."""
     aviso = f"{_AVISO_PERFIL}\n\n" if schema_por_perfil else ""
@@ -230,9 +251,11 @@ class MotorOraculo:
         self.ultima_chamada = None
 
     def gerar_sql(self, pergunta_texto, perfil):
-        for p in questions.CONJUNTO:
+        for p in questions.CONJUNTO_COMBINADO:
             if p.texto == pergunta_texto:
-                return p.sql_ref
+                # Pergunta a recusar: o oraculo se abstem (a resposta de
+                # referencia e nao responder).
+                return p.sql_ref if p.esperado == "responder" else config.MARCADOR_RECUSA
         raise KeyError(f"pergunta fora do conjunto de avaliacao: {pergunta_texto!r}")
 
     def descrever_ambiente(self):
@@ -331,7 +354,7 @@ class MotorLLM(_MotorReal):
             # reprodutibilidade do numero reportado (ainda assim, a chamada a um LLM
             # externo nao e deterministica como o restante do pipeline).
             "temperature": 0,
-            "system": _PROMPT_SISTEMA,
+            "system": prompt_sistema(self.variante),
             "messages": [{"role": "user", "content": prompt_usuario}],
         }
         payload = _post_json(
@@ -379,7 +402,7 @@ class MotorLocal(_MotorReal):
             "model": config.MODELO_LOCAL,
             "stream": False,
             "messages": [
-                {"role": "system", "content": _PROMPT_SISTEMA},
+                {"role": "system", "content": prompt_sistema(self.variante)},
                 {"role": "user", "content": prompt_usuario},
             ],
             "options": {
@@ -463,10 +486,23 @@ def _autoteste():
     prompt_c3 = montar_prompt_usuario("teste", render["C3"], schema_por_perfil=True)
     assert _AVISO_PERFIL in prompt_c3 and _AVISO_PERFIL not in montar_prompt_usuario("teste", render["C1"])
     assert VariantePrompt.da_celula("C0") == VariantePrompt(celula="C0")
+    # Etapa E: E0 e C3 sem nada a mais; E1 so acrescenta a instrucao de recusa.
+    e0, e1 = VariantePrompt.da_celula("E0"), VariantePrompt.da_celula("E1")
+    c3 = VariantePrompt.da_celula("C3")
+    assert (e0.descricao, e0.value_linking, e0.schema_por_perfil) == (c3.descricao, c3.value_linking, c3.schema_por_perfil)
+    assert not e0.instrucao_recusa and e1.instrucao_recusa and e1.celula == "E1"
+    assert descrever_schema(schema, "enfermagem", e1) == render["C3"]
+    assert prompt_sistema(e0) == _PROMPT_SISTEMA and prompt_sistema(None) == _PROMPT_SISTEMA
+    assert prompt_sistema(e1).startswith(_PROMPT_SISTEMA) and prompt_sistema(e1).endswith(config.MARCADOR_RECUSA + ".")
+    # O oraculo se abstem nas perguntas adversariais.
+    adv = questions.ADVERSARIAL[0]
+    assert oraculo.gerar_sql(adv.texto, adv.perfil) == config.MARCADOR_RECUSA
 
     print("nl2sql: autoteste OK")
     print(f"  motor oraculo confere as {len(questions.CONJUNTO)} perguntas")
     print(f"  {len(config.CELULAS)} celulas renderizam prompts distintos; C0 e o prompt do preliminar")
+    print(f"  celulas da Etapa E: E0 = C3; E1 = C3 + instrucao de recusa "
+          f"({len(prompt_sistema(e1)) - len(_PROMPT_SISTEMA)} caracteres a mais na instrucao de sistema)")
     for nome, texto in render.items():
         print(f"    {nome}: {len(texto)} caracteres, {len(texto.splitlines())} linhas (perfil enfermagem)")
 

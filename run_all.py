@@ -5,6 +5,7 @@ Dois modos, conforme a Definicao de pronto do GUIA_DESENVOLVIMENTO.md:
     python run_all.py oracle                          # autoteste da tubulacao, sem modelo e sem custo
     python run_all.py llm --motor local --celula C2   # execucao real, uma celula de prompt
     python run_all.py llm --motor local --matriz      # execucao real, todas as celulas (Etapa D)
+    python run_all.py llm --motor local --adversarial # execucao real, E0 e E1 sobre o conjunto combinado (Etapa E)
 
 O modo `oracle` exige 100% de execution match: e o autoteste de que a tubulacao
 (geracao -> governanca -> execucao -> avaliacao) esta correta. Esse numero nunca
@@ -20,7 +21,7 @@ acuracia, que e justamente o que se quer medir.
 import argparse
 import sys
 
-from src import config, data_gen, evaluate, matriz, nl2sql, pipeline
+from src import adversarial, config, data_gen, evaluate, matriz, nl2sql, pipeline
 
 
 def garantir_dados():
@@ -81,20 +82,25 @@ def _motor_pronto(motor_nome):
     return True
 
 
-def rodar_llm(motor_nome="local", celula=None, repeticoes=1, matriz_completa=False, saida=None):
+def rodar_llm(motor_nome="local", celula=None, repeticoes=1, matriz_completa=False, saida=None,
+              adversarial_completo=False):
     """Execucao real com um motor de verdade. Gera os numeros do TCC; nao faz assercao.
 
     Com `repeticoes > 1`, roda a avaliacao k vezes e reporta media, desvio e a
     estabilidade por pergunta, para separar erro sistematico de variancia de uma
     rodada (mesmo a temperatura zero, um LLM nao e estritamente deterministico).
     Com `matriz_completa`, roda todas as celulas pre-registradas de
-    config.CELULAS e consolida a matriz (Etapa D).
+    config.CELULAS e consolida a matriz (Etapa D). Com `adversarial_completo`,
+    roda as celulas de config.CELULAS_E sobre o conjunto combinado (Etapa E).
     """
     if not _motor_pronto(motor_nome):
         return 1
     garantir_dados()
-    if matriz_completa:
-        matriz.rodar_matriz(motor_nome, repeticoes=repeticoes, saida=saida)
+    if matriz_completa or adversarial_completo:
+        if matriz_completa:
+            matriz.rodar_matriz(motor_nome, repeticoes=repeticoes, saida=saida)
+        else:
+            adversarial.rodar_adversarial(motor_nome, repeticoes=repeticoes, saida=saida)
         modelo = config.MODELO_LOCAL if motor_nome == "local" else config.ANTHROPIC_MODEL
         print(f"numeros gerados pelo motor real '{motor_nome}' (modelo {modelo}); "
               "estes sim representam o desempenho do modelo.")
@@ -129,9 +135,10 @@ def main(argv=None):
         help="modo llm: 'local' (Ollama, padrao) ou 'llm' (API Anthropic, exige chave).",
     )
     celulas = [c["celula"] for c in config.CELULAS]
+    celulas_e = [c["celula"] for c in config.CELULAS_E]
     parser.add_argument(
         "--celula",
-        choices=celulas,
+        choices=celulas + celulas_e,
         default=None,
         help=f"celula de prompt pre-registrada (padrao {config.CELULA_PADRAO}); ver config.CELULAS.",
     )
@@ -141,23 +148,30 @@ def main(argv=None):
         help=f"roda todas as celulas ({', '.join(celulas)}) e consolida a matriz (Etapa D).",
     )
     parser.add_argument(
+        "--adversarial",
+        action="store_true",
+        help=f"roda as celulas {', '.join(celulas_e)} sobre as 18 legitimas mais as 25 adversariais (Etapa E).",
+    )
+    parser.add_argument(
         "--repeticoes",
         type=int,
         default=None,
-        help=f"execucoes por celula (padrao 1; com --matriz, {config.REPETICOES_MATRIZ}).",
+        help=f"execucoes por celula (padrao 1; com --matriz ou --adversarial, {config.REPETICOES_MATRIZ}).",
     )
     parser.add_argument(
         "--saida",
         default=None,
-        help="pasta dos relatorios (padrao results/; com --matriz, results/matriz/).",
+        help="pasta dos relatorios (padrao results/; com --matriz, results/matriz/; com --adversarial, results/adversarial/).",
     )
     args = parser.parse_args(argv)
     if args.modo == "oracle":
         return rodar_oracle()
-    repeticoes = args.repeticoes or (config.REPETICOES_MATRIZ if args.matriz else 1)
+    if args.matriz and args.adversarial:
+        parser.error("use --matriz ou --adversarial, nao os dois")
+    repeticoes = args.repeticoes or (config.REPETICOES_MATRIZ if (args.matriz or args.adversarial) else 1)
     return rodar_llm(
         motor_nome=args.motor, celula=args.celula, repeticoes=max(1, repeticoes),
-        matriz_completa=args.matriz, saida=args.saida,
+        matriz_completa=args.matriz, saida=args.saida, adversarial_completo=args.adversarial,
     )
 
 
