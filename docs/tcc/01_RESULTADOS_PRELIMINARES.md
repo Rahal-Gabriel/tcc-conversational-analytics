@@ -691,6 +691,35 @@ Leitura:
 - **Evidência**: `docs/tcc/anexos/ponte-sonnet/` (`matriz_llm.md`,
   `avaliacao_llm_C0.json`, `C3.json`, `sql_geradas_llm.md`, `auditoria.log`).
 
+### RES-016: Regra de projeção declarada e leitura cega de um segundo anotador: o veredito da hipótese não muda
+
+Resposta à banca (rodada 02, P-24; rodada 01, P-05). Registro completo em
+[tcc/anotacao/2026-09-20_regra-de-projecao.md](anotacao/2026-09-20_regra-de-projecao.md).
+
+- **Regra de projeção da referência**, explicitada a partir das 18 SQL: a
+  grandeza pedida e só ela; a chave da entidade quando há uma linha por
+  entidade; e, em superlativo ou seleção sobre entidade, a entidade **e** a
+  grandeza que motivou a seleção (Q05, Q14).
+- **Leitura cega** por um colega do autor, sem acesso ao gabarito, à SQL
+  nem ao sistema, a partir de uma folha com as 18 perguntas e a descrição
+  dos dados em linguagem comum: concordou com a referência em **17 de 18**,
+  inclusive em Q05 ("o nome de uma unidade só, e a taxa dela") e Q14 ("o
+  nome e a taxa de cada uma"), os dois casos que a banca supôs
+  superexigidos. A divergência é Q15: o anotador pede também o dia da maior
+  taxa, que nenhum modelo devolveu.
+- **Sensibilidade**: sob a leitura do anotador, todas as células perdem
+  5,6 pontos (Q15). O modelo local fica abaixo de 80% sob as duas leituras
+  (C3: 72,2% e 66,7%); o Sonnet em C3 fica acima sob as duas (90,7% e
+  85,2%). O veredito de RES-015 não muda.
+- **Limite declarado**: são duas leituras (autor e um anotador colega),
+  sem medida estatística de concordância; a ameaça de construção diminui,
+  não desaparece. A referência de Q15 não foi alterada (RNC-002).
+
+- **Status**: VALIDADO (instrumento, resposta literal e cálculo versionados
+  em `docs/tcc/anotacao/`).
+- **Evidência**: `docs/tcc/anotacao/2026-09-20_folha-anotador.md`,
+  `2026-09-20_resposta-anotador.md`, `2026-09-20_regra-de-projecao.md`.
+
 ## 5. O que ainda falta
 
 Os números estão coletados (RES-011: 72,2% estrito com o modelo local;
