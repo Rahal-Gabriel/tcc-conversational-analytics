@@ -2,7 +2,12 @@
 
 **Status**: referência
 **Prioridade**: ALTA
-**Última atualização**: 2026-06-15
+**Última atualização**: 2026-09-21
+
+> **Versão final**: este mapa foi feito para o template de Resultados
+> Preliminares. Para a versão final (template TCC_PT), o mapa de seções,
+> fontes e orçamento de páginas está em
+> [etapas/2026-09-21_etapa-F-plano.md](etapas/2026-09-21_etapa-F-plano.md) §2 e §3.
 
 ---
 

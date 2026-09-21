@@ -24,7 +24,7 @@ etapa gera para a Discussão. É o insumo direto da redação final.
 | C | Harness: rotulagem por tipo, Over/Proper Refusal e Safe-EX, Soft F1, auditoria com horário real | P-02, P-04, P-14, P-20 | não | concluída (2026-09-20) |
 | D | Matriz 2×2 de prompt (value linking × schema por perfil) sobre base enriquecida, motor local, artefatos versionados, tag | P-03, P-08 (parcial), P-10 | não (motor local) | concluída (2026-09-20: D1 pré-registro e código, D2 execução, ponte com o Sonnet em §12, RES-015; repetição em outro dia em 2026-09-21, RES-017) |
 | E | Conjunto adversarial (25 perguntas, cinco famílias), abstenção por instrução como variável, CTRL-GOV-008 (PII na pergunta), inventário do que sai do perímetro | P-12, P-18 | não (motor local) | concluída (2026-09-20: E1 pré-registro e código, E2 execução; repetição em outro dia em 2026-09-21, RES-017) |
-| F | Redação: hipótese original, comparação com literatura, escopo, ANVISA/LGPD, manual | P-01, P-05, P-06, P-07, P-13, P-19, P-21, P-22 | não | pendente |
+| F | Redação: hipótese original, comparação com literatura, escopo, ANVISA/LGPD, manual | P-01, P-05, P-06, P-07, P-13, P-19, P-21, P-22 | não | plano datado em 2026-09-21 ([2026-09-21_etapa-F-plano.md](2026-09-21_etapa-F-plano.md)); redação de 22/09 a 05/10 |
 
 ## 3. Etapas
 
@@ -37,3 +37,4 @@ etapa gera para a Discussão. É o insumo direto da redação final.
 | [2026-09-20_etapa-D.md](2026-09-20_etapa-D.md) | D | DA-NL2SQL-003/004; hipóteses H1 a H4 datadas antes dos números (D1); RES-011 (matriz: C3 vence, 72,2%, recusa indevida zero) e RES-012 (C0 vs preliminar, histórico); RES-015 (ponte com o Sonnet: 90,7% em C3, modelo e prompt cruzados); anexos em `anexos/etapa-D/` e `anexos/ponte-sonnet/`, tags `etapa-D` e `ponte-sonnet`; correção da assinatura do TARa |
 | [2026-09-20_etapa-E.md](2026-09-20_etapa-E.md) | E | CTRL-GOV-008, REG-LGPD-008, DA-GOV-003, DA-AVAL-006; RES-013 (recusa devida: escopo garantido pelo verificador, pertinência pela abstenção; E1 operacional) e RES-014 (perímetro); anexos em `anexos/etapa-E/`, tag `etapa-E` |
 | [2026-09-21_repeticao-outro-dia.md](2026-09-21_repeticao-outro-dia.md) | D e E (repetição) | RES-017: C3 e E1 idênticos entre dias após reinício do servidor (TARa entre dias 100%) |
+| [2026-09-21_etapa-F-plano.md](2026-09-21_etapa-F-plano.md) | F (plano) | cronograma até o depósito, orçamento de 27 páginas, o que entra como resultado, como limitação e o que sai (banca P-29) |

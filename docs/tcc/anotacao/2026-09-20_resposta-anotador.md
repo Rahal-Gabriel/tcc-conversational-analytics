@@ -1,6 +1,6 @@
 # Resposta do segundo anotador (leitura cega da projeção)
 
-**Anotador**: Carlos, colega do autor, sem participação no projeto e sem
+**Anotador**: anotador A, colega do autor (nome omitido conforme o manual de TCC), sem participação no projeto e sem
 conhecimento do gabarito nem do sistema. **Instrumento**:
 [2026-09-20_folha-anotador.md](2026-09-20_folha-anotador.md), respondido sem
 consulta a terceiros nem a ferramentas de IA, conforme as regras da folha.
