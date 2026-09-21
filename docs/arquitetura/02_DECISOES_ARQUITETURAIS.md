@@ -347,8 +347,9 @@ estável `DA-[MOD]-[NUM]` citável pelos demais módulos e pela redação do TCC
   `src/config.py:CELULAS`, `GOLD_NOTAS`, `VALUE_LINKING_MAX_VALORES`;
   `src/matriz.py`). Hipóteses e critério de decisão no
   [registro da Etapa D](../tcc/etapas/2026-09-20_etapa-D.md) §3; resultado
-  em §8 e RES-011: H2 e H3 confirmadas, H1 parcial (regressão em Q04 e
-  Q11), H4 confirmada; célula padrão C3 (`config.CELULA_PADRAO`).
+  em §8 e RES-011: H2 e H3 observadas na direção prevista (só H3 com
+  p < 0,05 no teste de sinal), H1 observada em parte (regressão em Q04 e
+  Q11), H4 observada; célula padrão C3 (`config.CELULA_PADRAO`).
 - **Relacionado**: [referencias/07](../referencias/07_MAPA_LITERATURA_PARA_CAMINHOS.md)
   caminhos 1 e 2, [DA-AVAL-004](#da-aval-004-desfechos-de-governança-em-dois-níveis).
 
@@ -407,6 +408,39 @@ estável `DA-[MOD]-[NUM]` citável pelos demais módulos e pela redação do TCC
   `config.AUDIT_HASH_GENESIS`).
 - **Relacionado**: [CTRL-AUD-001](../camadas/04_VALIDACAO_SAIDA.md),
   [AVAL-003](../avaliacao/01_METODOLOGIA_AVALIACAO.md),
+  [REG-LGPD-007](../governanca/01_CONFORMIDADE_REGULATORIA.md).
+
+### DA-VALID-004: Texto da pergunta fora da cadeia, com retenção e expurgo (projetado)
+
+- **Problema**: a trilha (DA-VALID-003) é imutável por construção e grava o
+  texto da pergunta. CTRL-GOV-008 mascara CPF, e-mail e telefone, mas não
+  nome próprio, que é a forma mais provável de dado pessoal numa pergunta
+  de gestor ("a Maria Souza ainda está internada?"). Um nome gravado ali não
+  poderia ser apagado sem quebrar a cadeia, o que conflita com o término do
+  tratamento (LGPD art. 15 e 16) e com o direito de eliminação (art. 18,
+  VI). A implantação local (DA-GOV-003) resolve o perímetro, não a
+  auditoria (banca, rodada 02, P-36).
+- **Decisão (projetada)**: separar o **fato** do **texto**. A cadeia de
+  hashes passa a guardar, no lugar do texto, o hash com chave (HMAC) da
+  pergunta mascarada; o texto mascarado vai para um armazenamento à parte,
+  indexado por `id_interacao`, com prazo de retenção configurável (por
+  exemplo, 90 dias, a fixar pela política do hospital). O expurgo apaga o
+  texto nesse armazenamento e mantém a cadeia íntegra: a auditoria continua
+  provando **que** houve uma pergunta, de quem, quando, com qual SQL e qual
+  resultado, e deixa de guardar **o que** foi perguntado depois do prazo.
+  Um pedido de eliminação antes do prazo segue o mesmo caminho, registrado
+  como evento próprio na cadeia.
+- **Por que não é implementado agora**: o protótipo não tem usuário real
+  nem política de retenção a cumprir, e o prazo do TCC não comporta; a
+  decisão fica projetada e declarada, com o risco residual nomeado: até a
+  implementação, nome próprio digitado na pergunta fica na trilha.
+- **Alternativas descartadas**: apagar ou reescrever registros da cadeia
+  (destrói a integridade que DA-VALID-003 garante); não gravar a pergunta
+  (perde a rastreabilidade que REG-LGPD-007 exige); detectar nome próprio
+  por lista ou modelo (falso positivo alto em português e sem garantia).
+- **Status**: PROJETADO (2026-09-21).
+- **Relacionado**: [DA-VALID-003](#da-valid-003-trilha-de-auditoria-com-horário-real-e-encadeamento-por-hash),
+  [DA-GOV-003](#da-gov-003-implantação-local-como-decisão-de-arquitetura-e-inventário-do-que-sai-do-perímetro),
   [REG-LGPD-007](../governanca/01_CONFORMIDADE_REGULATORIA.md).
 
 ## Avaliação (AVAL)
@@ -524,9 +558,11 @@ estável `DA-[MOD]-[NUM]` citável pelos demais módulos e pela redação do TCC
   `reliability_score`, `contrafactual_vazio`, `_por_familia`;
   `src/adversarial.py`; `src/questions.py:ADVERSARIAL`). Hipóteses H5 a H8
   e critério no [registro da Etapa E](../tcc/etapas/2026-09-20_etapa-E.md)
-  §3; resultado em §9 e RES-013: H5 confirmada no escopo e refutada na
-  pertinência, H6 confirmada com custo não previsto (Q02), H7 e H8
-  confirmadas; E1 é a célula operacional.
+  §3; resultado em §9 e RES-013: H5 observada no escopo e não observada
+  na pertinência, H6 observada na direção prevista com custo não previsto
+  (Q02), H7 e H8 observadas; E1 é a célula operacional. O relatório
+  separa "violação de política entregue" (zero) de "resposta indevida
+  entregue", desvio declarado da nomenclatura de Fei et al. (P-28).
 - **Relacionado**: [DA-AVAL-004](#da-aval-004-desfechos-de-governança-em-dois-níveis),
   [DA-GOV-003](#da-gov-003-implantação-local-como-decisão-de-arquitetura-e-inventário-do-que-sai-do-perímetro),
   [referencias/07](../referencias/07_MAPA_LITERATURA_PARA_CAMINHOS.md) caminho 5.

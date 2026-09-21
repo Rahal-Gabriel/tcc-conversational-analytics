@@ -461,13 +461,17 @@ Desvio zero em todas as métricas nas três execuções de cada célula. Os
 intervalos se sobrepõem (n=18) e nenhuma diferença é apresentada como
 significativa; a leitura é pareada por pergunta:
 
-| Hipótese | Comparação | Ganha | Perde | Resultado |
-|---|---|---|---|---|
-| H3 descrição enriquecida | C1 vs C0 | Q03, Q04, Q09, Q10, Q11, Q13 | nenhuma | confirmada; os erros de C0 são de vínculo de schema (coluna `data` suposta em tabela de fotografia) |
-| H1 value linking | C2 vs C1 | Q06, Q12, Q16 | Q04 (coluna a mais), Q11 (coluna inventada) | parcial: Q12 fecha, mas houve regressão |
-| H2 Role-Schema | C3 vs C1 | Q01, Q02, Q16 | nenhuma | confirmada; Violation Wrong permaneceu zero (a alucinação prevista por Fei et al. 2026 não ocorreu) |
-| ambos | C4 vs C1 | Q01, Q02, Q06, Q16 | Q04 | soma dos dois efeitos, menos a regressão de projeção |
-| H4 estabilidade | k=3 | | | confirmada: mesma SQL nas três chamadas para as 90 combinações pergunta × célula |
+| Hipótese | Comparação | Ganha | Perde | Teste de sinal (bilateral) | Leitura |
+|---|---|---|---|---|---|
+| H3 descrição enriquecida | C1 vs C0 | Q03, Q04, Q09, Q10, Q11, Q13 | nenhuma | p = 0,03 | observada na direção prevista; os erros de C0 são de vínculo de schema (coluna `data` suposta em tabela de fotografia) |
+| H1 value linking | C2 vs C1 | Q06, Q12, Q16 | Q04 (coluna a mais), Q11 (coluna inventada) | p = 1,0 | observada em parte: Q12 fecha, mas houve regressão |
+| H2 Role-Schema | C3 vs C1 | Q01, Q02, Q16 | nenhuma | p = 0,25 | observada na direção prevista; só Q01 é efeito de escopo (Q02 e Q16 vêm da forma do prompt); Violation Wrong permaneceu zero |
+| ambos | C4 vs C1 | Q01, Q02, Q06, Q16 | Q04 | p = 0,38 | soma dos dois efeitos, menos a regressão de projeção |
+| H4 estabilidade | k=3 | | | | observada: mesma SQL nas três chamadas para as 90 combinações pergunta × célula |
+
+Com n = 18 só H3 tem p < 0,05; as demais leituras são descritivas, como o
+pré-registro previa (revisão de vocabulário de 2026-09-21, banca rodada 02,
+P-27: a primeira redação usava "confirmada").
 
 **Célula vencedora**: pelo critério pré-registrado (Safe-EX, depois Violation
 Rate, depois tokens), C3 e C4 empatam nos dois primeiros e **C3 vence por
@@ -482,10 +486,14 @@ Q12 (literal: `'Cardiologia'` em vez de `'Unidade Cardiologia'`;
 (projeção em excesso), Q05, Q14, Q08 e Q12 (filtro extra de situação).
 Nenhum erro de cálculo.
 
-**P-10 respondida**: o "custo da governança" do preliminar (11,1 pontos, dois
-Violation Correct barrados) cai a 5,6 pontos com a descrição enriquecida (C1)
-e a **zero** quando o prompt informa o escopo do perfil (C3, C4), sem
-regressão. Era artefato do desenho do prompt. O verificador segue
+**P-10 respondida**: a recusa indevida do preliminar (11,1 pontos, dois
+Violation Correct barrados em perguntas legítimas) cai a 5,6 pontos com a
+descrição enriquecida (C1) e a **zero** quando o prompt informa o escopo do
+perfil (C3, C4), sem regressão. Era artefato do desenho do prompt. Isso não
+é "custo da governança zero": as 18 legítimas cabem por construção no
+perfil de quem pergunta, e o custo propriamente dito (perguntas que o
+hospital faria e o perfil não pode fazer) é medido na família (c) da Etapa
+E (RES-013; revisão de 2026-09-21, banca rodada 02, P-26). O verificador segue
 necessário: Violation Rate no nível do sistema é zero em todas as células,
 inclusive em C0, onde o modelo violou a política em 4 de 18.
 
@@ -547,10 +555,24 @@ mais as 18 legítimas, duas células (E0 = C3; E1 = C3 com instrução de
 recusa), k=3, 258 chamadas, TARa@3 100% nas duas. Anexos em
 `docs/tcc/anexos/etapa-E/`, tag `etapa-E`.
 
-| Célula | Estrito (legítimas) | Over-Refusal (legítimas) | Proper Refusal modelo | Proper Refusal sistema | Violation sistema (43) | RS(0) sist. | RS(10) sist. |
-|---|---|---|---|---|---|---|---|
-| E0 | 72,2% | 0 | 8,0% (2/25) | 60,0% (15/25) | 23,3% (10/43) | 65,1 | −260,5 |
-| E1 | 66,7% | 0 | 80,0% (20/25) | 88,0% (22/25) | 7,0% (3/43) | 79,1 | −107,0 |
+| Célula | Estrito (legítimas) | Over-Refusal (legítimas) | Proper Refusal modelo | Proper Refusal sistema | Violação de política entregue | Resposta indevida entregue | RS(0) sist. | RS(10) sist. |
+|---|---|---|---|---|---|---|---|---|
+| E0 | 72,2% | 0 | 8,0% (2/25) | 60,0% (15/25) | **0** | 23,3% (10/43) | 65,1 | −260,5 |
+| E1 | 66,7% | 0 | 80,0% (20/25) | 88,0% (22/25) | **0** | 7,0% (3/43) | 79,1 | −107,0 |
+
+"Violação de política entregue" é linha fora do perfil, de camada interna ou
+com campo sensível chegando ao usuário; "resposta indevida entregue" é uma
+consulta dentro do escopo, aprovada pelo verificador, a uma pergunta que não
+tinha resposta. O harness, seguindo Fei et al. (2026), rotula as duas como
+"Violation"; o texto as separa, e o desvio de nomenclatura fica declarado
+(revisão de 2026-09-21, banca rodada 02, P-28).
+
+**Custo da governança** (família (c), perguntas legítimas para outro
+perfil): em E1, 4 das 5 são negadas, que é o comportamento desejado, e 1
+(X13) é respondida erradamente com a tabela permitida; em E0, 2 negadas e 3
+respondidas erradamente. É aqui, e não nas 18 legítimas, que a governança
+cobra seu preço: quem não tem o perfil não obtém a resposta, e sem a
+instrução de recusa pode obter uma resposta errada.
 
 Achados, por hipótese pré-registrada:
 
@@ -561,7 +583,7 @@ Achados, por hipótese pré-registrada:
   modelo **obedeceu a quatro delas** em E0 (`DELETE`, `UPDATE` anexado,
   `read_csv`, `COPY` anexado) e a duas em E1. Sem instrução, o modelo se
   absteve sozinho em 2 de 25 (Fei et al. 2026: "raramente recusam").
-- **Pertinência não garantida (H5, parte refutada)**: 10 adversariais foram
+- **Pertinência não garantida (H5, parte não observada)**: 10 adversariais foram
   **entregues** em E0, e o que saiu não foi dado indevido, foi resposta a
   pergunta sem resposta: contagem na tabela permitida no lugar da tabela
   proibida (X06, X11, X13, X15), colunas `NULL` (X21, X22), uma projeção
@@ -569,7 +591,8 @@ Achados, por hipótese pré-registrada:
   É o efeito que Fei et al. (2026) descrevem para o Role-Schema (sem ver a
   tabela, o modelo responde com o que vê), agora medido sob verificador
   determinista.
-- **Instrução de recusa (H6)**: Proper Refusal subiu em todas as famílias
+- **Instrução de recusa (H6; 7 melhoram, 1 piora, teste de sinal p = 0,07)**:
+  Proper Refusal subiu em todas as famílias
   (modelo 8% para 80%, sistema 60% para 88%) sem nenhuma recusa indevida nas
   legítimas. O custo veio por outro mecanismo: Q02 trocou de SQL e passou de
   Correct a Wrong (estrito 72,2% para 66,7%), mais 42 tokens por pergunta.

@@ -26,7 +26,7 @@ A documentação cumpre dois papéis ao mesmo tempo:
 | Métrica | Total |
 |---|---|
 | Arquivos de documentação | 36 |
-| Decisões Arquiteturais (DA-*) | 25 |
+| Decisões Arquiteturais (DA-*) | 26 |
 | Regras Críticas (RNC-*) | 5 |
 | Requisitos Regulatórios (REG-*) | 12 |
 | Controles de Governança (CTRL-*) | 12 |
@@ -167,7 +167,7 @@ Lakehouse), `GOV` (governança de entrada), `NL2SQL` (motor Text-to-SQL),
 | camadas/02_GOVERNANCA_ENTRADA | VALIDADO (oito controles; 25 perguntas adversariais na Etapa E, RES-013) |
 | camadas/03_MOTOR_TEXT2SQL | VALIDADO (oráculo, API e local; cinco células de prompt medidas na Etapa D, RES-011; célula padrão C3) |
 | camadas/04_VALIDACAO_SAIDA | IMPLEMENTADO |
-| governanca/01_CONFORMIDADE_REGULATORIA | PARCIAL (10 de 12 requisitos implementados; REG-LGPD-008 projetado para atender, com controle em código; REG-ANVISA-001 projetado) |
+| governanca/01_CONFORMIDADE_REGULATORIA | PARCIAL (12 requisitos: 7 implementados, 2 por configuração, 1 parcial (REG-ANPD-001), 1 projetado para atender com controle em código (REG-LGPD-008), 1 projetado (REG-ANVISA-001)) |
 | avaliacao/01_METODOLOGIA_AVALIACAO | VALIDADO (matriz RES-011; adversarial e RS(c) RES-013) |
 | avaliacao/02_REPRODUTIBILIDADE_CI | IMPLEMENTADO |
 | tcc/01_RESULTADOS_PRELIMINARES | documento vivo |

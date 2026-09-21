@@ -88,6 +88,11 @@ A serem implementados em `src/governance.py`.
   `registrar_pergunta` receberia a identidade verificada pelo provedor de
   identidade do hospital. O encadeamento detecta adulteração, mas não
   autentica o autor do registro (exigiria assinatura com chave).
+- **Risco residual (declarado)**: nome próprio digitado na pergunta não é
+  mascarado por CTRL-GOV-008 e fica na trilha, que não pode ser editada sem
+  quebrar a cadeia. O desenho de retenção e expurgo (texto fora da cadeia,
+  hash com chave dentro) está em [DA-VALID-004](../arquitetura/02_DECISOES_ARQUITETURAIS.md#da-valid-004-texto-da-pergunta-fora-da-cadeia-com-retenção-e-expurgo-projetado),
+  com situação `projetado`.
 - **Status**: IMPLEMENTADO. Registro de entrada em
   `src/governance.py:registrar_pergunta`, de resposta em
   `src/governance.py:registrar_resposta`, verificação em
@@ -130,7 +135,7 @@ evento: é do harness, não do sistema.
 ## 5. Teste rápido
 
 `python -m src.governance`: além dos casos de entrada, cobre os casos que
-**devem** bloquear na saída — SQL que cita uma tabela Gold inexistente
+**devem** bloquear na saída: SQL que cita uma tabela Gold inexistente
 (aterramento, CTRL-VALID-001) e resultado cuja projeção inclui uma coluna
 sensível (filtro de saída, CTRL-VALID-002), e exercita a trilha num arquivo
 temporário: entrada e saída encadeadas, horário real em UTC distinto da data

@@ -75,7 +75,8 @@ Gao et al. (2024) para tratar prompt como variável experimental.
 > Q01, Q02 e Q16 sem perder nenhuma; Violation Correct 1 para 0, Violation
 > Wrong 0 para 0, Wrong 7 para 5; a alucinação de tabela prevista por Fei et
 > al. (2026) não ocorreu sob verificador determinista e aviso explícito. É
-> a célula padrão (`config.CELULA_PADRAO = "C3"`) e a resposta à P-10.
+> a célula padrão (`config.CELULA_PADRAO = "C3"`) e a resposta à P-10
+> (recusa indevida zero; o custo da governança é medido na Etapa E).
 
 **O que se sabe.**
 - Fei et al. (2026) definem seis desfechos (Correct, Wrong, Proper Refusal,
