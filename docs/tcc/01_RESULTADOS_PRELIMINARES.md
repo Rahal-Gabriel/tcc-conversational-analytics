@@ -720,6 +720,22 @@ Resposta à banca (rodada 02, P-24; rodada 01, P-05). Registro completo em
 - **Evidência**: `docs/tcc/anotacao/2026-09-20_folha-anotador.md`,
   `2026-09-20_resposta-anotador.md`, `2026-09-20_regra-de-projecao.md`.
 
+### RES-017: A inferência local foi exatamente reproduzível entre dias
+
+Repetição pré-registrada (Etapa D §3.7) feita em 2026-09-21, com o
+servidor do Ollama reiniciado: C3 (18 perguntas) e E1 (43), k=3, mesmos
+pesos e versão do servidor, mesma máquina (Apple M1 Pro, 16 GB). Nas 366
+chamadas do segundo dia, **todas as SQL foram idênticas às do primeiro**:
+TARa entre dias de 100% nas duas células, ao lado do TARa@3 de 100% em cada
+dia; estrito (72,2% e 66,7%), Proper Refusal (88%) e RS(10) (−107,0)
+iguais. Contraste: a API não repetiu a SQL em duas perguntas entre chamadas
+contíguas (RES-015). Limite declarado: não foi testada outra máquina nem
+outra versão do servidor.
+
+- **Status**: VALIDADO (anexos e trilhas íntegras em
+  `docs/tcc/anexos/repeticao-2026-09-21/`).
+- **Evidência**: [tcc/etapas/2026-09-21_repeticao-outro-dia.md](etapas/2026-09-21_repeticao-outro-dia.md).
+
 ## 5. O que ainda falta
 
 Os números estão coletados (RES-011: 72,2% estrito com o modelo local;
@@ -735,7 +751,7 @@ entregas:
 |---|---|---|
 | Value linking (valores categóricos no prompt) | Concluído na Etapa D, célula C2 (RES-011) | Q12 fechou; houve regressão em Q04 e Q11, declarada |
 | Discussão da métrica forma-sensível | Concluída na Etapa C (RES-010); números na Etapa D (RES-011) | Soft F1 por célula; erros residuais de projeção nomeados |
-| Repetição de C3 e E1 em outro dia (P-08) | `run_all.py llm --motor local --celula C3 --repeticoes 3` e `--celula E1`, antes do depósito | TARa entre dias ao lado do TARa@3 de cada dia |
+| Repetição de C3 e E1 em outro dia (P-08) | Concluída em 2026-09-21 (RES-017) | TARa entre dias 100%; outra máquina fica como limitação |
 | Conjunto adversarial e abstenção | Concluído na Etapa E (RES-013, RES-014) | Limite declarado: X13, X23 e X24 entregues em E1 (pertinência) |
 | Ampliação e estratificação do conjunto | `questions.py` | Reduzir ruído e medir por tipo de pergunta e por perfil (cruzar tipo × perfil); fica como limitação se não couber no prazo |
 
