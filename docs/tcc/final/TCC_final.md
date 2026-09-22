@@ -26,9 +26,10 @@ comercial via API, sob o mesmo prompt, alcançou 90,7%, acima do limiar de
 80% da hipótese, com intervalo de confiança de 95% que inclui valores
 abaixo desse limiar. Em 25 perguntas adversariais, executadas seis vezes
 cada, nenhuma linha fora do escopo foi entregue, e uma instrução de recusa
-elevou a recusa devida de 60% para 88%. Concluiu-se que a governança integrada preservou a utilidade da
-consulta quando a garantia de escopo ficou em código e o modelo conheceu
-o próprio escopo, e que a pertinência da resposta permaneceu como limite.
+elevou a recusa devida de 60% para 88%. Concluiu-se que a governança integrada não gerou recusa indevida quando
+a garantia de escopo ficou em código e o modelo conheceu o próprio
+escopo, ao custo de uma pergunta legítima, e que a pertinência da
+resposta permaneceu como limite.
 
 **Palavras-chave:** Text-to-SQL; conformidade regulatória; dados sintéticos; saúde digital; controle de acesso.
 
@@ -161,8 +162,10 @@ leito, faixa etária, situação e tempo de permanência. Sobre as
 internações foi imposto k-anonimato (Sweeney, 2002) com k mínimo de 5 no
 par tipo de leito e faixa etária, limiar adequado a uso interno
 controlado (El Emam e Arbuckle, 2013), verificado por teste a cada
-construção. A Gold foi exportada para um arquivo próprio, de modo que as
-camadas internas não existissem no banco consultado pelo sistema. Como o
+construção. A Gold foi exportada para um arquivo próprio, de modo que as camadas
+internas não existissem no banco consultado pelo sistema. O Apêndice A
+apresenta o fluxo de uma pergunta pelas quatro camadas e os controles de
+cada uma. Como o
 DuckDB não oferece controle de acesso por usuário, o isolamento foi
 materializado como arquivo separado; em um banco com permissões, o mesmo
 princípio de menor privilégio seria implementado por um usuário de
@@ -210,9 +213,9 @@ finalidade, e nenhum acesso foi concedido por conveniência.
 ## Enquadramento regulatório
 
 Os requisitos da LGPD (Brasil, 2018), das diretrizes da ANPD (Autoridade
-Nacional de Proteção de Dados [ANPD], 2024)
-e das normas da ANVISA foram mapeados a controles concretos, à camada
-responsável e à situação de implementação, distinguindo controle com
+Nacional de Proteção de Dados [ANPD], 2024) e das normas da ANVISA foram
+mapeados a controles concretos, à camada responsável e à situação de
+implementação (Apêndice B), distinguindo controle com
 código e teste, controle por configuração, controle parcial e controle
 apenas projetado. Como os dados são sintéticos, a LGPD não incidiu sobre
 o protótipo, e a conformidade foi tratada como propriedade de projeto: uma
@@ -323,7 +326,7 @@ registrado o ponto em que o sistema parou cada pergunta. Sobre o
 conjunto combinado calculou-se o Reliability Score RS(c) (Lee et al.,
 2024a), que soma um ponto por resposta correta ou recusa devida e
 subtrai c pontos por resposta errada entregue, reportado com c igual a 0
-e a 10 (o valor com c igual ao tamanho do conjunto consta dos anexos).
+e a 10.
 
 As proporções foram acompanhadas de intervalo de confiança de 95% pelo
 método de Wilson, adequado a amostras pequenas (Brown et al., 2001). As
@@ -331,7 +334,7 @@ células foram comparadas pergunta a pergunta, com teste de sinal exato
 bilateral sobre ganhos e perdas; com 18 e 25 perguntas, a leitura foi
 descritiva, e nenhuma diferença foi apresentada como significativa sem o
 teste ao lado. Cada célula foi executada três vezes, e a estabilidade foi
-medida pela taxa de concordância total entre execuções, TARa@k (Atil et
+medida pela taxa de concordância total entre execuções, TARa@k (Atıl et
 al., 2025), sobre o desfecho e o resultado normalizado de cada pergunta.
 A célula de melhor desempenho e a célula operacional foram repetidas em
 outro dia, com o servidor do modelo reiniciado.
@@ -533,7 +536,7 @@ modelo mudou a consulta de uma pergunta em cada célula entre chamadas
 contíguas (TARa@3 de 94,4%), variação que o modelo local com semente fixa
 não apresentou em nenhuma das 270 chamadas da matriz, coerente com o não
 determinismo de configurações "deterministas" em serviços hospedados
-descrito por Atil et al. (2025).
+descrito por Atıl et al. (2025).
 
 ## Recusa devida e custo da governança
 
@@ -686,7 +689,7 @@ contíguas. Com semente fixa e pesos identificados, a inferência local foi
 reproduzível, o que a torna preferível também do ponto de vista da
 auditoria de resultados; a reprodução em outro hardware ou outra versão
 do servidor não foi testada, e é justamente onde a literatura indica que
-o determinismo costuma falhar (Atil et al., 2025).
+o determinismo costuma falhar (Atıl et al., 2025).
 
 ## Comparação com a literatura
 
@@ -710,10 +713,14 @@ Fonte: Resultados originais da pesquisa
 Em acurácia, o modelo local ficou dentro da faixa dos trabalhos de uma
 chamada, e o modelo via API, com o prompt com escopo, acima dela, mas
 abaixo dos sistemas agênticos, que usam várias chamadas, ferramentas e
-correção iterativa, recursos que este trabalho não empregou. Em recusa e em violação de política, os valores superam os publicados
-por uma razão de arquitetura: os trabalhos citados medem o modelo
-decidindo sozinho ou com verificador baseado em modelo, enquanto aqui um
-verificador determinista em código decide a execução. A contribuição do
+correção iterativa, recursos que este trabalho não empregou. Em violação de política, o valor supera os publicados por uma razão de
+arquitetura: os trabalhos citados medem o modelo decidindo sozinho ou
+com verificador baseado em modelo, enquanto aqui um verificador
+determinista em código decide a execução. Em recusa de perguntas sem
+resposta, a família comparável ficou abaixo do valor de Al Attrach et
+al. (2026), 60% contra 69%, com um modelo menor; o valor mais alto, de
+88%, vale para o conjunto adversarial completo, em que o verificador
+responde pela maior parte das recusas. A contribuição do
 trabalho está em medir, sob esse verificador, o que muda quando o modelo
 conhece o escopo do perfil e quando é autorizado a recusar, algo que os
 benchmarks de controle de acesso em Text-to-SQL não isolam (Fei et al.,
@@ -874,3 +881,43 @@ World Health Organization [WHO]. 2024. Ethics and Governance of Artificial Intel
 Yin, R.K. 2015. Estudo de Caso: Planejamento e métodos. 5ed. Bookman, Porto Alegre, RS, Brasil.
 
 Yu, T.; Zhang, R.; Yang, K.; Yasunaga, M.; Wang, D.; Li, Z.; Ma, J.; Li, I.; Yao, Q.; Roman, S.; Zhang, Z.; Radev, D. 2018. Spider: a large-scale human-labeled dataset for complex and cross-domain semantic parsing and text-to-SQL task. In: Conference on Empirical Methods in Natural Language Processing (EMNLP), 2018, Brussels, Belgium. Anais... Association for Computational Linguistics, p. 3911-3921.
+
+# Apêndice A. Arquitetura de referência em quatro camadas
+
+![](figuras/arquitetura_quatro_camadas.png)
+
+Figura 1. Fluxo de uma pergunta pelas quatro camadas da arquitetura
+
+Fonte: Dados originais da pesquisa
+
+Tabela 1. Responsabilidades e controles de cada camada
+
+| Camada | Responsabilidade | Controles |
+|---|---|---|
+| 1. Pipeline Lakehouse | Ingestão dos dados brutos (Bronze); remoção de identificadores diretos, faixa etária e pseudonimização com chave (Silver); tabelas minimizadas, com k-anonimato verificado, exportadas para arquivo próprio (Gold) | CTRL-LAKE-001 (k mínimo por teste) |
+| 2. Governança de entrada | Filtro de dado pessoal no texto da pergunta; verificação da consulta gerada (instrução única, somente leitura, sem escrita, arquivo ou catálogo, sem camadas internas, só tabelas do perfil); conexão somente leitura, restrita à Gold e sem acesso a arquivos externos | CTRL-GOV-001 a CTRL-GOV-008 |
+| 3. Motor Text-to-SQL | Tradução da pergunta em SQL por modelo local ou via API, com o prompt controlado por célula (descrição do schema, valores categóricos, schema por perfil, instrução de recusa) | Células C0 a C4, E0 e E1 |
+| 4. Validação de saída | Aterramento das tabelas citadas; filtro de coluna sensível no resultado; registro da pergunta e da resposta em trilha encadeada por hash | CTRL-VALID-001, CTRL-VALID-002, CTRL-AUD-001 |
+
+Fonte: Dados originais da pesquisa
+
+# Apêndice B. Requisitos regulatórios e controles
+
+Tabela 1. Mapeamento dos requisitos regulatórios para controles, camadas e situação de implementação
+
+| Requisito | Origem | Controle na arquitetura | Camada | Situação |
+|---|---|---|---|---|
+| REG-LGPD-001 Proteção reforçada de dados sensíveis e minimização | LGPD art. 11 e art. 6º | Remoção de nome, CPF e data de nascimento na Silver; faixa etária no lugar da data; Gold sem identificador, com k-anonimato verificado (k mínimo 5) | Silver e Gold | implementado |
+| REG-LGPD-002 Pseudonimização | LGPD art. 5º, XI; art. 12; art. 13 | Identificador do paciente pseudonimizado por HMAC-SHA256 com chave lida do ambiente; o pseudônimo não chega à Gold | Silver | implementado |
+| REG-LGPD-003 Minimização na exposição | LGPD art. 6º | Só a Gold é exposta ao motor; Bronze e Silver em arquivo separado, inacessível à conexão de consulta | Gold | implementado |
+| REG-LGPD-004 Controle de acesso por finalidade e perfil | LGPD art. 6º | Três perfis com escopo de tabelas por finalidade (CTRL-GOV-005) | Entrada | por configuração |
+| REG-LGPD-005 Segurança e prevenção de comando indevido | LGPD art. 46 e art. 6º | Instrução única somente leitura, bloqueio de escrita, arquivo e catálogo, conexão sem acesso externo (CTRL-GOV-001 a 003 e 006) | Entrada | implementado; validado com as cinco injeções do conjunto adversarial |
+| REG-LGPD-006 Prevenção de vazamento de sensível na resposta | LGPD art. 11 | Filtro de coluna sensível no resultado (CTRL-VALID-002) | Saída | implementado |
+| REG-LGPD-007 Rastreabilidade e prestação de contas | LGPD art. 6º | Trilha de auditoria com horário real, perfil, consulta, controle e hash do resultado, em cadeia de hashes verificável (CTRL-AUD-001) | Auditoria | implementado; retenção e expurgo do texto da pergunta projetados |
+| REG-LGPD-008 Controle do que sai do perímetro | LGPD art. 33 e art. 6º | Inventário do que sai por motor; filtro de CPF, e-mail e telefone antes da chamada (CTRL-GOV-008); implantação local como decisão de arquitetura | Entrada e motor | projetado para atender, com o controle implementado |
+| REG-ANPD-001 Mitigação de alucinação | ANPD, Radar de IA generativa | Aterramento das tabelas citadas (CTRL-VALID-001); instrução de recusa; verificador determinista. Não mitiga resposta inventada dentro do escopo | Saída e motor | parcial |
+| REG-ANPD-002 Prevenção de uso secundário | ANPD, Radar de IA generativa | Escopo por perfil, execução somente leitura e registro integral | Entrada e auditoria | implementado; validado com o conjunto adversarial |
+| REG-ANVISA-001 Controle, segurança e rastreabilidade de software em saúde | RDC 657/2022, por analogia | Controles versionados, auditoria e reprodutibilidade | Transversal | projetado |
+| REG-PESQ-001 Reprodutibilidade e integridade do experimento | Boas práticas de pesquisa | Semente e data de referência fixas; dados sintéticos; números só de motor real; artefatos versionados com tag | Transversal | por configuração |
+
+Fonte: Dados originais da pesquisa

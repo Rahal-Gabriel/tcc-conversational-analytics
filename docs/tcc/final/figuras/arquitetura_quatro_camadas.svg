@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Arial, Helvetica, sans-serif">
+  <rect width="1200" height="1200" fill="#ffffff"/>
+  <defs>
+    <marker id="seta" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L12,6 L0,12 z" fill="#333333"/>
+    </marker>
+  </defs>
+  <g transform="translate(100,0)">
+
+  <!-- Usuario -->
+  <rect x="200" y="30" width="600" height="80" rx="8" fill="#f2f2f2" stroke="#333333" stroke-width="2"/>
+  <text x="500" y="62" text-anchor="middle" font-size="20" font-weight="bold" fill="#111111">Usuário (gestor, enfermagem ou administrativo)</text>
+  <text x="500" y="90" text-anchor="middle" font-size="17" fill="#111111">pergunta em português</text>
+  <line x1="500" y1="110" x2="500" y2="150" stroke="#333333" stroke-width="2" marker-end="url(#seta)"/>
+
+  <!-- Camada 2, antes do modelo -->
+  <rect x="120" y="152" width="760" height="112" rx="8" fill="#e8eef7" stroke="#333333" stroke-width="2"/>
+  <text x="140" y="180" font-size="19" font-weight="bold" fill="#111111">Camada 2. Governança de entrada, antes do modelo</text>
+  <text x="140" y="210" font-size="16" fill="#111111">filtro de dado pessoal na pergunta: CPF, e-mail e telefone barrados e mascarados (CTRL-GOV-008)</text>
+  <text x="140" y="238" font-size="16" fill="#111111">registro da pergunta na trilha de auditoria, com horário real, usuário e perfil</text>
+  <line x1="500" y1="264" x2="500" y2="304" stroke="#333333" stroke-width="2" marker-end="url(#seta)"/>
+
+  <!-- Camada 3 -->
+  <rect x="120" y="306" width="760" height="126" rx="8" fill="#eef7e8" stroke="#333333" stroke-width="2"/>
+  <text x="140" y="334" font-size="19" font-weight="bold" fill="#111111">Camada 3. Motor Text-to-SQL</text>
+  <text x="140" y="364" font-size="16" fill="#111111">modelo de linguagem local (Ollama) ou via API; prompt controlado por célula: descrição do schema,</text>
+  <text x="140" y="390" font-size="16" fill="#111111">valores categóricos, só as tabelas do perfil e instrução de recusa</text>
+  <text x="140" y="416" font-size="16" fill="#111111">devolve uma consulta SQL ou a palavra RECUSA</text>
+  <line x1="500" y1="432" x2="500" y2="472" stroke="#333333" stroke-width="2" marker-end="url(#seta)"/>
+
+  <!-- Camada 2, depois do modelo -->
+  <rect x="120" y="474" width="760" height="126" rx="8" fill="#e8eef7" stroke="#333333" stroke-width="2"/>
+  <text x="140" y="502" font-size="19" font-weight="bold" fill="#111111">Camada 2. Governança de entrada, depois do modelo: verificador determinista</text>
+  <text x="140" y="532" font-size="16" fill="#111111">instrução única e somente leitura; sem comando de escrita, leitura de arquivo ou catálogo;</text>
+  <text x="140" y="558" font-size="16" fill="#111111">sem referência a Bronze ou Silver; só as tabelas Gold autorizadas ao perfil (CTRL-GOV-001 a 005)</text>
+  <text x="140" y="584" font-size="16" fill="#111111">consulta reprovada não é executada: o usuário recebe a recusa e o controle que barrou</text>
+  <line x1="500" y1="600" x2="500" y2="640" stroke="#333333" stroke-width="2" marker-end="url(#seta)"/>
+
+  <!-- Camada 1 -->
+  <rect x="120" y="642" width="760" height="230" rx="8" fill="#fdf3e3" stroke="#333333" stroke-width="2"/>
+  <text x="140" y="670" font-size="19" font-weight="bold" fill="#111111">Camada 1. Pipeline Lakehouse (DuckDB)</text>
+  <rect x="150" y="690" width="200" height="96" rx="6" fill="#ffffff" stroke="#666666" stroke-width="1.5"/>
+  <text x="250" y="716" text-anchor="middle" font-size="17" font-weight="bold" fill="#111111">Bronze</text>
+  <text x="250" y="740" text-anchor="middle" font-size="14" fill="#111111">dados brutos, com dado</text>
+  <text x="250" y="760" text-anchor="middle" font-size="14" fill="#111111">pessoal proposital</text>
+  <line x1="350" y1="738" x2="392" y2="738" stroke="#333333" stroke-width="2" marker-end="url(#seta)"/>
+  <rect x="400" y="690" width="200" height="96" rx="6" fill="#ffffff" stroke="#666666" stroke-width="1.5"/>
+  <text x="500" y="716" text-anchor="middle" font-size="17" font-weight="bold" fill="#111111">Silver</text>
+  <text x="500" y="740" text-anchor="middle" font-size="14" fill="#111111">pseudonimizada: sem nome,</text>
+  <text x="500" y="760" text-anchor="middle" font-size="14" fill="#111111">CPF e nascimento; HMAC</text>
+  <line x1="600" y1="738" x2="642" y2="738" stroke="#333333" stroke-width="2" marker-end="url(#seta)"/>
+  <rect x="650" y="690" width="200" height="96" rx="6" fill="#ffffff" stroke="#333333" stroke-width="2.5"/>
+  <text x="750" y="716" text-anchor="middle" font-size="17" font-weight="bold" fill="#111111">Gold</text>
+  <text x="750" y="740" text-anchor="middle" font-size="14" fill="#111111">minimizada, k-anonimato,</text>
+  <text x="750" y="760" text-anchor="middle" font-size="14" fill="#111111">arquivo isolado</text>
+  <text x="140" y="818" font-size="16" fill="#111111">a Gold é a única camada consultada: conexão somente leitura, restrita ao arquivo da Gold,</text>
+  <text x="140" y="844" font-size="16" fill="#111111">sem acesso a arquivos externos (CTRL-GOV-006 e 007); Bronze e Silver não existem nesse banco</text>
+  <line x1="500" y1="872" x2="500" y2="912" stroke="#333333" stroke-width="2" marker-end="url(#seta)"/>
+
+  <!-- Camada 4 -->
+  <rect x="120" y="914" width="760" height="136" rx="8" fill="#f3e8f7" stroke="#333333" stroke-width="2"/>
+  <text x="140" y="942" font-size="19" font-weight="bold" fill="#111111">Camada 4. Validação de saída</text>
+  <text x="140" y="972" font-size="16" fill="#111111">aterramento: toda tabela citada existe na Gold (CTRL-VALID-001)</text>
+  <text x="140" y="998" font-size="16" fill="#111111">filtro de campo sensível no resultado (CTRL-VALID-002)</text>
+  <text x="140" y="1024" font-size="16" fill="#111111">registro da resposta na trilha, com hash do resultado, em cadeia verificável (CTRL-AUD-001)</text>
+  <line x1="500" y1="1050" x2="500" y2="1090" stroke="#333333" stroke-width="2" marker-end="url(#seta)"/>
+
+  <!-- Resposta -->
+  <rect x="200" y="1092" width="600" height="80" rx="8" fill="#f2f2f2" stroke="#333333" stroke-width="2"/>
+  <text x="500" y="1124" text-anchor="middle" font-size="20" font-weight="bold" fill="#111111">Resposta ao usuário</text>
+  <text x="500" y="1152" text-anchor="middle" font-size="17" fill="#111111">resultado da consulta, ou recusa com o motivo</text>
+  </g>
+</svg>
