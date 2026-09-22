@@ -1,17 +1,105 @@
-<!--
-Fonte da versão final do TCC (Etapa F). Cada seção entra num PR próprio,
-na ordem do plano (docs/tcc/etapas/2026-09-21_etapa-F-plano.md). O .docx é
-gerado a partir deste arquivo com o template oficial como referência de
-estilos. Seções ainda não escritas aparecem como marcador.
--->
+# Governança integrada viabiliza consulta em linguagem natural sobre ocupação de leitos hospitalares
 
-# [Título: escrito em 25/09]
+Gabriel Arcenio Rahal Marostica¹*; José Bernardo Neto²
 
-[Resumo, palavras-chave: escritos em 25/09]
+¹* [Titulação do autor]. E-mail: arcenio2501@gmail.com
+
+² [Titulação do orientador]. E-mail: [e-mail do orientador]
+
+**Resumo**
+
+A consulta a dados hospitalares em linguagem natural promete ampliar o
+acesso à informação, mas a governança costuma ser tratada à parte da
+arquitetura. Este trabalho propôs e avaliou uma arquitetura de referência em que o
+controle de acesso por perfil, a proteção dos dados, a validação da
+consulta e a auditoria atravessam todo o fluxo, da pergunta à resposta,
+aplicada à ocupação de leitos e construída sobre dados sintéticos. Um
+pipeline em camadas expôs ao modelo apenas uma camada minimizada, com
+k-anonimato verificado e isolada em arquivo próprio; um verificador
+determinista em código decidiu a execução de cada consulta; e o prompt
+foi tratado como variável experimental, com hipóteses registradas antes
+da execução. Com um modelo aberto de 14 bilhões de
+parâmetros executado localmente, o execution match estrito em 18
+perguntas subiu de 22,2% para 72,2% conforme o prompt descreveu o schema
+e informou o escopo do perfil, sem nenhuma recusa indevida; com um modelo
+comercial via API, sob o mesmo prompt, alcançou 90,7%, acima do limiar de
+80% da hipótese, com intervalo de confiança que não exclui valores menores. Em 25 perguntas adversariais, nenhuma linha fora do escopo foi
+entregue em 258 chamadas, e uma instrução de recusa elevou a recusa devida
+de 60% para 88%. Concluiu-se que a governança integrada preservou a utilidade da
+consulta quando a garantia de escopo ficou em código e o modelo conheceu
+o próprio escopo, e que a pertinência da resposta permaneceu como limite.
+
+**Palavras-chave:** Text-to-SQL; conformidade regulatória; dados sintéticos; saúde digital; controle de acesso.
 
 # Introdução
 
-[Escrita em 25/09]
+As interfaces em linguagem natural para bancos de dados formam um campo
+maduro (Affolter et al., 2019), e a tradução de perguntas em consultas
+SQL (Text-to-SQL) conta com benchmarks consolidados, como o Spider (Yu et
+al., 2018) e, no domínio clínico, o EHRSQL (Lee et al., 2022), tendo sido
+transformada pelos modelos de linguagem de grande porte (Shi et al.,
+2024). Em hospitais, a possibilidade de um gestor ou uma equipe
+assistencial perguntar aos dados sem depender de uma fila de solicitações
+à área técnica promete ampliar o acesso à informação operacional. Os
+trabalhos recentes que aplicam essa abordagem a dados clínicos relatam
+acurácias entre 43% e 78% em uma única chamada ao modelo e acima de 90%
+com agentes que corrigem a consulta iterativamente (Al Attrach et al.,
+2025; Tanković et al., 2025), e apontam que a principal causa de erro não
+é a sintaxe, mas a resolução de termos e valores do domínio.
+
+O obstáculo central está em outro lugar. A governança dos dados e do
+modelo costuma ser tratada de forma fragmentada, separada da arquitetura
+de dados, e em saúde essa fragmentação é crítica: os dados são pessoais e
+sensíveis, e o marco regulatório é exigente, composto pela Lei Geral de
+Proteção de Dados (Brasil, 2018), pelas normas da Agência Nacional de
+Vigilância Sanitária [ANVISA] (2022) aplicáveis a software em saúde e
+pelas diretrizes da Autoridade Nacional de Proteção de Dados [ANPD]
+(2024) sobre inteligência artificial generativa. Somam-se riscos próprios
+dos modelos de linguagem, como a injeção de instruções e o acesso
+indevido a recursos (OWASP Foundation, 2025), que uma instrução em
+linguagem natural pode converter em injeção de SQL (Pedro et al., 2025),
+tratados na prática por guardrails programáveis (Rebedea et al., 2023) e,
+no setor de saúde, sob diretrizes éticas e de governança dedicadas (World
+Health Organization [WHO], 2024).
+
+A literatura passou a medir o Text-to-SQL sob controle de acesso apenas
+recentemente. Benchmarks de 2025 e 2026 mostram que instruir a política
+de acesso no prompt não impede vazamentos, que restringir o schema
+visível ao papel do usuário reduz o vazamento explícito mas induz o
+modelo a alucinar tabelas, e que os modelos raramente recusam consultas
+não autorizadas por iniciativa própria (Fei et al., 2026; Klisura et al.,
+2025; Miyamoto et al., 2026). A recomendação convergente é a verificação
+determinista fora do modelo. Esses trabalhos, porém, avaliam o modelo
+decidindo sozinho ou com um verificador também baseado em modelo, e não
+isolam o que muda quando um verificador em código garante o escopo e o
+modelo é informado sobre ele.
+
+Este trabalho partiu da hipótese, registrada no projeto de pesquisa, de
+que uma arquitetura de Conversational Analytics com modelo de governança
+integrado responderia a consultas operacionais hospitalares em linguagem
+natural com acurácia superior a 80% e em conformidade com os requisitos
+da LGPD e das normas da ANVISA. Propôs-se uma arquitetura de referência
+em quatro camadas, na qual a proteção dos dados, o controle de acesso por
+perfil, a validação da consulta e a auditoria atravessam todo o fluxo, da
+pergunta do usuário à resposta entregue. O domínio de implementação e
+avaliação foi a ocupação de leitos hospitalares, e toda a pesquisa usou
+dados sintéticos, o que eliminou na origem o risco de exposição de dados
+reais e permite que a arquitetura seja replicada.
+
+O objetivo geral foi propor e validar, por meio de um protótipo
+funcional, essa arquitetura de referência, com foco na governança segura
+de modelos de linguagem sobre dados clínicos, respondendo à pergunta: uma
+arquitetura que integra a governança de ponta a ponta preserva a
+utilidade da consulta em linguagem natural, e a que custo mensurável? Os
+objetivos específicos foram: (a) levantar a literatura sobre
+Conversational Analytics, Text-to-SQL e governança de modelos de
+linguagem em contextos clínicos; (b) mapear os requisitos regulatórios
+aplicáveis; (c) projetar a arquitetura técnica, do pipeline de dados ao
+motor com guardrails; (d) desenvolver o modelo de governança, com
+controle de acesso, rastreabilidade, proteção dos dados e validação das
+respostas; e (e) implementar e avaliar o protótipo sobre dados
+sintéticos, medindo acurácia, recusa devida e indevida, rastreabilidade
+e conformidade de projeto.
 
 # Metodologia
 
@@ -651,3 +739,51 @@ foi, por isso, considerada parcial. A reprodutibilidade exata foi
 verificada em uma única máquina, e a latência do modelo local, de 4 a 5
 segundos por pergunta em um notebook, não foi avaliada frente a requisitos
 de uso.
+
+# Conclusão
+
+A arquitetura de referência proposta foi implementada como protótipo
+funcional e avaliada com execução real, e os cinco objetivos específicos
+foram cumpridos, do levantamento da literatura ao protótipo avaliado com
+hipóteses registradas antes dos números.
+
+Quanto à hipótese, a resposta é dupla e deve ser lida assim. A acurácia
+superior ao limiar previsto foi atingida, na estimativa pontual, com o
+modelo comercial via API sob o prompt que descreve o schema e informa o
+escopo do perfil; não foi atingida com o modelo aberto executado
+localmente, que ficou dentro da faixa publicada para sistemas de uma
+única chamada. Em ambos os casos o tamanho do conjunto de perguntas
+impede afirmar de que lado do limiar está o valor verdadeiro. Quanto à
+conformidade, com dados sintéticos a lei não incide, e o que se
+demonstrou foi uma arquitetura projetada para atender aos princípios da
+LGPD, com proteção dos dados verificada por teste, escopo de acesso
+garantido por verificador em código e auditoria encadeada, e com as
+normas da ANVISA adotadas por analogia.
+
+O achado principal responde à pergunta de pesquisa: a governança
+integrada não custou utilidade nas perguntas legítimas. Nenhuma pergunta
+dentro do escopo do perfil foi recusada quando o prompt informou esse
+escopo, e o custo da governança apareceu onde deve aparecer, na negação
+de perguntas para as quais o perfil não tem finalidade. A garantia de
+escopo veio do verificador determinista, que barrou todas as instruções
+injetadas às quais o modelo obedeceu e não deixou passar nenhuma linha
+fora do perfil; a garantia de pertinência não veio de lugar algum até que
+o modelo fosse autorizado a recusar, e mesmo então permaneceu incompleta.
+A separação entre esses dois tipos de garantia, e a medição de cada um
+sob verificador determinista, é a contribuição do trabalho.
+
+Dois resultados de método acompanham os de arquitetura. O desenho do
+prompt reduziu a um terço a distância entre um modelo local gratuito e
+um modelo comercial, o que torna a implantação local, sem saída de dados
+e com inferência repetível entre dias, uma opção defensável para
+hospitais. E o pré-registro das hipóteses, somado à execução real, expôs
+previsões erradas, custos não previstos e defeitos no próprio instrumento
+de medição, todos reportados ou corrigidos antes de qualquer número ser
+divulgado.
+
+Como trabalhos futuros indicam-se a ampliação do conjunto de perguntas
+com itens escritos por profissionais de hospital, a extensão do controle
+de acesso à granularidade de coluna, a implementação da retenção e do
+expurgo do texto das perguntas na trilha de auditoria e a avaliação em
+um schema de dezenas de tabelas, condição em que a viabilidade aqui
+observada precisa ser reexaminada.
