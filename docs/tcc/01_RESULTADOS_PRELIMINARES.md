@@ -674,15 +674,15 @@ k=3):
 
 | Célula (Sonnet) | IC95% Wilson | Set match | Soft F1 | Violation modelo | Over-Refusal sistema | TARa@3 | Tokens |
 |---|---|---|---|---|---|---|---|
-| C0 | [49,1%; 87,5%] | 96,3% | 89,9% | 11,1% (Q01, Q11) | 11,1% | 94,4% | 317 |
-| C3 | [67,2%; 96,9%] | 96,3% | 95,2% | 0 | 0 | 94,4% | 511 |
+| C0 | [51,0%; 88,7%] | 96,3% | 89,9% | 11,1% (Q01, Q11) | 11,1% | 94,4% | 317 |
+| C3 | [69,5%; 97,7%] | 96,3% | 95,2% | 0 | 0 | 94,4% | 511 |
 
 Leitura:
 
 - **Veredito da hipótese.** Sob execution match estrito, a arquitetura com o
   modelo forte e o prompt com escopo alcança **90,7%**, acima do limiar de
   80% da hipótese; com o modelo local, 72,2%. A estimativa pontual confirma
-  a hipótese para o modelo forte, mas o intervalo de Wilson ([67,2%; 96,9%],
+  a hipótese para o modelo forte, mas o intervalo de Wilson ([69,5%; 97,7%],
   n=18) **não exclui valores abaixo de 80%**, e o texto final diz as duas
   coisas. Com o modelo local a hipótese não se confirma.
 - **Modelo e prompt importam, e interagem.** O prompt vale 50 pontos no
@@ -709,7 +709,13 @@ Leitura:
   da implantação local, ao lado do perímetro e do custo.
 
 - **Status**: VALIDADO (execução real via API, 108 chamadas, trilha
-  íntegra, anexos versionados, tag `ponte-sonnet`). A chave de API foi
+  íntegra, anexos versionados, tag `ponte-sonnet`). Errata de 2026-09-22:
+  os intervalos de Wilson eram calculados sobre a média de acertos
+  arredondada a inteiro (`matriz.py`); com a média exata, C0 passa de
+  [49,1%; 87,5%] para [51,0%; 88,7%] e C3 de [67,2%; 96,9%] para [69,5%;
+  97,7%]; os anexos da ponte foram regenerados a partir dos relatórios,
+  sem nova chamada. As células do modelo local não mudam (médias
+  inteiras). A chave de API foi
   lida do ambiente e não consta de nenhum arquivo (RNC-004).
 - **Evidência**: `docs/tcc/anexos/ponte-sonnet/` (`matriz_llm.md`,
   `avaliacao_llm_C0.json`, `C3.json`, `sql_geradas_llm.md`, `auditoria.log`).

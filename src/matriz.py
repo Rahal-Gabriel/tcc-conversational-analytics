@@ -61,7 +61,7 @@ def _linha_celula(relatorio, papel):
         "estrito": a["AVAL-001_estrito"],
         "acertos_medio": round(acertos_medio, 2),
         # IC de Wilson sobre a media de acertos (n = perguntas a responder).
-        "ic95_wilson": evaluate.intervalo_wilson(round(acertos_medio), a["n_responder"]),
+        "ic95_wilson": evaluate.intervalo_wilson(acertos_medio, a["n_responder"]),
         "conteudo": a["match_conteudo_relaxado"],
         "soft_f1": a["soft_f1_medio"],
         "safe_ex_sistema": a["safe_ex_sistema"],

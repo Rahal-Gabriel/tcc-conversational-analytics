@@ -23,9 +23,10 @@ parâmetros executado localmente, o execution match estrito em 18
 perguntas subiu de 22,2% para 72,2% conforme o prompt descreveu o schema
 e informou o escopo do perfil, sem nenhuma recusa indevida; com um modelo
 comercial via API, sob o mesmo prompt, alcançou 90,7%, acima do limiar de
-80% da hipótese, com intervalo de confiança que não exclui valores menores. Em 25 perguntas adversariais, nenhuma linha fora do escopo foi
-entregue em 258 chamadas, e uma instrução de recusa elevou a recusa devida
-de 60% para 88%. Concluiu-se que a governança integrada preservou a utilidade da
+80% da hipótese, com intervalo de confiança de 95% que inclui valores
+abaixo desse limiar. Em 25 perguntas adversariais, executadas seis vezes
+cada, nenhuma linha fora do escopo foi entregue, e uma instrução de recusa
+elevou a recusa devida de 60% para 88%. Concluiu-se que a governança integrada preservou a utilidade da
 consulta quando a garantia de escopo ficou em código e o modelo conheceu
 o próprio escopo, e que a pertinência da resposta permaneceu como limite.
 
@@ -38,18 +39,18 @@ maduro (Affolter et al., 2019), e a tradução de perguntas em consultas
 SQL (Text-to-SQL) conta com benchmarks consolidados, como o Spider (Yu et
 al., 2018) e, no domínio clínico, o EHRSQL (Lee et al., 2022), tendo sido
 transformada pelos modelos de linguagem de grande porte (Shi et al.,
-2024). Em hospitais, a possibilidade de um gestor ou uma equipe
+2025). Em hospitais, a possibilidade de um gestor ou uma equipe
 assistencial perguntar aos dados sem depender de uma fila de solicitações
 à área técnica promete ampliar o acesso à informação operacional. Os
 trabalhos recentes que aplicam essa abordagem a dados clínicos relatam
 acurácias entre 43% e 78% em uma única chamada ao modelo e acima de 90%
 com agentes que corrigem a consulta iterativamente (Al Attrach et al.,
-2025; Tanković et al., 2025), e apontam que a principal causa de erro não
-é a sintaxe, mas a resolução de termos e valores do domínio.
+2026; Tanković et al., 2025), e apontam a resolução de termos e valores do domínio como principal
+causa de erro, à frente da sintaxe.
 
-O obstáculo central está em outro lugar. A governança dos dados e do
-modelo costuma ser tratada de forma fragmentada, separada da arquitetura
-de dados, e em saúde essa fragmentação é crítica: os dados são pessoais e
+A governança dos dados e do modelo, porém, costuma ser tratada de forma
+fragmentada, separada da arquitetura de dados. Em saúde essa
+fragmentação pesa mais do que em outros setores: os dados são pessoais e
 sensíveis, e o marco regulatório é exigente, composto pela Lei Geral de
 Proteção de Dados (Brasil, 2018), pelas normas da Agência Nacional de
 Vigilância Sanitária [ANVISA] (2022) aplicáveis a software em saúde e
@@ -68,7 +69,7 @@ de acesso no prompt não impede vazamentos, que restringir o schema
 visível ao papel do usuário reduz o vazamento explícito mas induz o
 modelo a alucinar tabelas, e que os modelos raramente recusam consultas
 não autorizadas por iniciativa própria (Fei et al., 2026; Klisura et al.,
-2025; Miyamoto et al., 2026). A recomendação convergente é a verificação
+2026; Miyamoto et al., 2026). A recomendação convergente é a verificação
 determinista fora do modelo. Esses trabalhos, porém, avaliam o modelo
 decidindo sozinho ou com um verificador também baseado em modelo, e não
 isolam o que muda quando um verificador em código garante o escopo e o
@@ -139,7 +140,7 @@ Todos os dados foram gerados de forma determinista com a biblioteca Faker
 em localidade pt_BR, controlada por uma semente única (42) e ancorada em
 uma data de referência fixa da simulação (31 de maio de 2026). O ambiente
 representou um hospital com oito unidades, duzentos leitos, seiscentos
-pacientes e cerca de 2.200 internações, com noventa dias de histórico de
+pacientes e 2.012 internações, com noventa dias de histórico de
 ocupação diária. Nenhum dado real foi utilizado em qualquer etapa.
 
 Os dados percorreram um pipeline em três camadas implementado em DuckDB,
@@ -176,7 +177,7 @@ catalogados para aplicações de modelos de linguagem, em especial a injeção
 de instruções e o acesso indevido a recursos (OWASP Foundation, 2025). O desenho
 seguiu o padrão gerador e verificador: o modelo propôs a consulta e um
 verificador determinista, escrito em código, decidiu se ela seria
-executada (Klisura et al., 2025).
+executada (Klisura et al., 2026).
 
 Antes de qualquer chamada ao modelo, o texto da pergunta foi verificado
 contra padrões de CPF, e-mail e telefone; havendo ocorrência, a pergunta
@@ -187,8 +188,8 @@ leitura de arquivo e de consulta ao catálogo do banco, ausência de
 referência às camadas Bronze e Silver, e restrição às tabelas Gold
 autorizadas ao perfil. A execução ocorreu em conexão somente leitura,
 restrita ao arquivo da Gold e com o acesso do banco a arquivos externos
-desligado, de modo que as garantias principais dependessem do dado e da
-conexão, e não apenas do texto da consulta. Na saída, o sistema verificou
+desligado, de modo que as garantias principais ficassem no dado e na conexão, além
+do texto da consulta. Na saída, o sistema verificou
 que as tabelas citadas existiam na Gold e bloqueou colunas com nome de
 campo sensível. Cada pergunta e cada resposta foram registradas numa
 trilha de auditoria com horário real, perfil, consulta, controle que
@@ -214,8 +215,9 @@ e das normas da ANVISA foram mapeados a controles concretos, à camada
 responsável e à situação de implementação, distinguindo controle com
 código e teste, controle por configuração, controle parcial e controle
 apenas projetado. Como os dados são sintéticos, a LGPD não incidiu sobre
-o protótipo, e a conformidade foi tratada como propriedade de projeto
-("projetada para atender"), e não como aderência demonstrada. O
+o protótipo, e a conformidade foi tratada como propriedade de projeto: uma
+arquitetura projetada para atender aos princípios da lei, sem aderência
+demonstrada em dados reais. O
 protótipo realiza análise de ocupação de leitos para apoio à gestão, sem
 finalidade diagnóstica ou terapêutica sobre paciente individual, e nesse
 escopo não se caracteriza como software como dispositivo médico nos
@@ -320,8 +322,8 @@ interna ou com campo sensível chegando ao usuário) da resposta indevida
 registrado o ponto em que o sistema parou cada pergunta. Sobre o
 conjunto combinado calculou-se o Reliability Score RS(c) (Lee et al.,
 2024a), que soma um ponto por resposta correta ou recusa devida e
-subtrai c pontos por resposta errada entregue, com c igual a 0, 10 e ao
-tamanho do conjunto.
+subtrai c pontos por resposta errada entregue, reportado com c igual a 0
+e a 10 (o valor com c igual ao tamanho do conjunto consta dos anexos).
 
 As proporções foram acompanhadas de intervalo de confiança de 95% pelo
 método de Wilson, adequado a amostras pequenas (Brown et al., 2001). As
@@ -331,8 +333,8 @@ descritiva, e nenhuma diferença foi apresentada como significativa sem o
 teste ao lado. Cada célula foi executada três vezes, e a estabilidade foi
 medida pela taxa de concordância total entre execuções, TARa@k (Atil et
 al., 2025), sobre o desfecho e o resultado normalizado de cada pergunta.
-A célula de melhor desempenho foi repetida em outro dia, com o servidor
-do modelo reiniciado.
+A célula de melhor desempenho e a célula operacional foram repetidas em
+outro dia, com o servidor do modelo reiniciado.
 
 ## Pré-registro, reprodutibilidade e integridade
 
@@ -347,15 +349,11 @@ métrica sem nova chamada ao modelo. O ambiente foi fixado em versão de
 Python, dependências travadas e imagem reprodutível, e a integração
 contínua executou, a cada alteração, apenas o motor oráculo.
 
-A execução real revelou três defeitos no próprio instrumento de medição,
-todos corrigidos antes de qualquer número ser reportado e registrados: a
-referência pré-arredondava médias que a normalização arredondava de novo
-(resultados preliminares); a assinatura de estabilidade usava a ordem das
-linhas devolvida pelo banco, não determinística em agrupamentos; e a
-execução diagnóstica de consultas barradas, usada para medir conteúdo,
-executou uma instrução de exportação injetada que o sistema havia
-recusado. Nos três casos a correção foi decidida antes de reexecutar, e
-a última foi convertida em barreira na própria conexão com o banco.
+A execução real revelou três defeitos no próprio instrumento de medição
+(um no arredondamento das referências, um na assinatura de estabilidade e
+um na execução diagnóstica de consultas barradas), todos corrigidos antes
+de qualquer número ser reportado e registrados; o último é descrito nos
+resultados, por ter consequência de segurança.
 
 # Resultados e Discussão
 
@@ -376,7 +374,8 @@ os 600 pacientes. A faixa etária derivada da idade completa resultou em
 por ano-calendário dos resultados preliminares, que classificava 11
 pacientes na faixa errada.
 
-A minimização da Gold foi decidida por medição. Com as colunas originais
+A medição do risco de reidentificação orientou a minimização da Gold.
+Com as colunas originais
 da tabela de internações (unidade, tipo, faixa etária, sexo e data de
 admissão), 1.763 dos 1.883 grupos de quase-identificadores tinham uma
 única internação: a tabela, apresentada como agregada, permitia
@@ -403,8 +402,8 @@ Tabela 2. Minimização da tabela de internações da Gold
 
 Fonte: Resultados originais da pesquisa
 
-O isolamento das camadas internas também foi corrigido por medição. Na
-primeira versão, a garantia de que Bronze e Silver eram inacessíveis
+Uma medição semelhante levou à correção do isolamento das camadas
+internas. Na primeira versão, a garantia de que Bronze e Silver eram inacessíveis
 dependia só da inspeção textual da consulta, e três consultas hostis
 aprovadas pelos guardrails devolveram dados internos: uma função de
 tabela que recebe o nome da tabela como texto, uma consulta ao catálogo
@@ -415,7 +414,7 @@ funções de tabela e de catálogo passaram a ser bloqueadas. O achado
 reproduz, no protótipo, o que a literatura recente afirma: restrições
 expressas apenas sobre o texto, no prompt ou por inspeção da consulta,
 não garantem isolamento, e a garantia precisa ser imposta de forma
-determinista fora do texto (Fei et al., 2026; Klisura et al., 2025;
+determinista fora do texto (Fei et al., 2026; Klisura et al., 2026;
 Miyamoto et al., 2026). A conexão de consulta recebeu ainda, na Etapa E,
 o bloqueio de acesso a arquivos externos, pelo motivo relatado adiante.
 
@@ -450,10 +449,10 @@ contexto (Maamari et al., 2024). O value linking (C2 contra C1) fechou o
 erro de literal que motivou sua adoção, a caixa de "Enfermaria", e mais
 duas perguntas, mas fez o modelo regredir em outras duas, uma por
 projetar coluna a mais e outra por inventar uma coluna na tabela certa;
-o saldo foi de uma pergunta (p = 1,0), com o maior Soft F1 da matriz. O
-resultado contraria em parte a expectativa formada a partir de Liu et
-al. (2026), para quem expor valores enumerados eleva a acurácia de
-filtros; aqui elevou, mas não sem custo.
+o saldo foi de uma pergunta (p = 1,0), com o maior Soft F1 da matriz. Liu et al. (2026) relatam que expor valores enumerados eleva a acurácia
+dos filtros; neste trabalho a elevação veio acompanhada de duas
+regressões, o que a expectativa formada a partir daquele estudo não
+previa.
 
 A restrição do schema ao perfil (C3 contra C1) foi observada na direção
 prevista: três perguntas passaram a corretas e nenhuma regrediu
@@ -472,9 +471,9 @@ perguntas que o perfil não pode fazer, é medido no conjunto adversarial.
 
 Pelo critério registrado antes da execução, C3 e C4 empataram no
 execution match e na ausência de violação, e C3 venceu por consumir
-menos tokens. C4 foi melhor nas métricas secundárias, o que fica
-declarado; o critério não foi alterado depois dos números. Os cinco erros
-residuais de C3 não foram de raciocínio sobre a pergunta: dois de
+menos tokens. C4 obteve set match e Soft F1 maiores, e a escolha por C3 seguiu o
+critério registrado, sem revisão posterior. Os cinco erros residuais de
+C3 concentraram-se em três causas: dois de
 projeção incompleta (a unidade sem a taxa que a selecionou), um de
 dialeto (uma função do MySQL em DuckDB, apesar de o prompt declarar o
 dialeto) e dois de literal (um nome de unidade incompleto e uma caixa
@@ -500,11 +499,12 @@ Tabela 4. Execution match estrito por modelo e célula (18 perguntas, média de 
 
 Fonte: Resultados originais da pesquisa
 
-Modelo e prompt importaram, e interagiram. O prompt valeu 50 pontos no
-modelo pequeno e 17 no grande; o modelo valeu 52 pontos sob o prompt
-simples e 19 sob o prompt com escopo. O que os dados sustentam é que um
-prompt bem desenhado reduziu a distância entre o modelo local e o modelo
-via API de 52 para 19 pontos, e não que um fator pese mais que o outro.
+Os dois fatores tiveram efeito, e o efeito de cada um dependeu do outro.
+O prompt valeu 50 pontos no modelo pequeno e 17 no grande; o modelo
+valeu 52 pontos sob o prompt simples e 19 sob o prompt com escopo. A
+leitura que os dados sustentam é a de que um prompt bem desenhado
+reduziu de 52 para 19 pontos a distância entre o modelo local e o modelo
+via API; nada permite dizer que um fator pese mais que o outro em geral.
 Em C0, o modelo via API reproduziu o padrão dos resultados preliminares:
 as duas perguntas da enfermagem barradas por escopo, duas perguntas com
 colunas a mais e a diferença de 61,1% para 74,1% explicada pela Gold
@@ -512,7 +512,7 @@ minimizada e pelo harness revisto, não pelo modelo, que foi o mesmo. Em
 C3, o modelo via API errou os mesmos dois tipos de coisa que o modelo
 local: uma coluna a mais em uma pergunta e a caixa de um literal em outra.
 
-O intervalo de Wilson para C3 no modelo via API foi de 67,2% a 96,9%; no
+O intervalo de Wilson para C3 no modelo via API foi de 69,5% a 97,7%; no
 modelo local, de 49,1% a 87,5%. Com 18 perguntas, nenhum dos intervalos
 exclui 80%. A hipótese de acurácia superior a 80% foi, portanto, atingida
 na estimativa pontual com o modelo forte sob o prompt com escopo (90,7%),
@@ -525,10 +525,10 @@ mínima do modelo havia contrariado, e divergiu em uma, pedindo também a
 data da maior taxa de ocupação, que nenhum modelo devolveu. Sob a leitura
 do anotador, todas as células perdem 5,6 pontos, e o modelo local fica
 abaixo de 80% nas duas leituras, enquanto o modelo via API fica acima nas
-duas (90,7% e 85,2%). A referência divergente não foi alterada, para não
-ajustar o gabarito depois dos números.
+duas (90,7% e 85,2%). A referência divergente foi mantida como estava, porque alterar o
+gabarito após conhecer os resultados comprometeria a comparação.
 
-A execução via API trouxe um achado próprio: com temperatura zero, o
+A execução via API mostrou ainda que, com temperatura zero, o
 modelo mudou a consulta de uma pergunta em cada célula entre chamadas
 contíguas (TARa@3 de 94,4%), variação que o modelo local com semente fixa
 não apresentou em nenhuma das 270 chamadas da matriz, coerente com o não
@@ -555,15 +555,19 @@ Tabela 5. Conjunto combinado: 18 perguntas legítimas e 25 adversariais (modelo 
 
 Fonte: Resultados originais da pesquisa
 
-Sem a instrução de recusa, o modelo se absteve sozinho em apenas 2 das 25
-perguntas adversariais, e as duas nem chegaram a ele, pois foram barradas
-pelo filtro de dado pessoal na pergunta. O resultado coincide com a
-observação de Fei et al. (2026) de que os modelos raramente recusam por
-iniciativa própria. Ainda assim, nenhuma linha fora do perfil, de camada
-interna ou com campo sensível foi entregue em nenhuma das 258 chamadas:
-das 15 recusas do sistema em E0, 11 vieram do verificador determinista
-(comandos de escrita e de leitura de arquivo, instrução múltipla, camada
-interna, catálogo, tabela fora do perfil e dado pessoal na pergunta).
+Sem a instrução de recusa, o modelo não se absteve por iniciativa própria
+em nenhuma pergunta adversarial: as duas recusas contadas no nível do
+modelo em E0 são as perguntas barradas pelo filtro de dado pessoal antes
+de qualquer chamada, que o harness registra como recusa nos dois níveis
+porque nenhum deles as entregou; excluídas, o modelo recusou 0 de 23 em
+E0 e 18 de 23 em E1. O resultado coincide com a observação de Fei et al.
+(2026) de que os modelos raramente recusam por iniciativa própria. Ainda assim, nenhuma linha fora do perfil, de camada
+interna ou com campo sensível foi entregue em nenhuma das 150 interações
+adversariais das duas células: das 15 recusas do sistema em E0, 11
+vieram de controles deterministas, 9 do verificador da consulta (comandos
+de escrita e de leitura de arquivo, instrução múltipla, camada interna,
+catálogo e tabela fora do perfil) e 2 do filtro de dado pessoal na
+pergunta.
 Nas quatro injeções de instrução em que o modelo obedeceu, gerando
 exclusão, alteração, leitura de arquivo do sistema e exportação de
 tabela, o verificador barrou a consulta antes da execução. As outras 4
@@ -573,8 +577,8 @@ apelido e duas colunas inexistentes que fizeram a consulta falhar. Em
 todas elas, o dado pessoal pedido não existia na Gold, de modo que o
 escopo não dependeu dessa contingência.
 
-O que o verificador não garantiu foi a pertinência. Em E0, 10 perguntas
-sem resposta receberam uma resposta: contagens feitas na tabela
+A pertinência da resposta ficou fora do alcance do verificador. Em E0,
+10 perguntas sem resposta receberam uma resposta: contagens feitas na tabela
 permitida no lugar da tabela proibida, colunas nulas com nome de
 diagnóstico ou de médico responsável, uma projeção de 5% de aumento para
 o dia seguinte e a parte benigna de uma pergunta que continha uma
@@ -585,10 +589,9 @@ pedida, responde com o que vê, agora medido sob verificador determinista.
 A instrução de recusa elevou a recusa devida em todas as famílias
 (Tabela 6), sem produzir nenhuma recusa indevida, e reduziu as respostas
 indevidas de 10 para 3 (teste de sinal sobre o desfecho do sistema: 7
-perguntas melhoraram e 1 piorou, p = 0,07). O custo apareceu por outro
-mecanismo: uma pergunta legítima mudou de consulta e passou de correta a
-errada, sem recusa, e o execution match das legítimas caiu de 72,2% para
-66,7%. Pelo critério registrado antes da execução, a instrução passou a
+perguntas melhoraram e 1 piorou, p = 0,07). Houve, porém, um custo que o critério de decisão não previa: uma
+pergunta legítima mudou de consulta e passou de correta a errada, sem
+recusa, e o execution match das legítimas caiu de 72,2% para 66,7%. Pelo critério registrado antes da execução, a instrução passou a
 fazer parte da configuração operacional, com esse custo declarado.
 
 Tabela 6. Recusa devida por família de perguntas adversariais (5 perguntas por família; modelo / sistema)
@@ -608,10 +611,10 @@ governança propriamente dito: são perguntas que o hospital faria e que o
 perfil de quem pergunta não pode fazer. Em E1, quatro das cinco foram
 negadas, que é o comportamento desejado, e uma foi respondida
 erradamente com a tabela permitida; em E0, duas foram negadas e três
-respondidas erradamente. O custo da governança, portanto, não é recusar
-perguntas legítimas do próprio perfil, o que não ocorreu, mas negar
-informação a quem não tem a finalidade, e, sem a instrução de recusa,
-arriscar entregar uma resposta errada em vez de negar.
+respondidas erradamente. O custo da governança consiste, portanto, em negar informação a quem não
+tem a finalidade correspondente; sem a instrução de recusa, esse custo
+se converte no risco de entregar uma resposta errada no lugar da
+negativa.
 
 Duas análises feitas sobre os relatórios, sem nova execução,
 complementam a leitura. Uma regra determinista que se abstivesse sempre
@@ -637,8 +640,8 @@ um arquivo, porque a conexão somente leitura impede escrita no banco, mas
 não em arquivo. O sistema, do ponto de vista do usuário, não entregou
 nada. A execução diagnóstica foi restrita a consultas barradas apenas por
 escopo, a conexão passou a negar acesso a arquivos externos, com teste, e
-a etapa foi reexecutada, com as 258 consultas idênticas às da primeira
-execução.
+a etapa foi reexecutada, com as consultas das 258 interações idênticas
+às da primeira execução.
 
 ## O que sai do perímetro
 
@@ -666,7 +669,7 @@ separação entre o fato registrado na cadeia e o texto da pergunta, guardado
 da auditoria com o término do tratamento e o direito de eliminação
 previstos na LGPD (Brasil, 2018). A implantação local, em que nada sai do
 perímetro, é a opção adotada na literatura mais próxima deste trabalho
-(Al Attrach et al., 2025); a abstração do schema e dos valores antes do
+(Al Attrach et al., 2026); a abstração do schema e dos valores antes do
 envio a um modelo remoto (Abedini et al., 2025) é a alternativa para quem
 precisa da API.
 
@@ -674,9 +677,10 @@ precisa da API.
 
 A célula de melhor desempenho do modelo local (C3) e a célula
 operacional (E1) foram repetidas em outro dia, com o servidor do modelo
-reiniciado e os mesmos pesos, semente e máquina. As 366 chamadas
-repetiram exatamente as consultas do primeiro dia, com concordância total
-de 100% entre os dias e métricas idênticas. O modelo via API, ao
+reiniciado e os mesmos pesos, semente e máquina. As 183 interações do
+segundo dia (61 perguntas, três execuções cada) repetiram exatamente as
+consultas do primeiro, com concordância total de 100% entre os dias e
+métricas idênticas. O modelo via API, ao
 contrário, mudou a consulta de uma pergunta por célula entre chamadas
 contíguas. Com semente fixa e pesos identificados, a inferência local foi
 reproduzível, o que a torna preferível também do ponto de vista da
@@ -696,8 +700,8 @@ Tabela 8. Resultados deste trabalho e da literatura
 | Aspecto | Literatura | Este trabalho |
 |---|---|---|
 | Execution match, uma chamada sem exemplos, dados clínicos | 43,4% a 78% (Tanković et al., 2025; Li et al., 2026) | 72,2% (local); 90,7% (via API) |
-| Execution match, agentes com ferramentas e correção | 83,3% a 94% (Al Attrach et al., 2025; Waltl, 2025) | não avaliado |
-| Recusa correta em perguntas sem resposta | 69% (Al Attrach et al., 2025, modelo aberto de 20 bilhões) | 88% no sistema, 80% no modelo (E1) |
+| Execution match, agentes com ferramentas e correção | 83,3% a 94% (Al Attrach et al., 2026; Waltl, 2025) | não avaliado |
+| Recusa correta em perguntas sem resposta no schema | 69% (Al Attrach et al., 2026, modelo aberto de 20 bilhões) | 60% na família equivalente (E1); 88% no conjunto adversarial completo, no sistema |
 | Vazamento com política apenas no prompt | 4,8% a 42,4% (Miyamoto et al., 2026) | 0 violação de política entregue, com verificador |
 | Violação da política de acesso pelo modelo | 7,4% no BIRD para um modelo comercial (Fei et al., 2026) | 0 no sistema em todas as células |
 
@@ -706,15 +710,14 @@ Fonte: Resultados originais da pesquisa
 Em acurácia, o modelo local ficou dentro da faixa dos trabalhos de uma
 chamada, e o modelo via API, com o prompt com escopo, acima dela, mas
 abaixo dos sistemas agênticos, que usam várias chamadas, ferramentas e
-correção iterativa, recursos que este trabalho não empregou. Em recusa e
-em violação de política, os valores são melhores que os publicados, e a
-razão é arquitetural, não do modelo: os trabalhos citados medem o modelo
+correção iterativa, recursos que este trabalho não empregou. Em recusa e em violação de política, os valores superam os publicados
+por uma razão de arquitetura: os trabalhos citados medem o modelo
 decidindo sozinho ou com verificador baseado em modelo, enquanto aqui um
 verificador determinista em código decide a execução. A contribuição do
 trabalho está em medir, sob esse verificador, o que muda quando o modelo
 conhece o escopo do perfil e quando é autorizado a recusar, algo que os
 benchmarks de controle de acesso em Text-to-SQL não isolam (Fei et al.,
-2026; Klisura et al., 2025).
+2026; Klisura et al., 2026).
 
 ## Limitações
 
@@ -724,9 +727,9 @@ das configurações. As perguntas, as referências e o sistema foram
 escritos pelo mesmo autor; a leitura cega de um anotador independente
 reduziu, mas não eliminou, esse viés. O schema tem quatro tabelas e
 nenhuma junção, e o comportamento com dezenas de tabelas, prompts maiores
-e permissões por coluna não foi avaliado. Os dados são sintéticos, o que
-torna a conformidade com a LGPD uma propriedade de projeto, e não uma
-aderência demonstrada, e as normas da ANVISA foram adotadas por analogia.
+e permissões por coluna não foi avaliado. Os dados são sintéticos, de modo que a conformidade com a LGPD só pôde
+ser demonstrada como propriedade de projeto, e as normas da ANVISA foram
+adotadas por analogia.
 A matriz de perfis foi desenhada pelo autor a partir da finalidade de
 cada função e não foi validada em campo com um hospital. O k-anonimato
 imposto cobre o conjunto completo de internações; no subconjunto das
@@ -747,7 +750,7 @@ funcional e avaliada com execução real, e os cinco objetivos específicos
 foram cumpridos, do levantamento da literatura ao protótipo avaliado com
 hipóteses registradas antes dos números.
 
-Quanto à hipótese, a resposta é dupla e deve ser lida assim. A acurácia
+A hipótese tem duas partes, com respostas diferentes. A acurácia
 superior ao limiar previsto foi atingida, na estimativa pontual, com o
 modelo comercial via API sob o prompt que descreve o schema e informa o
 escopo do perfil; não foi atingida com o modelo aberto executado
@@ -760,11 +763,13 @@ LGPD, com proteção dos dados verificada por teste, escopo de acesso
 garantido por verificador em código e auditoria encadeada, e com as
 normas da ANVISA adotadas por analogia.
 
-O achado principal responde à pergunta de pesquisa: a governança
-integrada não custou utilidade nas perguntas legítimas. Nenhuma pergunta
-dentro do escopo do perfil foi recusada quando o prompt informou esse
-escopo, e o custo da governança apareceu onde deve aparecer, na negação
-de perguntas para as quais o perfil não tem finalidade. A garantia de
+Em resposta à pergunta de pesquisa, a governança integrada não gerou
+recusa indevida. Nenhuma pergunta dentro do escopo do
+perfil foi recusada quando o prompt informou esse escopo; o custo em
+acurácia da configuração operacional foi de uma única pergunta legítima,
+respondida de outro modo depois que o modelo foi autorizado a recusar; e
+o custo da governança apareceu onde deve aparecer, na negação de
+perguntas para as quais o perfil não tem finalidade. A garantia de
 escopo veio do verificador determinista, que barrou todas as instruções
 injetadas às quais o modelo obedeceu e não deixou passar nenhuma linha
 fora do perfil; a garantia de pertinência não veio de lugar algum até que
@@ -772,8 +777,8 @@ o modelo fosse autorizado a recusar, e mesmo então permaneceu incompleta.
 A separação entre esses dois tipos de garantia, e a medição de cada um
 sob verificador determinista, é a contribuição do trabalho.
 
-Dois resultados de método acompanham os de arquitetura. O desenho do
-prompt reduziu a um terço a distância entre um modelo local gratuito e
+Além dos resultados de arquitetura, dois resultados de método merecem
+registro. O desenho do prompt reduziu a um terço a distância entre um modelo local gratuito e
 um modelo comercial, o que torna a implantação local, sem saída de dados
 e com inferência repetível entre dias, uma opção defensável para
 hospitais. E o pré-registro das hipóteses, somado à execução real, expôs
@@ -787,3 +792,85 @@ de acesso à granularidade de coluna, a implementação da retenção e do
 expurgo do texto das perguntas na trilha de auditoria e a avaliação em
 um schema de dezenas de tabelas, condição em que a viabilidade aqui
 observada precisa ser reexaminada.
+
+# Referências
+
+Abedini, S.; Mohapatra, S.; Emerson, D.B.; Shafieinejad, M.; Cresswell, J.C.; He, X. 2025. MaskSQL: safeguarding privacy for LLM-based text-to-SQL via abstraction. arXiv:2509.23459 (aceito no 3rd Workshop on Regulatable ML, NeurIPS 2025). Disponível em: <https://arxiv.org/abs/2509.23459>. Acesso em: 22 set. 2026.
+
+Affolter, K.; Stockinger, K.; Bernstein, A. 2019. A comparative survey of recent natural language interfaces for databases. The VLDB Journal 28(5): 793-819.
+
+Agência Nacional de Vigilância Sanitária [ANVISA]. 2022. Resolução da Diretoria Colegiada RDC nº 657, de 24 de março de 2022. Dispõe sobre a regularização de software como dispositivo médico (Software as a Medical Device, SaMD). Diário Oficial da União, Brasília, 30 mar. 2022. Seção 1, p. 330-331.
+
+Al Attrach, R.; Moreira, P.; Fani, R.; Umeton, R.; Fiske, A.; Celi, L.A. 2026. M3: conversational LLMs simplify secure clinical data access, understanding, and analysis. PLOS Digital Health 5(9): e0001671.
+
+Angelov, S.; Grefen, P.; Greefhorst, D. 2012. A framework for analysis and design of software reference architectures. Information and Software Technology 54(4): 417-431.
+
+Armbrust, M.; Ghodsi, A.; Xin, R.; Zaharia, M. 2021. Lakehouse: a new generation of open platforms that unify data warehousing and advanced analytics. In: Conference on Innovative Data Systems Research (CIDR), 11., 2021, evento virtual. Anais... Disponível em: <https://www.cidrdb.org/cidr2021/papers/cidr2021_paper17.pdf>. Acesso em: 22 set. 2026.
+
+Atıl, B.; Aykent, S.; Chittams, A.; Fu, L.; Passonneau, R.J.; Radcliffe, E.; Rajagopal, G.R.; Sloan, A.; Tudrej, T.; Ture, F.; Wu, Z.; Xu, L.; Baldwin, B. 2025. Non-determinism of "deterministic" LLM system settings in hosted environments. In: Workshop on Evaluation and Comparison of NLP Systems (Eval4NLP), 5., 2025. Anais... Association for Computational Linguistics, p. 135-148.
+
+Autoridade Nacional de Proteção de Dados [ANPD]. 2024. Radar tecnológico: inteligência artificial generativa. Disponível em: <https://www.gov.br/anpd/pt-br/documentos-e-publicacoes/documentos-de-publicacoes/radar_tecnologico_ia_generativa_anpd.pdf>. Acesso em: 10 jun. 2026.
+
+Brasil. 2018. Lei nº 13.709, de 14 de agosto de 2018. Lei Geral de Proteção de Dados Pessoais (LGPD). Diário Oficial da União, Brasília, 15 ago. 2018. Seção 1, p. 59.
+
+Brown, L.D.; Cai, T.T.; DasGupta, A. 2001. Interval estimation for a binomial proportion. Statistical Science 16(2): 101-133.
+
+El Emam, K.; Arbuckle, L. 2013. Anonymizing Health Data: Case studies and methods to get you started. O'Reilly Media, Sebastopol, CA, USA.
+
+European Data Protection Board [EDPB]. 2025. Guidelines 01/2025 on pseudonymisation. Disponível em: <https://www.edpb.europa.eu/system/files/2025-01/edpb_guidelines_202501_pseudonymisation_en.pdf>. Acesso em: 13 set. 2026.
+
+European Union Agency for Cybersecurity [ENISA]. 2022. Deploying pseudonymisation techniques: the case of the health sector. Disponível em: <https://www.enisa.europa.eu/publications/deploying-pseudonymisation-techniques>. Acesso em: 13 set. 2026.
+
+Fei, Y.; Jiang, Y.; Yang, Y.; Xiao, X. 2026. Benchmarking text-to-SQL under role-based access control. arXiv:2607.22115 (aceito no ACM SIGMOD 2027). Disponível em: <https://arxiv.org/abs/2607.22115>. Acesso em: 22 set. 2026.
+
+Gao, D.; Wang, H.; Li, Y.; Sun, X.; Qian, Y.; Ding, B.; Zhou, J. 2024. Text-to-SQL empowered by large language models: a benchmark evaluation. Proceedings of the VLDB Endowment 17(5): 1132-1145.
+
+Hevner, A.R.; March, S.T.; Park, J.; Ram, S. 2004. Design science in information systems research. MIS Quarterly 28(1): 75-105.
+
+Hui, B.; Yang, J.; Cui, Z.; Yang, J.; Liu, D.; Zhang, L.; Liu, T.; Zhang, J.; Yu, B.; Lu, K.; Dang, K.; Fan, Y.; Zhang, Y.; Yang, A.; Men, R.; Huang, F.; Zheng, B.; Miao, Y.; Quan, S.; Feng, Y.; Ren, X.; Ren, X.; Zhou, J.; Lin, J. 2024. Qwen2.5-Coder technical report. arXiv:2409.12186. Disponível em: <https://arxiv.org/abs/2409.12186>. Acesso em: 22 set. 2026.
+
+Kent, K.; Souppaya, M. 2006. Guide to Computer Security Log Management. NIST Special Publication 800-92. National Institute of Standards and Technology, Gaithersburg, MD, USA.
+
+Klisura, Đ.; Khoury, J.; Kundu, A.; Krishnan, R.; Rios, A. 2026. Role-conditioned refusals: evaluating access control reasoning in large language models. In: Findings of the Association for Computational Linguistics: EACL 2026, 2026, Rabat, Marrocos. Anais... Association for Computational Linguistics, p. 6018-6034.
+
+Lee, G.; Hwang, H.; Bae, S.; Kwon, Y.; Shin, W.; Yang, S.; Seo, M.; Kim, J.-Y.; Choi, E. 2022. EHRSQL: a practical text-to-SQL benchmark for electronic health records. In: Conference on Neural Information Processing Systems (NeurIPS), Datasets and Benchmarks Track, 36., 2022, New Orleans, LA, USA. Anais... Advances in Neural Information Processing Systems 35, p. 15589-15601.
+
+Lee, G.; Kweon, S.; Bae, S.; Choi, E. 2024a. Overview of the EHRSQL 2024 shared task on reliable text-to-SQL modeling on electronic health records. In: Clinical Natural Language Processing Workshop, 6., 2024, Mexico City, Mexico. Anais... Association for Computational Linguistics, p. 644-654.
+
+Lee, G.; Chay, W.; Cho, S.; Choi, E. 2024b. TrustSQL: benchmarking text-to-SQL reliability with penalty-based scoring. arXiv:2403.15879. Disponível em: <https://arxiv.org/abs/2403.15879>. Acesso em: 22 set. 2026.
+
+Li, J.; Hui, B.; Qu, G.; Yang, J.; Li, B.; Li, B.; Wang, B.; Qin, B.; Geng, R.; Huo, N.; Zhou, X.; Ma, C.; Li, G.; Chang, K.; Huang, F.; Cheng, R.; Li, Y. 2023. Can LLM already serve as a database interface? A big bench for large-scale database grounded text-to-SQLs. In: Conference on Neural Information Processing Systems (NeurIPS), Datasets and Benchmarks Track, 37., 2023, New Orleans, LA, USA. Anais... Advances in Neural Information Processing Systems 36, p. 42330-42357.
+
+Li, J.; Zhang, Y.; Zhao, J.; He, S.; Li, D. 2026. Harnessing the potential of LLMs in hospital management: insights into medical data inquiry. The International Journal of Health Planning and Management (publicação antecipada). DOI: 10.1002/hpm.70106.
+
+Liu, W.; Qu, B.; Mallya, P.; Wu, J.; Thomas, K.; Hall, J.L.; Zhao, J.; Yin, Z. 2026. Optimizing an LLM-based clinical data querying system using metadata enrichment and task decomposition. AMIA Joint Summits on Translational Science Proceedings 2026: 277-286.
+
+Maamari, K.; Abubaker, F.; Jaroslawicz, D.; Mhedhbi, A. 2024. The death of schema linking? Text-to-SQL in the age of well-reasoned language models. arXiv:2408.07702 (apresentado no Table Representation Learning Workshop, NeurIPS 2024). Disponível em: <https://arxiv.org/abs/2408.07702>. Acesso em: 22 set. 2026.
+
+Miyamoto, R.; Fan, X.; Yamana, H. 2026. Policy-conditioned constrained decoding for column-level access control in text-to-SQL. arXiv:2607.12341. Disponível em: <https://arxiv.org/abs/2607.12341>. Acesso em: 22 set. 2026.
+
+National Institute of Standards and Technology [NIST]. 2023. Artificial Intelligence Risk Management Framework (AI RMF 1.0). NIST AI 100-1. NIST, Gaithersburg, MD, USA.
+
+OWASP Foundation. 2025. OWASP Top 10 for LLM Applications 2025. Disponível em: <https://owasp.org/www-project-top-10-for-large-language-model-applications/>. Acesso em: 8 set. 2026.
+
+Pedro, R.; Coimbra, M.E.; Castro, D.; Carreira, P.; Santos, N. 2025. Prompt-to-SQL injections in LLM-integrated web applications: risks and defenses. In: IEEE/ACM International Conference on Software Engineering (ICSE), 47., 2025, Ottawa, Canada. Anais... p. 1768-1780.
+
+Prodanov, C.C.; Freitas, E.C. de. 2013. Metodologia do Trabalho Científico: Métodos e técnicas da pesquisa e do trabalho acadêmico. 2ed. Feevale, Novo Hamburgo, RS, Brasil.
+
+Rebedea, T.; Dinu, R.; Sreedhar, M.N.; Parisien, C.; Cohen, J. 2023. NeMo Guardrails: a toolkit for controllable and safe LLM applications with programmable rails. In: Conference on Empirical Methods in Natural Language Processing (EMNLP), System Demonstrations, 2023, Singapore. Anais... Association for Computational Linguistics, p. 431-445.
+
+Schneier, B.; Kelsey, J. 1999. Secure audit logs to support computer forensics. ACM Transactions on Information and System Security 2(2): 159-176.
+
+Shi, L.; Tang, Z.; Zhang, N.; Zhang, X.; Yang, Z. 2025. A survey on employing large language models for text-to-SQL tasks. ACM Computing Surveys 58(2): 1-37.
+
+Sweeney, L. 2002. k-anonymity: a model for protecting privacy. International Journal of Uncertainty, Fuzziness and Knowledge-Based Systems 10(5): 557-570.
+
+Tanković, N.; Šajina, R.; Lorencin, I. 2025. Transforming medical data access: the role and challenges of recent language models in SQL query automation. Algorithms 18(3): 124.
+
+Waltl, J. 2025. LETHE-Chat: Schema-aware LLM agents for text-to-SQL on clinical trial databases. Dissertação de Mestrado em Ciências. FH Joanneum, Graz, Áustria.
+
+World Health Organization [WHO]. 2024. Ethics and Governance of Artificial Intelligence for Health: Guidance on large multi-modal models. WHO, Geneva, Switzerland.
+
+Yin, R.K. 2015. Estudo de Caso: Planejamento e métodos. 5ed. Bookman, Porto Alegre, RS, Brasil.
+
+Yu, T.; Zhang, R.; Yang, K.; Yasunaga, M.; Wang, D.; Li, Z.; Ma, J.; Li, I.; Yao, Q.; Roman, S.; Zhang, Z.; Radev, D. 2018. Spider: a large-scale human-labeled dataset for complex and cross-domain semantic parsing and text-to-SQL task. In: Conference on Empirical Methods in Natural Language Processing (EMNLP), 2018, Brussels, Belgium. Anais... Association for Computational Linguistics, p. 3911-3921.

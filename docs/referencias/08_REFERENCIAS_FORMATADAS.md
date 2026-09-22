@@ -181,3 +181,20 @@ Zhong, R.; Yu, T.; Klein, D. 2020. Semantic evaluation for text-to-SQL with dist
 | "arxiv.org, 2025" no projeto | Citação sem autor | Al Attrach et al. (2025) |
 | "ehealth-graz.at, 2025" no projeto | Citação sem autor | Waltl (2025) |
 | OWASP (2023) | Edição desatualizada | OWASP (2025) |
+
+## Verificação bibliográfica de 2026-09-22 (versão final do TCC)
+
+As 40 obras citadas na versão final foram conferidas na web (arXiv, ACL
+Anthology, Crossref, OpenAlex, PMC, DOU) e a lista definitiva está em
+`docs/tcc/final/TCC_final.md`, seção Referências. Correções em relação às
+entradas acima:
+
+- Klisura et al.: publicado em Findings of EACL 2026, Rabat, p. 6018-6034 (ano de citação passa a 2026).
+- Al Attrach et al.: publicado em PLOS Digital Health 5(9): e0001671, 2026 (ano de citação passa a 2026).
+- Pedro et al. 2025: a versão do ICSE 2025 tem outro título ("Prompt-to-SQL injections in LLM-integrated web applications: risks and defenses"), cinco autores (inclui Coimbra, M.E.) e p. 1768-1780.
+- Shi et al.: ACM Computing Surveys 58(2): 1-37, 2025 (ano de citação passa a 2025).
+- Miyamoto et al.: segundo autor grafado como Fan, X. (o arXiv lista "Xin Fan").
+- Lee et al. 2022: NeurIPS 35, p. 15589-15601; Li et al. 2023: NeurIPS 36, p. 42330-42357; Lee et al. 2024a: p. 644-654; Liu et al. 2026: AMIA Summits 2026: 277-286; Hui et al.: 24 autores.
+- LGPD: DOU 15 ago. 2018, Seção 1, p. 59; RDC 657: DOU 30 mar. 2022, Seção 1, p. 330-331.
+- Fei et al. 2026 (aceito no SIGMOD 2027), Abedini et al. 2025 e Maamari et al. 2024 (workshops sem anais) e Lee et al. 2024b (sem versão publicada) permanecem como arXiv; Armbrust et al. 2021 sem páginas (CIDR não pagina); Li et al. 2026 em publicação antecipada.
+- Johnson et al. 2023 (MIMIC-IV) deixou de ser citado e não entra na lista final.

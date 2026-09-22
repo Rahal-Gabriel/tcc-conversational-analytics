@@ -4,8 +4,8 @@ Temperatura 0, k=3 por celula, janela UTC 2026-09-20T19:17:56+00:00 a 2026-09-20
 
 | Celula | Papel | Estrito (AVAL-001) | IC95% | Set match | Soft F1 | Safe-EX sist. | Violation mod. | Over-Refusal sist. | TARa@k | Tokens entrada | Duracao |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| C0 | prompt do preliminar (ponte) | 74.1% (dp 3.2) | [49.1%; 87.5%] | 96.3% (dp 3.2) | 89.9% (dp 1.1) | 74.1% (dp 3.2) | 11.1% (dp 0.0) | 11.1% (dp 0.0) | 94.4% | 316.7 | 88 s |
-| C3 | + schema por perfil | 90.7% (dp 3.2) | [67.2%; 96.9%] | 96.3% (dp 3.2) | 95.2% (dp 3.2) | 90.7% (dp 3.2) | 0.0% (dp 0.0) | 0.0% (dp 0.0) | 94.4% | 511.4 | 93 s |
+| C0 | prompt do preliminar (ponte) | 74.1% (dp 3.2) | [51.0%; 88.7%] | 96.3% (dp 3.2) | 89.9% (dp 1.1) | 74.1% (dp 3.2) | 11.1% (dp 0.0) | 11.1% (dp 0.0) | 94.4% | 316.7 | 88 s |
+| C3 | + schema por perfil | 90.7% (dp 3.2) | [69.5%; 97.7%] | 96.3% (dp 3.2) | 95.2% (dp 3.2) | 90.7% (dp 3.2) | 0.0% (dp 0.0) | 0.0% (dp 0.0) | 94.4% | 511.4 | 93 s |
 
 ## Desfechos (Fei et al. 2026), contagem media por execucao
 
