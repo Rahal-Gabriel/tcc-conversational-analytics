@@ -73,7 +73,11 @@ internações foi imposto k-anonimato (Sweeney, 2002) com k mínimo de 5 no
 par tipo de leito e faixa etária, limiar adequado a uso interno
 controlado (El Emam e Arbuckle, 2013), verificado por teste a cada
 construção. A Gold foi exportada para um arquivo próprio, de modo que as
-camadas internas não existissem no banco consultado pelo sistema.
+camadas internas não existissem no banco consultado pelo sistema. Como o
+DuckDB não oferece controle de acesso por usuário, o isolamento foi
+materializado como arquivo separado; em um banco com permissões, o mesmo
+princípio de menor privilégio seria implementado por um usuário de
+leitura restrito às tabelas Gold.
 
 ## Governança de entrada e de saída
 
@@ -264,3 +268,181 @@ execução diagnóstica de consultas barradas, usada para medir conteúdo,
 executou uma instrução de exportação injetada que o sistema havia
 recusado. Nos três casos a correção foi decidida antes de reexecutar, e
 a última foi convertida em barreira na própria conexão com o banco.
+
+# Resultados e Discussão
+
+Os resultados são apresentados na ordem da Metodologia. Todos os números
+do modelo de linguagem provêm de execução real, com os artefatos
+versionados; os do pipeline provêm de execução determinista.
+
+## Pipeline, minimização e isolamento
+
+A geração produziu, de forma determinista, 8 unidades, 200 leitos, 600
+pacientes, 2.012 internações e 18.000 registros diários de ocupação. Na
+data de referência, 150 leitos estavam ocupados, 42 livres e 8
+bloqueados (taxa de ocupação de 75%), e as 150 internações em andamento
+coincidiram com os 150 leitos ocupados. A Silver não conteve nome, CPF
+nem data de nascimento, e o pseudônimo por HMAC não teve colisão entre
+os 600 pacientes. A faixa etária derivada da idade completa resultou em
+108, 143, 127, 129 e 93 pacientes nas cinco faixas, corrigindo a fórmula
+por ano-calendário dos resultados preliminares, que classificava 11
+pacientes na faixa errada.
+
+A minimização da Gold foi decidida por medição. Com as colunas originais
+da tabela de internações (unidade, tipo, faixa etária, sexo e data de
+admissão), 1.763 dos 1.883 grupos de quase-identificadores tinham uma
+única internação: a tabela, apresentada como agregada, permitia
+individualizar cada estadia. Após a redução a tipo de leito, faixa
+etária, situação e tempo de permanência, o k mínimo passou a 29 sobre o
+par tipo e faixa, acima tanto do limiar de 5 adotado para uso interno
+controlado (El Emam e Arbuckle, 2013) quanto do limiar de 11 usado em
+regras de supressão de célula (Tabela 2). O custo de utilidade foi
+declarado: internações por unidade deixaram de ser respondíveis. Na
+análise de sensibilidade que acrescenta a situação (em andamento ou
+encerrada) aos quase-identificadores, o k mínimo cai para 3, com 3,2%
+das linhas em grupos menores que 11; o controle imposto por teste cobre o
+conjunto completo, e não esse subconjunto, o que é retomado nas
+limitações.
+
+Tabela 2. Minimização da tabela de internações da Gold
+
+| Medida | Antes | Depois |
+|---|---|---|
+| Colunas expostas | identificador, unidade, tipo, faixa etária, sexo, data de admissão, permanência, situação | tipo, faixa etária, situação, permanência |
+| k mínimo sobre os quase-identificadores | 1 (1.763 grupos com uma internação) | 29 sobre tipo e faixa; 3 incluindo a situação |
+| Linhas em grupos com k menor que 11 | 100% | 0% (3,2% incluindo a situação) |
+| Verificação | nenhuma | teste exige k de pelo menos 5 a cada construção |
+
+Fonte: Resultados originais da pesquisa
+
+O isolamento das camadas internas também foi corrigido por medição. Na
+primeira versão, a garantia de que Bronze e Silver eram inacessíveis
+dependia só da inspeção textual da consulta, e três consultas hostis
+aprovadas pelos guardrails devolveram dados internos: uma função de
+tabela que recebe o nome da tabela como texto, uma consulta ao catálogo
+que revelou a coluna de CPF e uma listagem das tabelas internas. A
+correção adotou duas barreiras independentes: a Gold passou a ser
+exportada para um arquivo próprio, o único que o sistema abre, e as
+funções de tabela e de catálogo passaram a ser bloqueadas. O achado
+reproduz, no protótipo, o que a literatura recente afirma: restrições
+expressas apenas sobre o texto, no prompt ou por inspeção da consulta,
+não garantem isolamento, e a garantia precisa ser imposta de forma
+determinista fora do texto (Fei et al., 2026; Klisura et al., 2025;
+Miyamoto et al., 2026). A conexão de consulta recebeu ainda, na Etapa E,
+o bloqueio de acesso a arquivos externos, pelo motivo relatado adiante.
+
+## Matriz de prompt com o modelo local
+
+A Tabela 3 apresenta as cinco células executadas com o modelo local, três
+vezes cada, sobre as 18 perguntas legítimas. O desvio entre execuções foi
+zero em todas as métricas e a concordância total (TARa@3) foi de 100% em
+todas as células: as 90 combinações de pergunta e célula produziram a
+mesma consulta nas três chamadas.
+
+Tabela 3. Matriz de prompt com o modelo local (18 perguntas, média de três execuções)
+
+| Célula | Execution match estrito | IC 95% | Set match | Soft F1 | Recusa indevida | Tokens por pergunta |
+|---|---|---|---|---|---|---|
+| C0 | 22,2% | 9,0% a 45,2% | 38,9% | 70,0% | 22,2% | 288 |
+| C1 | 55,6% | 33,7% a 75,4% | 61,1% | 72,5% | 5,6% | 529 |
+| C2 | 61,1% | 38,6% a 79,7% | 72,2% | 94,2% | 5,6% | 687 |
+| C3 | 72,2% | 49,1% a 87,5% | 72,2% | 84,3% | 0 | 463 |
+| C4 | 72,2% | 49,1% a 87,5% | 77,8% | 89,0% | 0 | 586 |
+
+Fonte: Resultados originais da pesquisa
+
+A descrição enriquecida do schema (C1 contra C0) produziu o maior efeito:
+seis perguntas passaram a corretas e nenhuma regrediu (teste de sinal,
+p = 0,03, a única comparação da matriz abaixo de 0,05). Com nomes de
+coluna sem descrição, o modelo supôs que a tabela de resumo por unidade,
+uma fotografia do dia, tinha coluna de data, e escreveu literais de texto
+para uma coluna booleana; a descrição resolveu ambos, em linha com a
+recomendação de fornecer o schema completo e descrito quando ele cabe no
+contexto (Maamari et al., 2024). O value linking (C2 contra C1) fechou o
+erro de literal que motivou sua adoção, a caixa de "Enfermaria", e mais
+duas perguntas, mas fez o modelo regredir em outras duas, uma por
+projetar coluna a mais e outra por inventar uma coluna na tabela certa;
+o saldo foi de uma pergunta (p = 1,0), com o maior Soft F1 da matriz. O
+resultado contraria em parte a expectativa formada a partir de Liu et
+al. (2026), para quem expor valores enumerados eleva a acurácia de
+filtros; aqui elevou, mas não sem custo.
+
+A restrição do schema ao perfil (C3 contra C1) foi observada na direção
+prevista: três perguntas passaram a corretas e nenhuma regrediu
+(p = 0,25). Só uma delas é efeito atribuível ao escopo, a pergunta em que
+o modelo, vendo o schema completo, buscava uma tabela fora do perfil e
+era barrado; as outras duas mudaram por efeito colateral da forma do
+prompt. A alucinação de tabelas que Fei et al. (2026) observam quando o
+schema é restrito não ocorreu: com o aviso explícito e o verificador, o
+modelo não citou tabela inexistente em nenhuma das 54 chamadas de C3. A
+recusa indevida, que nos resultados preliminares havia custado 11,1
+pontos de execution match, caiu a 5,6 pontos com a descrição enriquecida
+e a zero quando o prompt informou o escopo, sem regressão. Esse número
+mede a recusa de perguntas legítimas, todas construídas para caber no
+perfil de quem pergunta; o custo da governança propriamente dito, sobre
+perguntas que o perfil não pode fazer, é medido no conjunto adversarial.
+
+Pelo critério registrado antes da execução, C3 e C4 empataram no
+execution match e na ausência de violação, e C3 venceu por consumir
+menos tokens. C4 foi melhor nas métricas secundárias, o que fica
+declarado; o critério não foi alterado depois dos números. Os cinco erros
+residuais de C3 não foram de raciocínio sobre a pergunta: dois de
+projeção incompleta (a unidade sem a taxa que a selecionou), um de
+dialeto (uma função do MySQL em DuckDB, apesar de o prompt declarar o
+dialeto) e dois de literal (um nome de unidade incompleto e uma caixa
+errada com um valor de situação inexistente).
+
+## Modelo e prompt cruzados e o veredito da hipótese
+
+Os resultados preliminares haviam medido 61,1% de execution match com o
+modelo claude-sonnet-4-6, sobre a Gold anterior à minimização e com o
+prompt simples, e as consultas geradas naquela execução não foram
+preservadas. Esse número é tratado aqui como observação histórica, sem
+servir de base de comparação. Para separar o efeito do modelo do efeito
+do prompt, o mesmo modelo via API foi executado nas células C0 e C3 sobre
+a Gold e o harness atuais (Tabela 4).
+
+Tabela 4. Execution match estrito por modelo e célula (18 perguntas, média de três execuções)
+
+| Modelo | C0 (prompt simples) | C3 (enriquecido, schema por perfil) | Efeito do prompt |
+|---|---|---|---|
+| Qwen2.5-Coder 14B, local | 22,2% | 72,2% | 50,0 pontos |
+| Claude Sonnet 4.6, via API | 74,1% | 90,7% | 16,6 pontos |
+| Efeito do modelo | 51,9 pontos | 18,5 pontos | |
+
+Fonte: Resultados originais da pesquisa
+
+Modelo e prompt importaram, e interagiram. O prompt valeu 50 pontos no
+modelo pequeno e 17 no grande; o modelo valeu 52 pontos sob o prompt
+simples e 19 sob o prompt com escopo. O que os dados sustentam é que um
+prompt bem desenhado reduziu a distância entre o modelo local e o modelo
+via API de 52 para 19 pontos, e não que um fator pese mais que o outro.
+Em C0, o modelo via API reproduziu o padrão dos resultados preliminares:
+as duas perguntas da enfermagem barradas por escopo, duas perguntas com
+colunas a mais e a diferença de 61,1% para 74,1% explicada pela Gold
+minimizada e pelo harness revisto, não pelo modelo, que foi o mesmo. Em
+C3, o modelo via API errou os mesmos dois tipos de coisa que o modelo
+local: uma coluna a mais em uma pergunta e a caixa de um literal em outra.
+
+O intervalo de Wilson para C3 no modelo via API foi de 67,2% a 96,9%; no
+modelo local, de 49,1% a 87,5%. Com 18 perguntas, nenhum dos intervalos
+exclui 80%. A hipótese de acurácia superior a 80% foi, portanto, atingida
+na estimativa pontual com o modelo forte sob o prompt com escopo (90,7%),
+não foi atingida com o modelo local (72,2%), e em nenhum dos casos o
+tamanho do conjunto permite afirmar que o valor verdadeiro está acima ou
+abaixo do limiar. A leitura cega do segundo anotador tornou esse veredito
+robusto à convenção de projeção das referências: ele concordou com as
+referências em 17 das 18 perguntas, inclusive nas duas que a projeção
+mínima do modelo havia contrariado, e divergiu em uma, pedindo também a
+data da maior taxa de ocupação, que nenhum modelo devolveu. Sob a leitura
+do anotador, todas as células perdem 5,6 pontos, e o modelo local fica
+abaixo de 80% nas duas leituras, enquanto o modelo via API fica acima nas
+duas (90,7% e 85,2%). A referência divergente não foi alterada, para não
+ajustar o gabarito depois dos números.
+
+A execução via API trouxe um achado próprio: com temperatura zero, o
+modelo mudou a consulta de uma pergunta em cada célula entre chamadas
+contíguas (TARa@3 de 94,4%), variação que o modelo local com semente fixa
+não apresentou em nenhuma das 270 chamadas da matriz, coerente com o não
+determinismo de configurações "deterministas" em serviços hospedados
+descrito por Atil et al. (2025).
