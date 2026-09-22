@@ -120,3 +120,16 @@ uma coluna na Tabela 5 se o orçamento de páginas permitir, decisão no dia
 - [ ] Referências no formato do manual; literatura cinzenta identificada
 - [ ] Nenhum travessão; nenhuma instrução do template no arquivo
 - [ ] Nenhum nome de participante (o segundo anotador aparece como "um colega do autor, sem participação no projeto")
+
+## 7. Registro de andamento
+
+| Data | Seção | Palavras | Observação |
+|---|---|---|---|
+| 2026-09-21 | Metodologia | cerca de 2.350 (orçamento 2.000) | Citações no formato do manual (item 17: só a inicial maiúscula, "e" entre dois autores, autor institucional por extenso com sigla), diferente do documento aprovado, que usava caixa alta; fonte das tabelas da Metodologia como "Dados originais da pesquisa". Geração do .docx com o template testada |
+
+Pendências para o dia 26/09 (referências), anotadas durante a redação:
+
+- Incluir Atil et al. (2025) em `08_REFERENCIAS_FORMATADAS.md` (fichado em `02`, ausente da lista).
+- Renomear Lee et al. (2024) do EHRSQL 2024 para 2024a na lista, porque o texto cita "Lee et al., 2024a, 2024b" (manual, item 17.2: mesmo autor e ano, letras minúsculas).
+- Não incluir Johnson et al. (2023) na lista final: o MIMIC-IV deixou de ser citado no texto (o escopo é apresentado como delimitação afirmativa, sem contraste com o projeto de pesquisa, por decisão do autor em 2026-09-22).
+- Limitação a escrever em 24/09 (seção de limitações), retirada da Metodologia por decisão do autor em 2026-09-22: a matriz de perfis foi desenhada pelo autor a partir da finalidade de cada função e não foi validada em campo com um hospital (banca rodada 01, P-21).
