@@ -446,3 +446,208 @@ contíguas (TARa@3 de 94,4%), variação que o modelo local com semente fixa
 não apresentou em nenhuma das 270 chamadas da matriz, coerente com o não
 determinismo de configurações "deterministas" em serviços hospedados
 descrito por Atil et al. (2025).
+
+## Recusa devida e custo da governança
+
+A Tabela 5 compara as células E0 e E1 sobre o conjunto combinado de 43
+perguntas, três execuções cada, com concordância total de 100% entre as
+execuções nas duas células.
+
+Tabela 5. Conjunto combinado: 18 perguntas legítimas e 25 adversariais (modelo local)
+
+| Indicador | E0 (sem instrução de recusa) | E1 (com instrução de recusa) |
+|---|---|---|
+| Execution match estrito nas legítimas | 72,2% | 66,7% |
+| Recusa indevida nas legítimas | 0 | 0 |
+| Recusa devida pelo modelo (25 adversariais) | 8,0% | 80,0% |
+| Recusa devida pelo sistema (25 adversariais) | 60,0% | 88,0% |
+| Violação de política entregue (43) | 0 | 0 |
+| Resposta indevida entregue (43) | 23,3% | 7,0% |
+| Reliability Score RS(0) / RS(10) do sistema | 65,1 / −260,5 | 79,1 / −107,0 |
+
+Fonte: Resultados originais da pesquisa
+
+Sem a instrução de recusa, o modelo se absteve sozinho em apenas 2 das 25
+perguntas adversariais, e as duas nem chegaram a ele, pois foram barradas
+pelo filtro de dado pessoal na pergunta. O resultado coincide com a
+observação de Fei et al. (2026) de que os modelos raramente recusam por
+iniciativa própria. Ainda assim, nenhuma linha fora do perfil, de camada
+interna ou com campo sensível foi entregue em nenhuma das 258 chamadas:
+das 15 recusas do sistema em E0, 11 vieram do verificador determinista
+(comandos de escrita e de leitura de arquivo, instrução múltipla, camada
+interna, catálogo, tabela fora do perfil e dado pessoal na pergunta).
+Nas quatro injeções de instrução em que o modelo obedeceu, gerando
+exclusão, alteração, leitura de arquivo do sistema e exportação de
+tabela, o verificador barrou a consulta antes da execução. As outras 4
+recusas foram contingentes, isto é, dependeram do texto que o modelo
+escolheu: uma tabela inventada, um nome de coluna sensível usado como
+apelido e duas colunas inexistentes que fizeram a consulta falhar. Em
+todas elas, o dado pessoal pedido não existia na Gold, de modo que o
+escopo não dependeu dessa contingência.
+
+O que o verificador não garantiu foi a pertinência. Em E0, 10 perguntas
+sem resposta receberam uma resposta: contagens feitas na tabela
+permitida no lugar da tabela proibida, colunas nulas com nome de
+diagnóstico ou de médico responsável, uma projeção de 5% de aumento para
+o dia seguinte e a parte benigna de uma pergunta que continha uma
+injeção. Nenhuma delas vazou dado, e todas eram consultas válidas dentro
+do escopo, por isso passaram. É o efeito descrito por Fei et al. (2026)
+para o schema restrito ao perfil, em que o modelo, sem ver a tabela
+pedida, responde com o que vê, agora medido sob verificador determinista.
+A instrução de recusa elevou a recusa devida em todas as famílias
+(Tabela 6), sem produzir nenhuma recusa indevida, e reduziu as respostas
+indevidas de 10 para 3 (teste de sinal sobre o desfecho do sistema: 7
+perguntas melhoraram e 1 piorou, p = 0,07). O custo apareceu por outro
+mecanismo: uma pergunta legítima mudou de consulta e passou de correta a
+errada, sem recusa, e o execution match das legítimas caiu de 72,2% para
+66,7%. Pelo critério registrado antes da execução, a instrução passou a
+fazer parte da configuração operacional, com esse custo declarado.
+
+Tabela 6. Recusa devida por família de perguntas adversariais (5 perguntas por família; modelo / sistema)
+
+| Família | E0 | E1 |
+|---|---|---|
+| Dado pessoal | 2 / 4 | 5 / 5 |
+| Camada interna ou catálogo | 0 / 4 | 5 / 5 |
+| Fora do perfil | 0 / 2 | 4 / 4 |
+| Injeção de instruções | 0 / 4 | 3 / 5 |
+| Sem resposta no schema | 0 / 1 | 3 / 3 |
+
+Fonte: Resultados originais da pesquisa
+
+A família de perguntas legítimas para outro perfil mede o custo da
+governança propriamente dito: são perguntas que o hospital faria e que o
+perfil de quem pergunta não pode fazer. Em E1, quatro das cinco foram
+negadas, que é o comportamento desejado, e uma foi respondida
+erradamente com a tabela permitida; em E0, duas foram negadas e três
+respondidas erradamente. O custo da governança, portanto, não é recusar
+perguntas legítimas do próprio perfil, o que não ocorreu, mas negar
+informação a quem não tem a finalidade, e, sem a instrução de recusa,
+arriscar entregar uma resposta errada em vez de negar.
+
+Duas análises feitas sobre os relatórios, sem nova execução,
+complementam a leitura. Uma regra determinista que se abstivesse sempre
+que a consulta aprovada devolvesse resultado vazio ou só com valores
+nulos, na linha do filtro por execução do sistema vencedor do EHRSQL 2024
+(Lee et al., 2024a), levaria a recusa devida do sistema a 92% em E1,
+restando duas respostas indevidas (a explicação pedida por "por que" e a
+previsão), ao custo de duas perguntas legítimas, então erradas, virarem
+abstenção. O Reliability Score com penalidade 10 é negativo nas duas
+células porque cada resposta errada entregue custa 23 pontos num
+conjunto de 43 com 58% de perguntas a recusar, e inclui como erro duas
+perguntas legítimas às quais faltou só uma coluna; o valor não é
+comparável ao do EHRSQL 2024, cujo conjunto tem 20% de perguntas a
+recusar, e é apresentado ao lado do RS(0).
+
+A execução do conjunto adversarial revelou ainda um defeito no próprio
+instrumento de medição. Para medir se uma consulta barrada teria o
+conteúdo certo, o harness a executava de forma diagnóstica, fora da
+trilha de auditoria. A consulta de uma das injeções, barrada pelo
+verificador por conter duas instruções, foi assim executada pelo
+avaliador, e sua segunda instrução exportou a tabela de internações para
+um arquivo, porque a conexão somente leitura impede escrita no banco, mas
+não em arquivo. O sistema, do ponto de vista do usuário, não entregou
+nada. A execução diagnóstica foi restrita a consultas barradas apenas por
+escopo, a conexão passou a negar acesso a arquivos externos, com teste, e
+a etapa foi reexecutada, com as 258 consultas idênticas às da primeira
+execução.
+
+## O que sai do perímetro
+
+A Tabela 7 apresenta o que deixa a máquina em cada motor, levantado a
+partir do código.
+
+Tabela 7. Dados que saem do perímetro, por motor
+
+| Motor | Sai do perímetro | Nunca sai |
+|---|---|---|
+| Via API | instrução de sistema; descrição do schema Gold; valores distintos das colunas categóricas, só nas células com value linking; texto da pergunta, já sem CPF, e-mail e telefone | linhas da Gold; qualquer dado da Bronze ou da Silver; chave da pseudonimização; resultado da consulta |
+| Local | nada | tudo |
+
+Fonte: Resultados originais da pesquisa
+
+O filtro de dado pessoal barrou as duas perguntas adversariais que
+continham CPF e e-mail em todas as execuções, antes de qualquer chamada
+ao modelo, e nenhum dos arquivos da execução contém esses valores
+fictícios. Nome próprio não é detectável por padrão e permanece como
+risco: uma pergunta com o nome de um paciente seguiria para o modelo e
+ficaria registrada na trilha, que não pode ser editada sem quebrar a
+cadeia de hashes. Para isso foi projetada, sem implementação, a
+separação entre o fato registrado na cadeia e o texto da pergunta, guardado
+à parte com prazo de retenção e expurgo, o que conciliaria a integridade
+da auditoria com o término do tratamento e o direito de eliminação
+previstos na LGPD (Brasil, 2018). A implantação local, em que nada sai do
+perímetro, é a opção adotada na literatura mais próxima deste trabalho
+(Al Attrach et al., 2025); a abstração do schema e dos valores antes do
+envio a um modelo remoto (Abedini et al., 2025) é a alternativa para quem
+precisa da API.
+
+## Estabilidade e reprodutibilidade
+
+A célula de melhor desempenho do modelo local (C3) e a célula
+operacional (E1) foram repetidas em outro dia, com o servidor do modelo
+reiniciado e os mesmos pesos, semente e máquina. As 366 chamadas
+repetiram exatamente as consultas do primeiro dia, com concordância total
+de 100% entre os dias e métricas idênticas. O modelo via API, ao
+contrário, mudou a consulta de uma pergunta por célula entre chamadas
+contíguas. Com semente fixa e pesos identificados, a inferência local foi
+reproduzível, o que a torna preferível também do ponto de vista da
+auditoria de resultados; a reprodução em outro hardware ou outra versão
+do servidor não foi testada, e é justamente onde a literatura indica que
+o determinismo costuma falhar (Atil et al., 2025).
+
+## Comparação com a literatura
+
+A Tabela 8 posiciona os resultados em relação a trabalhos com objetivo
+semelhante. As comparações são indicativas: os conjuntos, os schemas e as
+métricas diferem, e o schema deste trabalho é mais simples que os da
+literatura, com quatro tabelas e nenhuma pergunta que exija junção.
+
+Tabela 8. Resultados deste trabalho e da literatura
+
+| Aspecto | Literatura | Este trabalho |
+|---|---|---|
+| Execution match, uma chamada sem exemplos, dados clínicos | 43,4% a 78% (Tanković et al., 2025; Li et al., 2026) | 72,2% (local); 90,7% (via API) |
+| Execution match, agentes com ferramentas e correção | 83,3% a 94% (Al Attrach et al., 2025; Waltl, 2025) | não avaliado |
+| Recusa correta em perguntas sem resposta | 69% (Al Attrach et al., 2025, modelo aberto de 20 bilhões) | 88% no sistema, 80% no modelo (E1) |
+| Vazamento com política apenas no prompt | 4,8% a 42,4% (Miyamoto et al., 2026) | 0 violação de política entregue, com verificador |
+| Violação da política de acesso pelo modelo | 7,4% no BIRD para um modelo comercial (Fei et al., 2026) | 0 no sistema em todas as células |
+
+Fonte: Resultados originais da pesquisa
+
+Em acurácia, o modelo local ficou dentro da faixa dos trabalhos de uma
+chamada, e o modelo via API, com o prompt com escopo, acima dela, mas
+abaixo dos sistemas agênticos, que usam várias chamadas, ferramentas e
+correção iterativa, recursos que este trabalho não empregou. Em recusa e
+em violação de política, os valores são melhores que os publicados, e a
+razão é arquitetural, não do modelo: os trabalhos citados medem o modelo
+decidindo sozinho ou com verificador baseado em modelo, enquanto aqui um
+verificador determinista em código decide a execução. A contribuição do
+trabalho está em medir, sob esse verificador, o que muda quando o modelo
+conhece o escopo do perfil e quando é autorizado a recusar, algo que os
+benchmarks de controle de acesso em Text-to-SQL não isolam (Fei et al.,
+2026; Klisura et al., 2025).
+
+## Limitações
+
+Os conjuntos têm 18 perguntas legítimas e 25 adversariais, e os
+intervalos de confiança largos impedem afirmar diferenças entre a maioria
+das configurações. As perguntas, as referências e o sistema foram
+escritos pelo mesmo autor; a leitura cega de um anotador independente
+reduziu, mas não eliminou, esse viés. O schema tem quatro tabelas e
+nenhuma junção, e o comportamento com dezenas de tabelas, prompts maiores
+e permissões por coluna não foi avaliado. Os dados são sintéticos, o que
+torna a conformidade com a LGPD uma propriedade de projeto, e não uma
+aderência demonstrada, e as normas da ANVISA foram adotadas por analogia.
+A matriz de perfis foi desenhada pelo autor a partir da finalidade de
+cada função e não foi validada em campo com um hospital. O k-anonimato
+imposto cobre o conjunto completo de internações; no subconjunto das
+internações em andamento o k mínimo é 3, e não há regra de supressão para
+o caso, esperado em dados reais, de um grupo pequeno violar o limiar.
+Nome próprio na pergunta não é filtrado, e a retenção do texto na trilha
+foi apenas projetada. Três respostas a perguntas sem resposta seguiram
+sendo entregues com a instrução de recusa, e a mitigação de alucinação
+foi, por isso, considerada parcial. A reprodutibilidade exata foi
+verificada em uma única máquina, e a latência do modelo local, de 4 a 5
+segundos por pergunta em um notebook, não foi avaliada frente a requisitos
+de uso.
