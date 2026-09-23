@@ -33,7 +33,7 @@
   <text x="140" y="502" font-size="19" font-weight="bold" fill="#111111">Camada 2. Governança de entrada, depois do modelo: verificador determinista</text>
   <text x="140" y="532" font-size="16" fill="#111111">instrução única e somente leitura; sem comando de escrita, leitura de arquivo ou catálogo;</text>
   <text x="140" y="558" font-size="16" fill="#111111">sem referência a Bronze ou Silver; só as tabelas Gold autorizadas ao perfil (CTRL-GOV-001 a 005)</text>
-  <text x="140" y="584" font-size="16" fill="#111111">consulta reprovada não é executada: o usuário recebe a recusa e o controle que barrou</text>
+  <text x="140" y="584" font-size="16" fill="#111111">consulta reprovada não é executada: o controle que barrou fica registrado na trilha</text>
   <line x1="500" y1="600" x2="500" y2="640" stroke="#333333" stroke-width="2" marker-end="url(#seta)"/>
 
   <!-- Camada 1 -->
@@ -68,6 +68,6 @@
   <!-- Resposta -->
   <rect x="200" y="1092" width="600" height="80" rx="8" fill="#f2f2f2" stroke="#333333" stroke-width="2"/>
   <text x="500" y="1124" text-anchor="middle" font-size="20" font-weight="bold" fill="#111111">Resposta ao usuário</text>
-  <text x="500" y="1152" text-anchor="middle" font-size="17" fill="#111111">resultado da consulta, ou recusa com o motivo</text>
+  <text x="500" y="1152" text-anchor="middle" font-size="17" fill="#111111">resultado da consulta, ou recusa</text>
   </g>
 </svg>

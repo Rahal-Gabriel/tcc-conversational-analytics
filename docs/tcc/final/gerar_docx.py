@@ -91,7 +91,9 @@ def preparar_markdown(destino):
     linhas = []
     for l in refs.strip("\n").split("\n\n"):
         if l.strip():
-            linhas.append(f'::: {{custom-style="Referencia"}}\n{l.strip()}\n:::')
+            # o manual pede o endereco entre < e >; escapados, o pandoc os mantem
+            ref = re.sub(r"<(https?://[^>]+)>", r"\\<\1\\>", l.strip())
+            linhas.append(f'::: {{custom-style="Referencia"}}\n{ref}\n:::')
     refs_fmt = "\n\n".join(linhas)
 
     def larguras(bloco):

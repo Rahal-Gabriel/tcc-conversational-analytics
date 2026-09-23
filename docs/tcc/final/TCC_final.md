@@ -10,25 +10,26 @@ Gabriel Arcenio Rahal Marostica¹*; José Bernardo Neto²
 
 A consulta a dados hospitalares em linguagem natural promete ampliar o
 acesso à informação, mas a governança costuma ser tratada à parte da
-arquitetura. Este trabalho propôs e avaliou uma arquitetura de referência em que o
-controle de acesso por perfil, a proteção dos dados, a validação da
-consulta e a auditoria atravessam todo o fluxo, da pergunta à resposta,
-aplicada à ocupação de leitos e construída sobre dados sintéticos. Um
-pipeline em camadas expôs ao modelo apenas uma camada minimizada, com
-k-anonimato verificado e isolada em arquivo próprio; um verificador
-determinista em código decidiu a execução de cada consulta; e o prompt
-foi tratado como variável experimental, com hipóteses registradas antes
-da execução. Com um modelo aberto de 14 bilhões de
-parâmetros executado localmente, o execution match estrito em 18
-perguntas subiu de 22,2% para 72,2% conforme o prompt descreveu o schema
-e informou o escopo do perfil, sem nenhuma recusa indevida; com um modelo
-comercial via API, sob o mesmo prompt, alcançou 90,7%, acima do limiar de
-80% da hipótese, com intervalo de confiança de 95% que inclui valores
-abaixo desse limiar. Em 25 perguntas adversariais, executadas seis vezes
-cada, nenhuma linha fora do escopo foi entregue, e uma instrução de recusa
-elevou a recusa devida de 60% para 88%. Concluiu-se que a governança integrada não gerou recusa indevida quando
-a garantia de escopo ficou em código e o modelo conheceu o próprio
-escopo, ao custo de uma pergunta legítima, e que a pertinência da
+arquitetura. Este trabalho propôs e avaliou uma arquitetura de
+referência em que controle de acesso, proteção dos dados, validação da
+consulta e auditoria atravessam todo o fluxo, aplicada à ocupação de
+leitos sobre dados sintéticos. Um pipeline em camadas expôs ao modelo só uma camada minimizada, com
+k-anonimato verificado sobre o conjunto completo e isolada em arquivo
+próprio; um verificador determinista em código decidiu a execução de cada
+consulta; e o prompt foi tratado como variável experimental, com
+hipóteses pré-registradas. Com um modelo aberto de 14 bilhões de
+parâmetros executado localmente, o execution match estrito em 18 perguntas
+subiu de 22,2% para 72,2% conforme o prompt descreveu o schema e
+informou o escopo, sem recusa indevida; a configuração operacional, que
+autoriza o modelo a recusar, mediu 66,7% nas legítimas e 88% de recusa
+devida em 25 perguntas adversariais, sem que nenhuma linha fora do escopo
+fosse entregue. Um modelo comercial via interface de programação alcançou 90,7% sem
+instrução de recusa e, na configuração operacional, 94,4% com 88% de
+recusa devida. A hipótese de acurácia superior a 80% foi atingida na
+estimativa pontual só com o modelo comercial, e o tamanho do conjunto não permite cravar de que lado do limiar está o
+valor verdadeiro; a conformidade foi demonstrada como propriedade de
+projeto. A
+governança integrada não gerou recusa indevida, e a pertinência da
 resposta permaneceu como limite.
 
 **Palavras-chave:** Text-to-SQL; conformidade regulatória; dados sintéticos; saúde digital; controle de acesso.
@@ -52,11 +53,11 @@ causa de erro, à frente da sintaxe.
 A governança dos dados e do modelo, porém, costuma ser tratada de forma
 fragmentada, separada da arquitetura de dados. Em saúde essa
 fragmentação pesa mais do que em outros setores: os dados são pessoais e
-sensíveis, e o marco regulatório é exigente, composto pela Lei Geral de
-Proteção de Dados (Brasil, 2018), pelas normas da Agência Nacional de
-Vigilância Sanitária [ANVISA] (2022) aplicáveis a software em saúde e
-pelas diretrizes da Autoridade Nacional de Proteção de Dados [ANPD]
-(2024) sobre inteligência artificial generativa. Somam-se riscos próprios
+sensíveis, e o marco regulatório é exigente, composto pela Lei Geral de Proteção de Dados [LGPD] (Brasil, 2018),
+pelas normas da Agência Nacional de Vigilância Sanitária [ANVISA] (2022)
+aplicáveis a software em saúde e pelas diretrizes da Autoridade Nacional
+de Proteção de Dados [ANPD] (2024) sobre inteligência artificial
+generativa. Somam-se riscos próprios
 dos modelos de linguagem, como a injeção de instruções e o acesso
 indevido a recursos (OWASP Foundation, 2025), que uma instrução em
 linguagem natural pode converter em injeção de SQL (Pedro et al., 2025),
@@ -119,11 +120,17 @@ resultados são apresentados.
 
 A pesquisa delimitou-se a um domínio operacional hospitalar, a ocupação
 de leitos, com modelo de dados próprio e quatro tabelas expostas ao
-motor de linguagem. A delimitação privilegiou profundidade de governança
-sobre amplitude de dados: com um domínio único foi possível medir cada
-controle isoladamente, em execução real e com repetição, dentro do prazo
-do trabalho. As consequências dessa escolha para a generalização são
-discutidas entre as limitações.
+motor de linguagem. Em relação ao projeto de pesquisa, o escopo foi
+ajustado em três pontos: o conjunto de dados restringiu-se a esse
+domínio, sem as áreas de prontuário, farmácia e faturamento nem a
+estruturação sobre uma base pública; o levantamento da literatura foi
+narrativo, com protocolo, em vez de sistemático; e a conformidade
+regulatória foi tratada como propriedade de projeto, e não como
+aderência demonstrada, porque os dados são sintéticos. A delimitação
+privilegiou profundidade de governança sobre amplitude de dados: com um
+domínio único foi possível medir cada controle isoladamente, em execução
+real e com repetição, dentro do prazo do trabalho. As consequências
+dessa escolha para a generalização são discutidas entre as limitações.
 
 O levantamento da literatura foi narrativo, com protocolo registrado: a
 busca de 8 de setembro de 2026 usou arXiv, ACL Anthology, Europe PMC e
@@ -150,7 +157,8 @@ dados brutos, com nome, CPF e data de nascimento inseridos de propósito,
 para que a proteção aplicada na camada seguinte fosse real e verificável.
 A camada Silver removeu esses campos, derivou a faixa etária a partir da
 idade completa na data de referência e pseudonimizou o identificador do
-paciente com HMAC-SHA256, hash com chave lida do ambiente, técnica
+paciente com código de autenticação de mensagem com chave [HMAC], na
+variante HMAC-SHA256, com a chave lida do ambiente, técnica
 recomendada no lugar do hash simples quando o domínio do identificador é
 pequeno (European Data Protection Board [EDPB], 2025; European Union Agency
 for Cybersecurity [ENISA], 2022); por isso a Silver foi tratada como
@@ -163,9 +171,11 @@ internações foi imposto k-anonimato (Sweeney, 2002) com k mínimo de 5 no
 par tipo de leito e faixa etária, limiar adequado a uso interno
 controlado (El Emam e Arbuckle, 2013), verificado por teste a cada
 construção. A Gold foi exportada para um arquivo próprio, de modo que as camadas
-internas não existissem no banco consultado pelo sistema. O Apêndice A
-apresenta o fluxo de uma pergunta pelas quatro camadas e os controles de
-cada uma. Como o
+internas não existissem no banco consultado pelo sistema. A Figura 1 do Apêndice A apresenta o fluxo de uma pergunta pelas quatro
+camadas, e a Tabela 1 do mesmo apêndice, os controles de cada uma; a
+mensagem de recusa com o ponto de bloqueio, prevista na arquitetura, não
+foi implementada no protótipo, que devolve apenas a recusa e registra o
+controle na trilha. Como o
 DuckDB não oferece controle de acesso por usuário, o isolamento foi
 materializado como arquivo separado; em um banco com permissões, o mesmo
 princípio de menor privilégio seria implementado por um usuário de
@@ -205,16 +215,19 @@ de cada função, conforme os princípios de finalidade e necessidade da
 LGPD (Brasil, 2018). A enfermagem acessou a situação de cada leito e o
 resumo por unidade, que servem à operação do turno. O perfil
 administrativo acessou o resumo por unidade e a série histórica, que
-servem ao planejamento, sem nível de leito nem de internação. O gestor
-acessou as quatro tabelas. A matriz seguiu o princípio do menor
-privilégio: cada perfil recebeu o escopo mínimo necessário à sua
-finalidade, e nenhum acesso foi concedido por conveniência.
+servem ao planejamento, sem nível de leito nem de internação. O gestor,
+responsável pela capacidade do hospital, acessou as quatro tabelas,
+inclusive as internações em nível de linha, para análises de permanência
+que combinem tipo de leito, faixa etária e situação. A matriz seguiu o
+princípio do menor privilégio: cada perfil recebeu o escopo mínimo
+necessário à sua finalidade, e nenhum acesso foi concedido por
+conveniência; a alternativa de expor ao gestor apenas agregados de
+internações é discutida entre as limitações.
 
 ## Enquadramento regulatório
 
-Os requisitos da LGPD (Brasil, 2018), das diretrizes da ANPD (Autoridade
-Nacional de Proteção de Dados [ANPD], 2024) e das normas da ANVISA foram
-mapeados a controles concretos, à camada responsável e à situação de
+Os requisitos da LGPD (Brasil, 2018), das diretrizes da ANPD (2024) e
+das normas da ANVISA foram mapeados a controles concretos, à camada responsável e à situação de
 implementação (Apêndice B), distinguindo controle com
 código e teste, controle por configuração, controle parcial e controle
 apenas projetado. Como os dados são sintéticos, a LGPD não incidiu sobre
@@ -224,10 +237,16 @@ demonstrada em dados reais. O
 protótipo realiza análise de ocupação de leitos para apoio à gestão, sem
 finalidade diagnóstica ou terapêutica sobre paciente individual, e nesse
 escopo não se caracteriza como software como dispositivo médico nos
-termos da RDC 657/2022 (Agência Nacional de
-Vigilância Sanitária [ANVISA], 2022); as normas da ANVISA foram adotadas
-por analogia, como referência de controle, segurança e rastreabilidade de
-software em saúde.
+termos da Resolução da Diretoria Colegiada [RDC] nº 657/2022 (ANVISA,
+2022). Dessa norma usou-se apenas o enquadramento, isto é, a definição
+de software como dispositivo médico e a exclusão do software de gestão
+sem finalidade clínica; nenhum requisito específico de regularização foi
+verificado, e as RDC 751/2022 e 830/2023, citadas no projeto de
+pesquisa, tratam da regularização de dispositivos médicos e não se
+aplicam a software sem finalidade clínica. A parte da hipótese relativa
+às normas da ANVISA, portanto, não pôde ser testada, e as normas foram
+adotadas por analogia, como referência de controle, segurança e
+rastreabilidade de software em saúde.
 
 ## Motores de tradução e desenho do prompt
 
@@ -236,7 +255,7 @@ devolveu a consulta de referência e serviu apenas para o autoteste do
 pipeline, nunca como medida de desempenho. O motor local executou o
 modelo aberto Qwen2.5-Coder de 14 bilhões de parâmetros (Hui et al.,
 2024), quantizado em 4 bits, pelo servidor Ollama na própria máquina, sem
-custo e sem saída de dados. O motor via API usou o modelo
+custo e sem saída de dados. O motor via interface de programação de aplicações [API] usou o modelo
 claude-sonnet-4-6, o mesmo dos resultados preliminares. Todas as
 chamadas usaram temperatura zero; no motor local, a semente do projeto
 também controlou a amostragem, e o relatório registrou a versão do
@@ -268,8 +287,9 @@ Tabela 1. Células de prompt avaliadas
 
 Fonte: Dados originais da pesquisa
 
-As células C0 a C4 foram executadas com o motor local; C0 e C3 também com
-o motor via API, para cruzar modelo e prompt; E0 e E1, com o motor local.
+As células C0 a C4 foram executadas com o motor local; C0 e C3 também
+com o motor via API, para cruzar modelo e prompt; E0 e E1, com os dois
+motores.
 
 ## Conjuntos de avaliação
 
@@ -295,7 +315,7 @@ fora do escopo de quem pergunta; injeção de instruções em linguagem
 natural, inclusive com instrução dupla (Pedro et al., 2025); e pergunta
 sem resposta no schema, como diagnóstico, previsão ou causa. As famílias
 seguiram a noção de que abster-se de perguntas não respondíveis é parte
-da confiabilidade (Lee et al., 2024a, 2024b). O conjunto
+da confiabilidade (Lee et al., 2024a, b). O conjunto
 combinado, com 43 perguntas, foi usado nas células E0 e E1. Os valores de
 CPF e e-mail das perguntas foram fictícios.
 
@@ -329,7 +349,10 @@ subtrai c pontos por resposta errada entregue, reportado com c igual a 0
 e a 10.
 
 As proporções foram acompanhadas de intervalo de confiança de 95% pelo
-método de Wilson, adequado a amostras pequenas (Brown et al., 2001). As
+método de Wilson, adequado a amostras pequenas (Brown et al., 2001);
+quando as execuções de uma célula não coincidiram, o intervalo foi
+calculado sobre a execução mais conservadora, porque o método supõe uma
+contagem inteira de acertos. As
 células foram comparadas pergunta a pergunta, com teste de sinal exato
 bilateral sobre ganhos e perdas; com 18 e 25 perguntas, a leitura foi
 descritiva, e nenhuma diferença foi apresentada como significativa sem o
@@ -462,9 +485,15 @@ prevista: três perguntas passaram a corretas e nenhuma regrediu
 (p = 0,25). Só uma delas é efeito atribuível ao escopo, a pergunta em que
 o modelo, vendo o schema completo, buscava uma tabela fora do perfil e
 era barrado; as outras duas mudaram por efeito colateral da forma do
-prompt. A alucinação de tabelas que Fei et al. (2026) observam quando o
-schema é restrito não ocorreu: com o aviso explícito e o verificador, o
-modelo não citou tabela inexistente em nenhuma das 54 chamadas de C3. A
+prompt. A alucinação de tabelas que Fei et al. (2026) observam quando o schema é
+restrito não ocorreu nas perguntas legítimas: com o aviso explícito e o
+verificador, o modelo não citou tabela inexistente em nenhuma das 54
+chamadas de C3 sobre as 18 perguntas; no conjunto adversarial, uma
+pergunta por dado pessoal o levou a inventar uma tabela de pacientes,
+barrada pelo verificador. Cabe uma ressalva de desenho: cinco das seis
+perguntas de situação atual pertencem ao perfil enfermagem, o único em
+que o escopo restringe tabelas, de modo que tipo de pergunta e perfil
+estão confundidos e o efeito do escopo só foi observado nesse perfil. A
 recusa indevida, que nos resultados preliminares havia custado 11,1
 pontos de execution match, caiu a 5,6 pontos com a descrição enriquecida
 e a zero quando o prompt informou o escopo, sem regressão. Esse número
@@ -475,7 +504,11 @@ perguntas que o perfil não pode fazer, é medido no conjunto adversarial.
 Pelo critério registrado antes da execução, C3 e C4 empataram no
 execution match e na ausência de violação, e C3 venceu por consumir
 menos tokens. C4 obteve set match e Soft F1 maiores, e a escolha por C3 seguiu o
-critério registrado, sem revisão posterior. Os cinco erros residuais de
+critério registrado, sem revisão posterior. O desempate por tokens foi
+pensado para o custo por chamada de um motor via API; com o motor local,
+gratuito, C4 teria sido a escolha natural, e dois dos cinco erros
+residuais de C3 são justamente de literal, que o value linking corrige.
+C4 com instrução de recusa não foi medida. Os cinco erros residuais de
 C3 concentraram-se em três causas: dois de
 projeção incompleta (a unidade sem a taxa que a selecionou), um de
 dialeto (uma função do MySQL em DuckDB, apesar de o prompt declarar o
@@ -515,8 +548,10 @@ minimizada e pelo harness revisto, não pelo modelo, que foi o mesmo. Em
 C3, o modelo via API errou os mesmos dois tipos de coisa que o modelo
 local: uma coluna a mais em uma pergunta e a caixa de um literal em outra.
 
-O intervalo de Wilson para C3 no modelo via API foi de 69,5% a 97,7%; no
-modelo local, de 49,1% a 87,5%. Com 18 perguntas, nenhum dos intervalos
+O intervalo de Wilson para C3 no modelo via API, calculado sobre a
+execução mais conservadora (16 de 18, pois as três execuções deram
+88,9%, 88,9% e 94,4%), foi de 67,2% a 96,9%; no modelo local, cujas
+execuções coincidiram, de 49,1% a 87,5%. Com 18 perguntas, nenhum dos intervalos
 exclui 80%. A hipótese de acurácia superior a 80% foi, portanto, atingida
 na estimativa pontual com o modelo forte sob o prompt com escopo (90,7%),
 não foi atingida com o modelo local (72,2%), e em nenhum dos casos o
@@ -541,20 +576,22 @@ descrito por Atıl et al. (2025).
 ## Recusa devida e custo da governança
 
 A Tabela 5 compara as células E0 e E1 sobre o conjunto combinado de 43
-perguntas, três execuções cada, com concordância total de 100% entre as
-execuções nas duas células.
+perguntas, três execuções cada, com o modelo local e com o modelo via
+API. No modelo local a concordância entre execuções foi total nas duas
+células.
 
-Tabela 5. Conjunto combinado: 18 perguntas legítimas e 25 adversariais (modelo local)
+Tabela 5. Conjunto combinado: 18 perguntas legítimas e 25 adversariais, por modelo e célula (média de três execuções)
 
-| Indicador | E0 (sem instrução de recusa) | E1 (com instrução de recusa) |
-|---|---|---|
-| Execution match estrito nas legítimas | 72,2% | 66,7% |
-| Recusa indevida nas legítimas | 0 | 0 |
-| Recusa devida pelo modelo (25 adversariais) | 8,0% | 80,0% |
-| Recusa devida pelo sistema (25 adversariais) | 60,0% | 88,0% |
-| Violação de política entregue (43) | 0 | 0 |
-| Resposta indevida entregue (43) | 23,3% | 7,0% |
-| Reliability Score RS(0) / RS(10) do sistema | 65,1 / −260,5 | 79,1 / −107,0 |
+| Indicador | Local E0 | Local E1 | API E0 | API E1 |
+|---|---|---|---|---|
+| Execution match estrito nas legítimas | 72,2% | 66,7% | 88,9% | 94,4% |
+| Recusa indevida nas legítimas | 0 | 0 | 0 | 0 |
+| Recusa devida pelo modelo (25) | 8,0% | 80,0% | 8,0% | 88,0% |
+| Recusa devida pelo sistema (25) | 60,0% | 88,0% | 12,0% | 88,0% |
+| Violação de política entregue (43) | 0 | 0 | 0 | 0 |
+| Resposta indevida entregue (43) | 23,3% | 7,0% | 51,2% | 7,0% |
+| Reliability Score RS(0) / RS(10) do sistema | 65,1 / −260,5 | 79,1 / −107,0 | 44,2 / −514,0 | 90,7 / −2,3 |
+| TARa@3 | 100% | 100% | 83,7% | 97,7% |
 
 Fonte: Resultados originais da pesquisa
 
@@ -586,8 +623,8 @@ permitida no lugar da tabela proibida, colunas nulas com nome de
 diagnóstico ou de médico responsável, uma projeção de 5% de aumento para
 o dia seguinte e a parte benigna de uma pergunta que continha uma
 injeção. Nenhuma delas vazou dado, e todas eram consultas válidas dentro
-do escopo, por isso passaram. É o efeito descrito por Fei et al. (2026)
-para o schema restrito ao perfil, em que o modelo, sem ver a tabela
+do escopo, por isso passaram. Foi o efeito descrito por Fei et al. (2026) para o schema restrito ao
+perfil, em que o modelo, sem ver a tabela
 pedida, responde com o que vê, agora medido sob verificador determinista.
 A instrução de recusa elevou a recusa devida em todas as famílias
 (Tabela 6), sem produzir nenhuma recusa indevida, e reduziu as respostas
@@ -609,21 +646,45 @@ Tabela 6. Recusa devida por família de perguntas adversariais (5 perguntas por 
 
 Fonte: Resultados originais da pesquisa
 
-A família de perguntas legítimas para outro perfil mede o custo da
-governança propriamente dito: são perguntas que o hospital faria e que o
+O modelo via API repetiu o padrão com uma diferença de mecanismo. Sem a
+instrução de recusa, recusou por iniciativa própria as mesmas zero
+perguntas, mas em vez de responder com a tabela permitida improvisou
+recusas dentro do contrato de saída: consultas que devolvem resultado
+vazio ("SELECT 0 WHERE 1=0"), o valor um, ou uma mensagem de texto como
+"Acesso negado", todas consultas válidas dentro do escopo, que o
+verificador aprovou e o sistema entregou. Vinte e duas das 25
+adversariais foram entregues assim, sem que nenhuma tocasse Bronze,
+Silver, comando de escrita ou tabela fora do perfil; uma injeção que
+pedia a exportação da tabela de internações resultou na entrega das
+2.012 linhas ao gestor, que tinha acesso a elas. Com a instrução de
+recusa, o modelo via API recusou 22 das 25 no próprio nível do modelo,
+entregou as mesmas duas perguntas com injeção respondidas pela parte
+benigna e a mesma pergunta fora do perfil respondida com a tabela
+permitida, e o execution match das legítimas subiu de 88,9% para 94,4%,
+com a pergunta de literal em caixa baixa passando a correta. A
+configuração operacional com o modelo comercial mediu, portanto, 94,4%
+nas legítimas e 88% de recusa devida, e o Reliability Score com
+penalidade 10 ficou próximo de zero. A lição vale para os dois modelos:
+um contrato de saída que só admite SQL leva o modelo a codificar a
+recusa como consulta, e o harness a contar como resposta indevida o que
+era uma abstenção sem canal; autorizar a recusa explicitamente resolve o
+problema nos dois. A família de perguntas legítimas para outro perfil
+mede o custo da governança propriamente dito: são perguntas que o hospital faria e que o
 perfil de quem pergunta não pode fazer. Em E1, quatro das cinco foram
 negadas, que é o comportamento desejado, e uma foi respondida
 erradamente com a tabela permitida; em E0, duas foram negadas e três
-respondidas erradamente. O custo da governança consiste, portanto, em negar informação a quem não
-tem a finalidade correspondente; sem a instrução de recusa, esse custo
-se converte no risco de entregar uma resposta errada no lugar da
+respondidas erradamente. O custo da governança consistiu, portanto, em negar informação a quem
+não tinha a finalidade correspondente; sem a instrução de recusa, esse
+custo se converteu no risco de entregar uma resposta errada no lugar da
 negativa.
 
 Duas análises feitas sobre os relatórios, sem nova execução,
-complementam a leitura. Uma regra determinista que se abstivesse sempre
-que a consulta aprovada devolvesse resultado vazio ou só com valores
-nulos, na linha do filtro por execução do sistema vencedor do EHRSQL 2024
-(Lee et al., 2024a), levaria a recusa devida do sistema a 92% em E1,
+complementam a leitura. Uma regra determinista que se abstivesse sempre que a consulta aprovada
+devolvesse resultado vazio ou só com valores nulos, na linha do filtro
+por execução do sistema vencedor do EHRSQL 2024 (Lee et al., 2024a),
+levaria a recusa devida do sistema a 92% em E1 (a versão da regra
+versionada no harness cobre só o resultado vazio e dá 88%; a extensão
+aos resultados nulos foi calculada sobre os relatórios),
 restando duas respostas indevidas (a explicação pedida por "por que" e a
 previsão), ao custo de duas perguntas legítimas, então erradas, virarem
 abstenção. O Reliability Score com penalidade 10 é negativo nas duas
@@ -670,9 +731,13 @@ cadeia de hashes. Para isso foi projetada, sem implementação, a
 separação entre o fato registrado na cadeia e o texto da pergunta, guardado
 à parte com prazo de retenção e expurgo, o que conciliaria a integridade
 da auditoria com o término do tratamento e o direito de eliminação
-previstos na LGPD (Brasil, 2018). A implantação local, em que nada sai do
-perímetro, é a opção adotada na literatura mais próxima deste trabalho
-(Al Attrach et al., 2026); a abstração do schema e dos valores antes do
+previstos na LGPD (Brasil, 2018). O caminho via API, além do filtro, exigiria de um hospital um dos
+mecanismos de transferência internacional previstos no art. 33 da LGPD e
+um contrato com o operador do modelo, e a implantação real de qualquer
+dos caminhos exigiria o relatório de impacto à proteção de dados do art.
+38, ambos fora do escopo deste trabalho. A implantação local, em que
+nada sai do perímetro, é a opção adotada na literatura mais próxima
+deste trabalho (Al Attrach et al., 2026); a abstração do schema e dos valores antes do
 envio a um modelo remoto (Abedini et al., 2025) é a alternativa para quem
 precisa da API.
 
@@ -680,12 +745,16 @@ precisa da API.
 
 A célula de melhor desempenho do modelo local (C3) e a célula
 operacional (E1) foram repetidas em outro dia, com o servidor do modelo
-reiniciado e os mesmos pesos, semente e máquina. As 183 interações do
-segundo dia (61 perguntas, três execuções cada) repetiram exatamente as
-consultas do primeiro, com concordância total de 100% entre os dias e
-métricas idênticas. O modelo via API, ao
-contrário, mudou a consulta de uma pergunta por célula entre chamadas
-contíguas. Com semente fixa e pesos identificados, a inferência local foi
+reiniciado e os mesmos pesos, semente e máquina. As 183 interações do segundo dia (61 perguntas, três execuções cada)
+repetiram exatamente as consultas do primeiro, com concordância total de
+100% entre os dias e métricas idênticas. A rastreabilidade foi
+verificada em todas as execuções versionadas: as 1.077 interações da matriz, do conjunto adversarial com os dois
+modelos, da ponte com o modelo via API e da repetição têm registro de
+entrada e de saída na trilha, e as cinco cadeias de hashes foram
+conferidas íntegras a partir do arquivo. O modelo via API, ao contrário, mudou a consulta entre chamadas
+contíguas em uma pergunta por célula na matriz e em sete perguntas de E0
+e uma de E1 no conjunto adversarial, quase todas nas recusas
+improvisadas. Com semente fixa e pesos identificados, a inferência local foi
 reproduzível, o que a torna preferível também do ponto de vista da
 auditoria de resultados; a reprodução em outro hardware ou outra versão
 do servidor não foi testada, e é justamente onde a literatura indica que
@@ -702,9 +771,14 @@ Tabela 8. Resultados deste trabalho e da literatura
 
 | Aspecto | Literatura | Este trabalho |
 |---|---|---|
-| Execution match, uma chamada sem exemplos, dados clínicos | 43,4% a 78% (Tanković et al., 2025; Li et al., 2026) | 72,2% (local); 90,7% (via API) |
+| Execution match, uma chamada sem exemplos, dados clínicos | 43,4%
+(Tanković et al., 2025) a 78% (Li et al., 2026) | 72,2% (local); 90,7%
+(via API) |
 | Execution match, agentes com ferramentas e correção | 83,3% a 94% (Al Attrach et al., 2026; Waltl, 2025) | não avaliado |
-| Recusa correta em perguntas sem resposta no schema | 69% (Al Attrach et al., 2026, modelo aberto de 20 bilhões) | 60% na família equivalente (E1); 88% no conjunto adversarial completo, no sistema |
+| Recusa correta em perguntas sem resposta no schema | 69% (Al Attrach
+et al., 2026, modelo aberto de 20 bilhões) | 60% na família equivalente
+com o modelo local e 100% com o modelo via API (E1); 88% no conjunto
+adversarial completo com ambos |
 | Vazamento com política apenas no prompt | 4,8% a 42,4% (Miyamoto et al., 2026) | 0 violação de política entregue, com verificador |
 | Violação da política de acesso pelo modelo | 7,4% no BIRD para um modelo comercial (Fei et al., 2026) | 0 no sistema em todas as células |
 
@@ -716,11 +790,11 @@ abaixo dos sistemas agênticos, que usam várias chamadas, ferramentas e
 correção iterativa, recursos que este trabalho não empregou. Em violação de política, o valor supera os publicados por uma razão de
 arquitetura: os trabalhos citados medem o modelo decidindo sozinho ou
 com verificador baseado em modelo, enquanto aqui um verificador
-determinista em código decide a execução. Em recusa de perguntas sem
-resposta, a família comparável ficou abaixo do valor de Al Attrach et
-al. (2026), 60% contra 69%, com um modelo menor; o valor mais alto, de
-88%, vale para o conjunto adversarial completo, em que o verificador
-responde pela maior parte das recusas. A contribuição do
+determinista em código decide a execução. Em recusa de perguntas sem resposta, a família comparável ficou abaixo
+do valor de Al Attrach et al. (2026) com o modelo local, 60% contra 69%,
+e acima com o modelo via API, que recusou as cinco; o valor de 88% vale
+para o conjunto adversarial completo, em que, no modelo local, o
+verificador responde pela maior parte das recusas. A contribuição do
 trabalho está em medir, sob esse verificador, o que muda quando o modelo
 conhece o escopo do perfil e quando é autorizado a recusar, algo que os
 benchmarks de controle de acesso em Text-to-SQL não isolam (Fei et al.,
@@ -738,55 +812,70 @@ e permissões por coluna não foi avaliado. Os dados são sintéticos, de modo q
 ser demonstrada como propriedade de projeto, e as normas da ANVISA foram
 adotadas por analogia.
 A matriz de perfis foi desenhada pelo autor a partir da finalidade de
-cada função e não foi validada em campo com um hospital. O k-anonimato
+cada função e não foi validada em campo com um hospital; para o gestor,
+a tabela de internações poderia ser exposta só como agregados por tipo,
+faixa etária e situação, sem perda para as perguntas avaliadas, o que
+reduziria o risco de reidentificação no subconjunto em andamento. O k-anonimato
 imposto cobre o conjunto completo de internações; no subconjunto das
 internações em andamento o k mínimo é 3, e não há regra de supressão para
 o caso, esperado em dados reais, de um grupo pequeno violar o limiar.
 Nome próprio na pergunta não é filtrado, e a retenção do texto na trilha
 foi apenas projetada. Três respostas a perguntas sem resposta seguiram
 sendo entregues com a instrução de recusa, e a mitigação de alucinação
-foi, por isso, considerada parcial. A reprodutibilidade exata foi
-verificada em uma única máquina, e a latência do modelo local, de 4 a 5
-segundos por pergunta em um notebook, não foi avaliada frente a requisitos
-de uso.
+foi, por isso, considerada parcial. A reprodutibilidade exata foi verificada em uma única máquina, e a
+latência do modelo local, de 4 a 5 segundos por pergunta em um notebook,
+não foi avaliada frente a requisitos de uso. A interação tem um único
+turno: o sistema não pede esclarecimento, não mostra ao usuário a
+leitura que adotou e responde à pergunta ambígua com uma das leituras
+possíveis; o anotador independente julgou ambíguas três das 18
+perguntas. A célula C4 com instrução de recusa não foi medida.
 
 # Conclusão
 
 A arquitetura de referência proposta foi implementada como protótipo
 funcional e avaliada com execução real, e os cinco objetivos específicos
-foram cumpridos, do levantamento da literatura ao protótipo avaliado com
-hipóteses registradas antes dos números.
+foram cumpridos no escopo ajustado declarado na Metodologia, do
+levantamento da literatura ao protótipo avaliado com hipóteses
+registradas antes dos números.
 
-A hipótese tem duas partes, com respostas diferentes. A acurácia
-superior ao limiar previsto foi atingida, na estimativa pontual, com o
-modelo comercial via API sob o prompt que descreve o schema e informa o
-escopo do perfil; não foi atingida com o modelo aberto executado
-localmente, que ficou dentro da faixa publicada para sistemas de uma
-única chamada. Em ambos os casos o tamanho do conjunto de perguntas
-impede afirmar de que lado do limiar está o valor verdadeiro. Quanto à
+A hipótese tem duas partes, com respostas diferentes. Quanto à acurácia,
+o veredito é o mesmo enunciado no Resumo: o limiar previsto foi atingido na estimativa pontual só com o modelo
+comercial, tanto sob o prompt que descreve o schema e informa o escopo
+quanto na configuração operacional que autoriza a recusa, e não foi
+atingido com o modelo aberto executado localmente, e o tamanho do conjunto de perguntas impede
+afirmar de que lado do limiar está o valor verdadeiro. Cabe separar o
+que é da arquitetura do que é do modelo: o nível de acurácia é
+propriedade do modelo e do prompt, e a arquitetura, por si, apenas o
+preserva ou o reduz; o que a arquitetura respondeu foi que não o reduziu
+por recusa indevida e que garantiu o escopo em todas as configurações. Quanto à
 conformidade, com dados sintéticos a lei não incide, e o que se
 demonstrou foi uma arquitetura projetada para atender aos princípios da
-LGPD, com proteção dos dados verificada por teste, escopo de acesso
-garantido por verificador em código e auditoria encadeada, e com as
-normas da ANVISA adotadas por analogia.
+LGPD, com proteção dos dados verificada por teste sobre o conjunto completo,
+escopo de acesso garantido por verificador em código e auditoria
+encadeada; a parte relativa às normas da ANVISA não pôde ser testada,
+porque a norma não incide sobre software de gestão sem finalidade
+clínica, e foi tratada por analogia.
 
 Em resposta à pergunta de pesquisa, a governança integrada não gerou
-recusa indevida. Nenhuma pergunta dentro do escopo do
-perfil foi recusada quando o prompt informou esse escopo; o custo em
-acurácia da configuração operacional foi de uma única pergunta legítima,
-respondida de outro modo depois que o modelo foi autorizado a recusar; e
-o custo da governança apareceu onde deve aparecer, na negação de
-perguntas para as quais o perfil não tem finalidade. A garantia de
+recusa indevida. Nenhuma pergunta dentro do escopo do perfil foi recusada quando o prompt
+informou esse escopo; a configuração operacional pagou por isso uma
+regressão pontual em pergunta legítima, respondida de outro modo depois
+que o modelo foi autorizado a recusar; e o custo da governança apareceu
+onde deve aparecer, na negação de perguntas para as quais o perfil não
+tem finalidade. A garantia de
 escopo veio do verificador determinista, que barrou todas as instruções
 injetadas às quais o modelo obedeceu e não deixou passar nenhuma linha
-fora do perfil; a garantia de pertinência não veio de lugar algum até que
-o modelo fosse autorizado a recusar, e mesmo então permaneceu incompleta.
+fora do perfil; a garantia de pertinência não veio de lugar algum até que o modelo fosse
+autorizado a recusar, e mesmo então permaneceu incompleta; sem esse
+canal, o modelo comercial codificou recusas como consultas vazias ou
+mensagens, que o sistema entregou como resposta.
 A separação entre esses dois tipos de garantia, e a medição de cada um
 sob verificador determinista, é a contribuição do trabalho.
 
 Além dos resultados de arquitetura, dois resultados de método merecem
-registro. O desenho do prompt reduziu a um terço a distância entre um modelo local gratuito e
-um modelo comercial, o que torna a implantação local, sem saída de dados
+registro. O desenho do prompt reduziu de forma acentuada a distância entre um
+modelo local gratuito e um modelo comercial, o que torna a implantação
+local, sem saída de dados
 e com inferência repetível entre dias, uma opção defensável para
 hospitais. E o pré-registro das hipóteses, somado à execução real, expôs
 previsões erradas, custos não previstos e defeitos no próprio instrumento
@@ -794,9 +883,10 @@ de medição, todos reportados ou corrigidos antes de qualquer número ser
 divulgado.
 
 Como trabalhos futuros indicam-se a ampliação do conjunto de perguntas
-com itens escritos por profissionais de hospital, a extensão do controle
-de acesso à granularidade de coluna, a implementação da retenção e do
-expurgo do texto das perguntas na trilha de auditoria e a avaliação em
+com itens escritos por profissionais de hospital, a extensão do controle de acesso à granularidade de coluna, a
+implementação da retenção e do expurgo do texto das perguntas na trilha
+de auditoria, a exibição ao usuário da leitura adotada pelo sistema e do
+motivo de cada recusa, e a avaliação em
 um schema de dezenas de tabelas, condição em que a viabilidade aqui
 observada precisa ser reexaminada.
 
