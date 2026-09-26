@@ -57,6 +57,7 @@ ESTILOS = """
 <w:style w:type="paragraph" w:styleId="BlockText"><w:name w:val="Block Text"/><w:basedOn w:val="Normal"/><w:qFormat/></w:style>
 <w:style w:type="paragraph" w:styleId="FootnoteText"><w:name w:val="footnote text"/><w:basedOn w:val="Normal"/><w:qFormat/><w:pPr><w:ind w:firstLine="0"/></w:pPr><w:rPr><w:sz w:val="18"/></w:rPr></w:style>
 <w:style w:type="paragraph" w:styleId="SourceCode"><w:name w:val="Source Code"/><w:basedOn w:val="Normal"/><w:qFormat/></w:style>
+<w:style w:type="paragraph" w:styleId="Titulo"><w:name w:val="Titulo"/><w:basedOn w:val="Normal"/><w:qFormat/><w:pPr><w:spacing w:before="0" w:after="240" w:line="240" w:lineRule="auto"/><w:ind w:firstLine="0"/><w:jc w:val="center"/></w:pPr><w:rPr><w:b/><w:bCs/></w:rPr></w:style>
 <w:style w:type="paragraph" w:styleId="Autores"><w:name w:val="Autores"/><w:basedOn w:val="Normal"/><w:qFormat/><w:pPr><w:spacing w:before="120" w:after="120" w:line="240" w:lineRule="auto"/><w:ind w:firstLine="0"/><w:jc w:val="center"/></w:pPr></w:style>
 <w:style w:type="paragraph" w:styleId="Endereco"><w:name w:val="Endereco"/><w:basedOn w:val="Normal"/><w:qFormat/><w:pPr><w:spacing w:before="0" w:after="0" w:line="240" w:lineRule="auto"/><w:ind w:firstLine="0"/><w:jc w:val="left"/></w:pPr><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr></w:style>
 <w:style w:type="paragraph" w:styleId="Rotulo"><w:name w:val="Rotulo"/><w:basedOn w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="360" w:after="120" w:line="240" w:lineRule="auto"/><w:ind w:firstLine="0"/><w:jc w:val="left"/></w:pPr></w:style>
@@ -125,6 +126,9 @@ def preparar_markdown(destino):
                 i += 1
         return "\n".join(linhas)
 
+    titulo = corpo.lstrip("\n").split("\n", 1)[0].removeprefix("# ").strip()
+    titulo_visto = [False]
+
     def estilizar(bloco):
         out = []
         apos_resumo = False
@@ -137,7 +141,15 @@ def preparar_markdown(destino):
                 continue
             if t == "**Resumo**":
                 apos_resumo = True
-            if re.match(r"^\S.*¹\*; .*²$", t):
+                # o template repete o titulo, centralizado e em negrito, no alto da
+                # pagina 2, logo antes do Resumo (apontamento do formatador da USP)
+                out.append("```{=openxml}\n<w:p><w:r><w:br w:type=\"page\"/></w:r></w:p>\n```")
+                out.append(f'::: {{custom-style="Titulo"}}\n{titulo}\n:::')
+            if t.startswith("# ") and not titulo_visto[0]:
+                # titulo da folha de rosto: centralizado e em negrito, nao e secao
+                titulo_visto[0] = True
+                out.append(f'::: {{custom-style="Titulo"}}\n{titulo}\n:::')
+            elif re.match(r"^\S.*¹\*; .*²$", t):
                 # linha dos autores: centralizada (manual, folha de rosto)
                 out.append(f'::: {{custom-style="Autores"}}\n{t}\n:::')
             elif re.match(r"^(¹\*|²) ", t):

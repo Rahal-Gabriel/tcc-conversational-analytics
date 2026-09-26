@@ -107,8 +107,7 @@ e conformidade de projeto.
 # Metodologia
 
 A pesquisa caracterizou-se como aplicada, com abordagem quantitativa e
-caráter exploratório e descritivo, e adotou o delineamento de estudo de
-caso instrumental (Yin, 2015) apoiado no desenvolvimento de um protótipo
+caráter exploratório e descritivo, e adotou o delineamento de estudo de caso instrumental, conforme Yin (2015), apoiado no desenvolvimento de um protótipo
 funcional, em linha com a pesquisa em ciência do projeto, na qual o
 artefato construído é também o instrumento de avaliação (Hevner et al.,
 2004). O protótipo materializou uma arquitetura de referência, entendida
@@ -132,8 +131,7 @@ domínio único foi possível medir cada controle isoladamente, em execução
 real e com repetição, dentro do prazo do trabalho. As consequências
 dessa escolha para a generalização são discutidas entre as limitações.
 
-O levantamento da literatura foi narrativo, com protocolo registrado: a
-busca de 8 de setembro de 2026 usou arXiv, ACL Anthology, Europe PMC e
+O levantamento da literatura foi narrativo, com protocolo registrado: a busca de 08 set. 2026 usou arXiv, ACL Anthology, Europe PMC e
 PubMed, bibliotecas de editoras e da Sociedade Brasileira de Computação e
 os portais oficiais da ANPD e da ANVISA, com termos, recorte temporal e
 critérios de inclusão e exclusão definidos antes da leitura, seguindo
@@ -146,7 +144,7 @@ tema, das quais saíram as citações deste trabalho.
 
 Todos os dados foram gerados de forma determinista com a biblioteca Faker
 em localidade pt_BR, controlada por uma semente única (42) e ancorada em
-uma data de referência fixa da simulação (31 de maio de 2026). O ambiente
+uma data de referência fixa da simulação (31 maio 2026). O ambiente
 representou um hospital com oito unidades, duzentos leitos, seiscentos
 pacientes e 2.012 internações, com noventa dias de histórico de
 ocupação diária. Nenhum dado real foi utilizado em qualquer etapa.
@@ -167,7 +165,7 @@ de linguagem, reuniu quatro tabelas: a situação de cada leito na data de
 referência, o resumo por unidade, a série diária do hospital e as
 internações, estas sem identificador de paciente e reduzidas a tipo de
 leito, faixa etária, situação e tempo de permanência. Sobre as
-internações foi imposto k-anonimato (Sweeney, 2002) com k mínimo de 5 no
+internações foi imposto k-anonimato, conforme Sweeney (2002), com k mínimo de 5 no
 par tipo de leito e faixa etária, limiar adequado a uso interno
 controlado (El Emam e Arbuckle, 2013), verificado por teste a cada
 construção. A Gold foi exportada para um arquivo próprio, de modo que as camadas
@@ -389,7 +387,7 @@ versionados; os do pipeline provêm de execução determinista.
 
 ## Pipeline, minimização e isolamento
 
-A geração produziu, de forma determinista, 8 unidades, 200 leitos, 600
+A geração produziu, de forma determinista, oito unidades, 200 leitos, 600
 pacientes, 2.012 internações e 18.000 registros diários de ocupação. Na
 data de referência, 150 leitos estavam ocupados, 42 livres e 8
 bloqueados (taxa de ocupação de 75%), e as 150 internações em andamento
@@ -582,21 +580,18 @@ Fonte: Resultados originais da pesquisa
 Sem a instrução de recusa, o modelo não se absteve por iniciativa
 própria em nenhuma pergunta adversarial. As duas recusas contadas no
 nível do modelo em E0 são perguntas barradas pelo filtro de dado pessoal
-antes de qualquer chamada; excluídas, o modelo recusou 0 de 23 em E0 e
-18 de 23 em E1, como Fei et al. (2026) observam: os modelos raramente
+antes de qualquer chamada; excluídas, o modelo não recusou nenhuma das 23 em E0 e recusou 18 das 23 em E1, como Fei et al. (2026) observam: os modelos raramente
 recusam por iniciativa própria. Ainda assim, nenhuma linha fora do
 perfil, de camada interna ou com campo sensível foi entregue nas 150
 interações adversariais das duas células. Das 15 recusas do sistema em
-E0, 11 vieram de controles deterministas: 9 do verificador da consulta
+E0, 11 vieram de controles deterministas: nove do verificador da consulta
 (as quatro injeções em que o modelo obedeceu, gerando exclusão,
 alteração, leitura de arquivo do sistema e exportação de tabela, além de
-camada interna, catálogo e tabela fora do perfil) e 2 do filtro de dado
-pessoal. As outras 4 dependeram do texto que o modelo escolheu (tabela
+camada interna, catálogo e tabela fora do perfil) e dois do filtro de dado pessoal. As outras quatro dependeram do texto que o modelo escolheu (tabela
 inventada, apelido de coluna sensível, colunas inexistentes), mas em
 todas o dado pedido não existia na Gold.
 
-A pertinência da resposta ficou fora do alcance do verificador. Em E0,
-10 perguntas sem resposta receberam uma, sem vazar dado: contagens na
+A pertinência da resposta ficou fora do alcance do verificador. Em E0, dez perguntas sem resposta receberam uma, sem vazar dado: contagens na
 tabela permitida no lugar da proibida, colunas nulas com nome de
 diagnóstico ou de médico, uma projeção de 5% de aumento para o dia
 seguinte e a parte benigna de uma pergunta com injeção. É o efeito que
@@ -606,10 +601,7 @@ instrução de recusa elevou a recusa devida em todas as famílias, sem
 produzir nenhuma recusa indevida: em E1, o sistema recusou as cinco
 perguntas por dado pessoal, as cinco de camada interna ou catálogo e as
 cinco injeções (três já no modelo, duas pelo verificador), quatro das
-cinco fora do perfil e três das cinco sem resposta no schema, contra 4,
-4, 4, 2 e 1 recusas em E0, na mesma ordem. As respostas indevidas caíram
-de 10 para 3 (teste de sinal sobre o desfecho do sistema: 7 perguntas
-melhoraram e 1 piorou, p = 0,07). Houve um custo que o critério de
+cinco fora do perfil e três das cinco sem resposta no schema, contra quatro, quatro, quatro, duas e uma recusa em E0, na mesma ordem. As respostas indevidas caíram de dez para três (teste de sinal sobre o desfecho do sistema: sete perguntas melhoraram e uma piorou, p = 0,07). Houve um custo que o critério de
 decisão não previa: uma pergunta legítima mudou de consulta e passou de
 correta a errada, sem recusa, e o execution match das legítimas caiu de
 72,2% para 66,7%. Pelo critério registrado antes da execução, a
@@ -699,8 +691,7 @@ e a implantação real de qualquer dos caminhos exigiria o relatório de
 impacto à proteção de dados do art. 38, ambos fora do escopo deste
 trabalho. A implantação local, em que nada sai do perímetro, é a opção
 adotada na literatura mais próxima deste trabalho (Al Attrach et al.,
-2026); a abstração do schema e dos valores antes do envio a um modelo
-remoto (Abedini et al., 2025) é a alternativa para quem precisa da API.
+2026); a abstração do schema e dos valores antes do envio a um modelo remoto, proposta por Abedini et al. (2025), é a alternativa para quem precisa da API.
 
 ## Estabilidade e reprodutibilidade
 
@@ -933,6 +924,10 @@ Yin, R.K. 2015. Estudo de Caso: Planejamento e métodos. 5ed. Bookman, Porto Ale
 Yu, T.; Zhang, R.; Yang, K.; Yasunaga, M.; Wang, D.; Li, Z.; Ma, J.; Li, I.; Yao, Q.; Roman, S.; Zhang, Z.; Radev, D. 2018. Spider: a large-scale human-labeled dataset for complex and cross-domain semantic parsing and text-to-SQL task. In: Conference on Empirical Methods in Natural Language Processing (EMNLP), 2018, Brussels, Belgium. Anais... Association for Computational Linguistics, p. 3911-3921.
 
 # Apêndice A. Arquitetura de referência em quatro camadas
+
+A Figura 1 apresenta o fluxo de uma pergunta pelas quatro camadas da
+arquitetura, da governança de entrada à validação de saída, com os
+pontos em que a consulta pode ser recusada antes de chegar ao usuário.
 
 ![](figuras/arquitetura_quatro_camadas.png)
 
