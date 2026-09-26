@@ -33,6 +33,8 @@ ANO_DEFESA = "2026"
 # Estilos que o pandoc procura pelo nome. Todos herdam de Normal; os titulos
 # ficam em negrito e alinhados a esquerda (manual, itens 16.x); as celulas de
 # tabela, referencias e legendas ficam sem recuo e com espacamento simples.
+# A linha dos autores e centralizada e os enderecos (titulacao e e-mail) ficam
+# em Arial 9, como pede a folha de rosto do manual.
 ESTILOS = """
 <w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:next w:val="BodyText"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="360" w:after="120"/><w:jc w:val="left"/><w:outlineLvl w:val="0"/></w:pPr><w:rPr><w:b/><w:bCs/></w:rPr></w:style>
 <w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:next w:val="BodyText"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="240" w:after="120"/><w:jc w:val="left"/><w:outlineLvl w:val="1"/></w:pPr><w:rPr><w:b/><w:bCs/></w:rPr></w:style>
@@ -55,6 +57,11 @@ ESTILOS = """
 <w:style w:type="paragraph" w:styleId="BlockText"><w:name w:val="Block Text"/><w:basedOn w:val="Normal"/><w:qFormat/></w:style>
 <w:style w:type="paragraph" w:styleId="FootnoteText"><w:name w:val="footnote text"/><w:basedOn w:val="Normal"/><w:qFormat/><w:pPr><w:ind w:firstLine="0"/></w:pPr><w:rPr><w:sz w:val="18"/></w:rPr></w:style>
 <w:style w:type="paragraph" w:styleId="SourceCode"><w:name w:val="Source Code"/><w:basedOn w:val="Normal"/><w:qFormat/></w:style>
+<w:style w:type="paragraph" w:styleId="Autores"><w:name w:val="Autores"/><w:basedOn w:val="Normal"/><w:qFormat/><w:pPr><w:spacing w:before="120" w:after="120" w:line="240" w:lineRule="auto"/><w:ind w:firstLine="0"/><w:jc w:val="center"/></w:pPr></w:style>
+<w:style w:type="paragraph" w:styleId="Endereco"><w:name w:val="Endereco"/><w:basedOn w:val="Normal"/><w:qFormat/><w:pPr><w:spacing w:before="0" w:after="0" w:line="240" w:lineRule="auto"/><w:ind w:firstLine="0"/><w:jc w:val="left"/></w:pPr><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="Rotulo"><w:name w:val="Rotulo"/><w:basedOn w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="360" w:after="120" w:line="240" w:lineRule="auto"/><w:ind w:firstLine="0"/><w:jc w:val="left"/></w:pPr></w:style>
+<w:style w:type="paragraph" w:styleId="SemRecuo"><w:name w:val="SemRecuo"/><w:basedOn w:val="BodyText"/><w:qFormat/><w:pPr><w:ind w:firstLine="0"/></w:pPr></w:style>
+<w:style w:type="paragraph" w:styleId="ResumoTexto"><w:name w:val="ResumoTexto"/><w:basedOn w:val="BodyText"/><w:qFormat/><w:pPr><w:spacing w:line="240" w:lineRule="auto"/></w:pPr></w:style>
 <w:style w:type="character" w:styleId="VerbatimChar"><w:name w:val="Verbatim Char"/><w:qFormat/></w:style>
 <w:style w:type="character" w:styleId="FootnoteReference"><w:name w:val="footnote reference"/><w:qFormat/><w:rPr><w:vertAlign w:val="superscript"/></w:rPr></w:style>
 <w:style w:type="table" w:styleId="Table"><w:name w:val="Table"/><w:basedOn w:val="Tabelanormal"/><w:qFormat/><w:tblPr><w:tblBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="auto"/><w:left w:val="single" w:sz="4" w:space="0" w:color="auto"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="auto"/><w:right w:val="single" w:sz="4" w:space="0" w:color="auto"/><w:insideH w:val="single" w:sz="4" w:space="0" w:color="auto"/><w:insideV w:val="single" w:sz="4" w:space="0" w:color="auto"/></w:tblBorders><w:tblCellMar><w:top w:w="40" w:type="dxa"/><w:left w:w="80" w:type="dxa"/><w:bottom w:w="40" w:type="dxa"/><w:right w:w="80" w:type="dxa"/></w:tblCellMar></w:tblPr></w:style>
@@ -120,9 +127,28 @@ def preparar_markdown(destino):
 
     def estilizar(bloco):
         out = []
+        apos_resumo = False
         for par in bloco.split("\n\n"):
             t = par.strip()
-            if re.match(r"^(Tabela|Figura) \d+\. ", t):
+            if apos_resumo and t:
+                # texto do Resumo: paragrafo unico em espacamento simples (manual, item 6)
+                out.append(f'::: {{custom-style="ResumoTexto"}}\n{t}\n:::')
+                apos_resumo = False
+                continue
+            if t == "**Resumo**":
+                apos_resumo = True
+            if re.match(r"^\S.*¹\*; .*²$", t):
+                # linha dos autores: centralizada (manual, folha de rosto)
+                out.append(f'::: {{custom-style="Autores"}}\n{t}\n:::')
+            elif re.match(r"^(¹\*|²) ", t):
+                # enderecos dos autores: Arial 9, espacamento simples, a esquerda
+                out.append(f'::: {{custom-style="Endereco"}}\n{t}\n:::')
+            elif t == "**Resumo**":
+                # rotulo do Resumo: negrito, a esquerda, sem recuo (manual, item 6)
+                out.append(f'::: {{custom-style="Rotulo"}}\n{t}\n:::')
+            elif t.startswith("**Palavras-chave:**"):
+                out.append(f'::: {{custom-style="SemRecuo"}}\n{t}\n:::')
+            elif re.match(r"^(Tabela|Figura) \d+\. ", t):
                 out.append(f'::: {{custom-style="Legenda"}}\n{t}\n:::')
             elif t.startswith("Fonte: "):
                 out.append(f'::: {{custom-style="FonteTabela"}}\n{t}\n:::')

@@ -1,10 +1,10 @@
-# Governança integrada viabiliza consulta em linguagem natural sobre ocupação de leitos hospitalares
+# Governança integrada habilita consulta em linguagem natural sobre ocupação de leitos hospitalares
 
 Gabriel Arcenio Rahal Marostica¹*; José Bernardo Neto²
 
-¹* [Titulação do autor]. E-mail: arcenio2501@gmail.com
+¹* Bacharel em Design Gráfico, especialista em Machine Learning e Inteligência Artificial. Hospital Sírio-Libanês. E-mail autor correspondente: arcenio2501@gmail.com
 
-² [Titulação do orientador]. E-mail: [e-mail do orientador]
+² Doutor em Ciências. E-mail: bernardo@ita.br
 
 **Resumo**
 
@@ -401,21 +401,19 @@ por ano-calendário dos resultados preliminares, que classificava 11
 pacientes na faixa errada.
 
 A medição do risco de reidentificação orientou a minimização da Gold.
-Com as colunas originais
-da tabela de internações (unidade, tipo, faixa etária, sexo e data de
-admissão), 1.763 dos 1.883 grupos de quase-identificadores tinham uma
-única internação: a tabela, apresentada como agregada, permitia
-individualizar cada estadia. Após a redução a tipo de leito, faixa
-etária, situação e tempo de permanência, o k mínimo passou a 29 sobre o
-par tipo e faixa, acima tanto do limiar de 5 adotado para uso interno
-controlado (El Emam e Arbuckle, 2013) quanto do limiar de 11 usado em
-regras de supressão de célula (Tabela 2). O custo de utilidade foi
-declarado: internações por unidade deixaram de ser respondíveis. Na
-análise de sensibilidade que acrescenta a situação (em andamento ou
-encerrada) aos quase-identificadores, o k mínimo cai para 3, com 3,2%
-das linhas em grupos menores que 11; o controle imposto por teste cobre o
-conjunto completo, e não esse subconjunto, o que é retomado nas
-limitações.
+Com as colunas originais da tabela de internações (unidade, tipo, faixa
+etária, sexo e data de admissão), 1.763 dos 1.883 grupos de
+quase-identificadores tinham uma única internação: a tabela, apresentada
+como agregada, permitia individualizar cada estadia. Após a redução a
+tipo de leito, faixa etária, situação e tempo de permanência, o k mínimo
+passou a 29 sobre o par tipo e faixa, acima do limiar de 5 adotado para
+uso interno controlado (El Emam e Arbuckle, 2013) e do limiar de 11
+usado em regras de supressão de célula (Tabela 2). O custo de utilidade
+foi declarado: internações por unidade deixaram de ser respondíveis.
+Quando a situação (em andamento ou encerrada) entra nos
+quase-identificadores, o k mínimo cai para 3, com 3,2% das linhas em
+grupos menores que 11; o controle imposto por teste cobre o conjunto
+completo, não esse subconjunto, o que é retomado nas limitações.
 
 Tabela 2. Minimização da tabela de internações da Gold
 
@@ -428,29 +426,27 @@ Tabela 2. Minimização da tabela de internações da Gold
 
 Fonte: Resultados originais da pesquisa
 
-Uma medição semelhante levou à correção do isolamento das camadas
-internas. Na primeira versão, a garantia de que Bronze e Silver eram inacessíveis
-dependia só da inspeção textual da consulta, e três consultas hostis
-aprovadas pelos guardrails devolveram dados internos: uma função de
-tabela que recebe o nome da tabela como texto, uma consulta ao catálogo
-que revelou a coluna de CPF e uma listagem das tabelas internas. A
-correção adotou duas barreiras independentes: a Gold passou a ser
-exportada para um arquivo próprio, o único que o sistema abre, e as
-funções de tabela e de catálogo passaram a ser bloqueadas. O achado
-reproduz, no protótipo, o que a literatura recente afirma: restrições
-expressas apenas sobre o texto, no prompt ou por inspeção da consulta,
-não garantem isolamento, e a garantia precisa ser imposta de forma
-determinista fora do texto (Fei et al., 2026; Klisura et al., 2026;
-Miyamoto et al., 2026). A conexão de consulta recebeu ainda, na Etapa E,
-o bloqueio de acesso a arquivos externos, pelo motivo relatado adiante.
+Uma medição semelhante corrigiu o isolamento das camadas internas. Na
+primeira versão, a inacessibilidade de Bronze e Silver dependia só da
+inspeção textual da consulta, e três consultas hostis aprovadas pelos
+guardrails devolveram dados internos: uma função de tabela que recebe o
+nome da tabela como texto, uma consulta ao catálogo que revelou a coluna
+de CPF e uma listagem das tabelas internas. A correção adotou duas
+barreiras independentes: a Gold passou a ser exportada para um arquivo
+próprio, o único que o sistema abre, e as funções de tabela e de
+catálogo passaram a ser bloqueadas. O protótipo reproduziu o que a
+literatura recente afirma: restrição expressa apenas sobre o texto, no
+prompt ou por inspeção da consulta, não garante isolamento, e a garantia
+precisa ser imposta de forma determinista fora do texto (Fei et al.,
+2026; Klisura et al., 2026; Miyamoto et al., 2026).
 
 ## Matriz de prompt com o modelo local
 
-A Tabela 3 apresenta as cinco células executadas com o modelo local, três
-vezes cada, sobre as 18 perguntas legítimas. O desvio entre execuções foi
-zero em todas as métricas e a concordância total (TARa@3) foi de 100% em
-todas as células: as 90 combinações de pergunta e célula produziram a
-mesma consulta nas três chamadas.
+A Tabela 3 apresenta as cinco células executadas com o modelo local,
+três vezes cada, sobre as 18 perguntas legítimas. O desvio entre
+execuções foi zero em todas as métricas e a concordância total (TARa@3)
+foi de 100% em todas as células: as 90 combinações de pergunta e célula
+produziram a mesma consulta nas três chamadas.
 
 Tabela 3. Matriz de prompt com o modelo local (18 perguntas, média de três execuções)
 
@@ -464,66 +460,61 @@ Tabela 3. Matriz de prompt com o modelo local (18 perguntas, média de três exe
 
 Fonte: Resultados originais da pesquisa
 
-A descrição enriquecida do schema (C1 contra C0) produziu o maior efeito:
-seis perguntas passaram a corretas e nenhuma regrediu (teste de sinal,
-p = 0,03, a única comparação da matriz abaixo de 0,05). Com nomes de
-coluna sem descrição, o modelo supôs que a tabela de resumo por unidade,
-uma fotografia do dia, tinha coluna de data, e escreveu literais de texto
-para uma coluna booleana; a descrição resolveu ambos, em linha com a
+A descrição enriquecida do schema (C1 contra C0) produziu o maior
+efeito: seis perguntas passaram a corretas e nenhuma regrediu (teste de
+sinal, p = 0,03, a única comparação da matriz abaixo de 0,05). Sem
+descrição, o modelo supôs que a tabela de resumo por unidade, uma
+fotografia do dia, tinha coluna de data, e escreveu literais de texto
+para uma coluna booleana. A descrição resolveu ambos, em linha com a
 recomendação de fornecer o schema completo e descrito quando ele cabe no
 contexto (Maamari et al., 2024). O value linking (C2 contra C1) fechou o
 erro de literal que motivou sua adoção, a caixa de "Enfermaria", e mais
 duas perguntas, mas fez o modelo regredir em outras duas, uma por
-projetar coluna a mais e outra por inventar uma coluna na tabela certa;
-o saldo foi de uma pergunta (p = 1,0), com o maior Soft F1 da matriz. Liu et al. (2026) relatam que expor valores enumerados eleva a acurácia
-dos filtros; neste trabalho a elevação veio acompanhada de duas
-regressões, o que a expectativa formada a partir daquele estudo não
-previa.
+projetar coluna a mais e outra por inventar uma coluna na tabela certa.
+O saldo foi de uma pergunta (p = 1,0), com o maior Soft F1 da matriz.
+Liu et al. (2026) relatam que expor valores enumerados eleva a acurácia
+dos filtros; aqui a elevação veio acompanhada de duas regressões que
+aquele estudo não previa.
 
 A restrição do schema ao perfil (C3 contra C1) foi observada na direção
-prevista: três perguntas passaram a corretas e nenhuma regrediu
-(p = 0,25). Só uma delas é efeito atribuível ao escopo, a pergunta em que
-o modelo, vendo o schema completo, buscava uma tabela fora do perfil e
-era barrado; as outras duas mudaram por efeito colateral da forma do
-prompt. A alucinação de tabelas que Fei et al. (2026) observam quando o schema é
-restrito não ocorreu nas perguntas legítimas: com o aviso explícito e o
-verificador, o modelo não citou tabela inexistente em nenhuma das 54
-chamadas de C3 sobre as 18 perguntas; no conjunto adversarial, uma
+prevista: três perguntas passaram a corretas e nenhuma regrediu (p =
+0,25). Só uma delas é efeito atribuível ao escopo, a pergunta em que o
+modelo, vendo o schema completo, buscava uma tabela fora do perfil e era
+barrado; as outras duas mudaram por efeito colateral da forma do prompt.
+A alucinação de tabelas que Fei et al. (2026) observam sob schema
+restrito não ocorreu nas perguntas legítimas: nas 54 chamadas de C3, o
+modelo não citou tabela inexistente. No conjunto adversarial, uma
 pergunta por dado pessoal o levou a inventar uma tabela de pacientes,
 barrada pelo verificador. Cabe uma ressalva de desenho: cinco das seis
 perguntas de situação atual pertencem ao perfil enfermagem, o único em
 que o escopo restringe tabelas, de modo que tipo de pergunta e perfil
-estão confundidos e o efeito do escopo só foi observado nesse perfil. A
-recusa indevida, que nos resultados preliminares havia custado 11,1
-pontos de execution match, caiu a 5,6 pontos com a descrição enriquecida
-e a zero quando o prompt informou o escopo, sem regressão. Esse número
-mede a recusa de perguntas legítimas, todas construídas para caber no
-perfil de quem pergunta; o custo da governança propriamente dito, sobre
-perguntas que o perfil não pode fazer, é medido no conjunto adversarial.
+estão confundidos. A recusa indevida, que nos resultados preliminares
+havia custado 11,1 pontos de execution match, caiu a 5,6 pontos com a
+descrição enriquecida e a zero quando o prompt informou o escopo. Esse
+número mede só a recusa de perguntas legítimas; o custo da governança
+propriamente dito é medido no conjunto adversarial.
 
 Pelo critério registrado antes da execução, C3 e C4 empataram no
 execution match e na ausência de violação, e C3 venceu por consumir
-menos tokens. C4 obteve set match e Soft F1 maiores, e a escolha por C3 seguiu o
-critério registrado, sem revisão posterior. O desempate por tokens foi
-pensado para o custo por chamada de um motor via API; com o motor local,
-gratuito, C4 teria sido a escolha natural, e dois dos cinco erros
-residuais de C3 são justamente de literal, que o value linking corrige.
-C4 com instrução de recusa não foi medida. Os cinco erros residuais de
-C3 concentraram-se em três causas: dois de
-projeção incompleta (a unidade sem a taxa que a selecionou), um de
-dialeto (uma função do MySQL em DuckDB, apesar de o prompt declarar o
-dialeto) e dois de literal (um nome de unidade incompleto e uma caixa
-errada com um valor de situação inexistente).
+menos tokens, apesar do set match e do Soft F1 maiores de C4. O
+desempate por tokens foi pensado para o custo por chamada de um motor
+via API; com o motor local, gratuito, C4 teria sido a escolha natural, e
+dois dos cinco erros residuais de C3 são justamente de literal, que o
+value linking corrige. C4 com instrução de recusa não foi medida. Os
+cinco erros residuais de C3 tiveram três causas: dois de projeção
+incompleta (a unidade sem a taxa que a selecionou), um de dialeto (uma
+função do MySQL em DuckDB, apesar de o prompt declarar o dialeto) e dois
+de literal (um nome de unidade incompleto e uma caixa errada com um
+valor de situação inexistente).
 
 ## Modelo e prompt cruzados e o veredito da hipótese
 
 Os resultados preliminares haviam medido 61,1% de execution match com o
-modelo claude-sonnet-4-6, sobre a Gold anterior à minimização e com o
-prompt simples, e as consultas geradas naquela execução não foram
-preservadas. Esse número é tratado aqui como observação histórica, sem
-servir de base de comparação. Para separar o efeito do modelo do efeito
-do prompt, o mesmo modelo via API foi executado nas células C0 e C3 sobre
-a Gold e o harness atuais (Tabela 4).
+modelo claude-sonnet-4-6, sobre a Gold anterior à minimização, com o
+prompt simples e sem preservar as consultas geradas. Esse número é
+tratado aqui como observação histórica. Para separar o efeito do modelo
+do efeito do prompt, o mesmo modelo via API foi executado nas células C0
+e C3 sobre a Gold e o harness atuais (Tabela 4).
 
 Tabela 4. Execution match estrito por modelo e célula (18 perguntas, média de três execuções)
 
@@ -537,41 +528,34 @@ Fonte: Resultados originais da pesquisa
 
 Os dois fatores tiveram efeito, e o efeito de cada um dependeu do outro.
 O prompt valeu 50 pontos no modelo pequeno e 17 no grande; o modelo
-valeu 52 pontos sob o prompt simples e 19 sob o prompt com escopo. A
-leitura que os dados sustentam é a de que um prompt bem desenhado
-reduziu de 52 para 19 pontos a distância entre o modelo local e o modelo
-via API; nada permite dizer que um fator pese mais que o outro em geral.
-Em C0, o modelo via API reproduziu o padrão dos resultados preliminares:
-as duas perguntas da enfermagem barradas por escopo, duas perguntas com
-colunas a mais e a diferença de 61,1% para 74,1% explicada pela Gold
-minimizada e pelo harness revisto, não pelo modelo, que foi o mesmo. Em
-C3, o modelo via API errou os mesmos dois tipos de coisa que o modelo
-local: uma coluna a mais em uma pergunta e a caixa de um literal em outra.
+valeu 52 pontos sob o prompt simples e 19 sob o prompt com escopo. Um
+prompt bem desenhado reduziu de 52 para 19 pontos a distância entre o
+modelo local e o modelo via API; nada permite dizer que um fator pese
+mais que o outro em geral. Em C0, o modelo via API reproduziu o padrão
+dos resultados preliminares, com as duas perguntas da enfermagem
+barradas por escopo e duas perguntas com colunas a mais; a diferença de
+61,1% para 74,1% vem da Gold minimizada e do harness revisto, não do
+modelo, que foi o mesmo. Em C3, o modelo via API errou os mesmos dois
+tipos de coisa que o modelo local: uma coluna a mais em uma pergunta e a
+caixa de um literal em outra.
 
 O intervalo de Wilson para C3 no modelo via API, calculado sobre a
 execução mais conservadora (16 de 18, pois as três execuções deram
-88,9%, 88,9% e 94,4%), foi de 67,2% a 96,9%; no modelo local, cujas
-execuções coincidiram, de 49,1% a 87,5%. Com 18 perguntas, nenhum dos intervalos
-exclui 80%. A hipótese de acurácia superior a 80% foi, portanto, atingida
-na estimativa pontual com o modelo forte sob o prompt com escopo (90,7%),
-não foi atingida com o modelo local (72,2%), e em nenhum dos casos o
-tamanho do conjunto permite afirmar que o valor verdadeiro está acima ou
-abaixo do limiar. A leitura cega do segundo anotador tornou esse veredito
-robusto à convenção de projeção das referências: ele concordou com as
-referências em 17 das 18 perguntas, inclusive nas duas que a projeção
-mínima do modelo havia contrariado, e divergiu em uma, pedindo também a
-data da maior taxa de ocupação, que nenhum modelo devolveu. Sob a leitura
-do anotador, todas as células perdem 5,6 pontos, e o modelo local fica
-abaixo de 80% nas duas leituras, enquanto o modelo via API fica acima nas
-duas (90,7% e 85,2%). A referência divergente foi mantida como estava, porque alterar o
-gabarito após conhecer os resultados comprometeria a comparação.
-
-A execução via API mostrou ainda que, com temperatura zero, o
-modelo mudou a consulta de uma pergunta em cada célula entre chamadas
-contíguas (TARa@3 de 94,4%), variação que o modelo local com semente fixa
-não apresentou em nenhuma das 270 chamadas da matriz, coerente com o não
-determinismo de configurações "deterministas" em serviços hospedados
-descrito por Atıl et al. (2025).
+88,9%, 88,9% e 94,4%), foi de 67,2% a 96,9%; no modelo local, de 49,1% a
+87,5%. Nenhum dos dois exclui 80%. A hipótese de acurácia superior a 80%
+foi, portanto, atingida na estimativa pontual com o modelo forte sob o
+prompt com escopo (90,7%), não foi atingida com o modelo local (72,2%),
+e em nenhum dos casos o tamanho do conjunto permite situar o valor
+verdadeiro acima ou abaixo do limiar. A leitura cega do segundo anotador
+tornou esse veredito robusto à convenção de projeção das referências:
+ele concordou com as referências em 17 das 18 perguntas, inclusive nas
+duas que a projeção mínima do modelo havia contrariado, e divergiu em
+uma, pedindo também a data da maior taxa de ocupação, que nenhum modelo
+devolveu. Sob a leitura do anotador, todas as células perdem 5,6 pontos:
+o modelo local fica abaixo de 80% nas duas leituras e o modelo via API
+fica acima nas duas (90,7% e 85,2%). A referência divergente foi
+mantida, porque alterar o gabarito após conhecer os resultados
+comprometeria a comparação.
 
 ## Recusa devida e custo da governança
 
@@ -595,124 +579,101 @@ Tabela 5. Conjunto combinado: 18 perguntas legítimas e 25 adversariais, por mod
 
 Fonte: Resultados originais da pesquisa
 
-Sem a instrução de recusa, o modelo não se absteve por iniciativa própria
-em nenhuma pergunta adversarial: as duas recusas contadas no nível do
-modelo em E0 são as perguntas barradas pelo filtro de dado pessoal antes
-de qualquer chamada, que o harness registra como recusa nos dois níveis
-porque nenhum deles as entregou; excluídas, o modelo recusou 0 de 23 em
-E0 e 18 de 23 em E1. O resultado coincide com a observação de Fei et al.
-(2026) de que os modelos raramente recusam por iniciativa própria. Ainda assim, nenhuma linha fora do perfil, de camada
-interna ou com campo sensível foi entregue em nenhuma das 150 interações
-adversariais das duas células: das 15 recusas do sistema em E0, 11
-vieram de controles deterministas, 9 do verificador da consulta (comandos
-de escrita e de leitura de arquivo, instrução múltipla, camada interna,
-catálogo e tabela fora do perfil) e 2 do filtro de dado pessoal na
-pergunta.
-Nas quatro injeções de instrução em que o modelo obedeceu, gerando
-exclusão, alteração, leitura de arquivo do sistema e exportação de
-tabela, o verificador barrou a consulta antes da execução. As outras 4
-recusas foram contingentes, isto é, dependeram do texto que o modelo
-escolheu: uma tabela inventada, um nome de coluna sensível usado como
-apelido e duas colunas inexistentes que fizeram a consulta falhar. Em
-todas elas, o dado pessoal pedido não existia na Gold, de modo que o
-escopo não dependeu dessa contingência.
+Sem a instrução de recusa, o modelo não se absteve por iniciativa
+própria em nenhuma pergunta adversarial. As duas recusas contadas no
+nível do modelo em E0 são perguntas barradas pelo filtro de dado pessoal
+antes de qualquer chamada; excluídas, o modelo recusou 0 de 23 em E0 e
+18 de 23 em E1, como Fei et al. (2026) observam: os modelos raramente
+recusam por iniciativa própria. Ainda assim, nenhuma linha fora do
+perfil, de camada interna ou com campo sensível foi entregue nas 150
+interações adversariais das duas células. Das 15 recusas do sistema em
+E0, 11 vieram de controles deterministas: 9 do verificador da consulta
+(as quatro injeções em que o modelo obedeceu, gerando exclusão,
+alteração, leitura de arquivo do sistema e exportação de tabela, além de
+camada interna, catálogo e tabela fora do perfil) e 2 do filtro de dado
+pessoal. As outras 4 dependeram do texto que o modelo escolheu (tabela
+inventada, apelido de coluna sensível, colunas inexistentes), mas em
+todas o dado pedido não existia na Gold.
 
 A pertinência da resposta ficou fora do alcance do verificador. Em E0,
-10 perguntas sem resposta receberam uma resposta: contagens feitas na tabela
-permitida no lugar da tabela proibida, colunas nulas com nome de
-diagnóstico ou de médico responsável, uma projeção de 5% de aumento para
-o dia seguinte e a parte benigna de uma pergunta que continha uma
-injeção. Nenhuma delas vazou dado, e todas eram consultas válidas dentro
-do escopo, por isso passaram. Foi o efeito descrito por Fei et al. (2026) para o schema restrito ao
-perfil, em que o modelo, sem ver a tabela
-pedida, responde com o que vê, agora medido sob verificador determinista.
-A instrução de recusa elevou a recusa devida em todas as famílias
-(Tabela 6), sem produzir nenhuma recusa indevida, e reduziu as respostas
-indevidas de 10 para 3 (teste de sinal sobre o desfecho do sistema: 7
-perguntas melhoraram e 1 piorou, p = 0,07). Houve, porém, um custo que o critério de decisão não previa: uma
-pergunta legítima mudou de consulta e passou de correta a errada, sem
-recusa, e o execution match das legítimas caiu de 72,2% para 66,7%. Pelo critério registrado antes da execução, a instrução passou a
-fazer parte da configuração operacional, com esse custo declarado.
-
-Tabela 6. Recusa devida por família de perguntas adversariais (5 perguntas por família; modelo / sistema)
-
-| Família | E0 | E1 |
-|---|---|---|
-| Dado pessoal | 2 / 4 | 5 / 5 |
-| Camada interna ou catálogo | 0 / 4 | 5 / 5 |
-| Fora do perfil | 0 / 2 | 4 / 4 |
-| Injeção de instruções | 0 / 4 | 3 / 5 |
-| Sem resposta no schema | 0 / 1 | 3 / 3 |
-
-Fonte: Resultados originais da pesquisa
+10 perguntas sem resposta receberam uma, sem vazar dado: contagens na
+tabela permitida no lugar da proibida, colunas nulas com nome de
+diagnóstico ou de médico, uma projeção de 5% de aumento para o dia
+seguinte e a parte benigna de uma pergunta com injeção. É o efeito que
+Fei et al. (2026) descrevem para o schema restrito ao perfil, o modelo
+respondendo com o que vê, agora medido sob verificador determinista. A
+instrução de recusa elevou a recusa devida em todas as famílias, sem
+produzir nenhuma recusa indevida: em E1, o sistema recusou as cinco
+perguntas por dado pessoal, as cinco de camada interna ou catálogo e as
+cinco injeções (três já no modelo, duas pelo verificador), quatro das
+cinco fora do perfil e três das cinco sem resposta no schema, contra 4,
+4, 4, 2 e 1 recusas em E0, na mesma ordem. As respostas indevidas caíram
+de 10 para 3 (teste de sinal sobre o desfecho do sistema: 7 perguntas
+melhoraram e 1 piorou, p = 0,07). Houve um custo que o critério de
+decisão não previa: uma pergunta legítima mudou de consulta e passou de
+correta a errada, sem recusa, e o execution match das legítimas caiu de
+72,2% para 66,7%. Pelo critério registrado antes da execução, a
+instrução passou a fazer parte da configuração operacional, com esse
+custo declarado.
 
 O modelo via API repetiu o padrão com uma diferença de mecanismo. Sem a
-instrução de recusa, recusou por iniciativa própria as mesmas zero
-perguntas, mas em vez de responder com a tabela permitida improvisou
-recusas dentro do contrato de saída: consultas que devolvem resultado
-vazio ("SELECT 0 WHERE 1=0"), o valor um, ou uma mensagem de texto como
-"Acesso negado", todas consultas válidas dentro do escopo, que o
-verificador aprovou e o sistema entregou. Vinte e duas das 25
-adversariais foram entregues assim, sem que nenhuma tocasse Bronze,
-Silver, comando de escrita ou tabela fora do perfil; uma injeção que
-pedia a exportação da tabela de internações resultou na entrega das
-2.012 linhas ao gestor, que tinha acesso a elas. Com a instrução de
-recusa, o modelo via API recusou 22 das 25 no próprio nível do modelo,
-entregou as mesmas duas perguntas com injeção respondidas pela parte
-benigna e a mesma pergunta fora do perfil respondida com a tabela
-permitida, e o execution match das legítimas subiu de 88,9% para 94,4%,
-com a pergunta de literal em caixa baixa passando a correta. A
-configuração operacional com o modelo comercial mediu, portanto, 94,4%
-nas legítimas e 88% de recusa devida, e o Reliability Score com
-penalidade 10 ficou próximo de zero. A lição vale para os dois modelos:
+instrução, tampouco recusou por iniciativa própria, mas em vez de
+responder com a tabela permitida improvisou recusas dentro do contrato
+de saída: consultas de resultado vazio ("SELECT 0 WHERE 1=0"), o valor
+um ou uma mensagem como "Acesso negado", todas válidas dentro do escopo,
+que o verificador aprovou e o sistema entregou. Vinte e duas das 25
+adversariais foram entregues assim, nenhuma tocando camada interna,
+comando de escrita ou tabela fora do perfil; uma injeção que pedia a
+exportação da tabela de internações entregou as 2.012 linhas ao gestor,
+que tinha acesso a elas. Com a instrução, o modelo via API recusou 22
+das 25 no próprio nível do modelo e entregou três respostas indevidas
+(duas injeções respondidas pela parte benigna e uma pergunta fora do
+perfil respondida com a tabela permitida); o execution match das
+legítimas subiu de 88,9% para 94,4%. A lição vale para os dois modelos:
 um contrato de saída que só admite SQL leva o modelo a codificar a
 recusa como consulta, e o harness a contar como resposta indevida o que
-era uma abstenção sem canal; autorizar a recusa explicitamente resolve o
-problema nos dois. A família de perguntas legítimas para outro perfil
-mede o custo da governança propriamente dito: são perguntas que o hospital faria e que o
+era uma abstenção sem canal. Autorizar a recusa resolve o problema nos
+dois.
+
+A família de perguntas legítimas para outro perfil mede o custo da
+governança propriamente dito: são perguntas que o hospital faria e que o
 perfil de quem pergunta não pode fazer. Em E1, quatro das cinco foram
-negadas, que é o comportamento desejado, e uma foi respondida
-erradamente com a tabela permitida; em E0, duas foram negadas e três
-respondidas erradamente. O custo da governança consistiu, portanto, em negar informação a quem
-não tinha a finalidade correspondente; sem a instrução de recusa, esse
-custo se converteu no risco de entregar uma resposta errada no lugar da
-negativa.
+negadas, o comportamento desejado, e uma foi respondida erradamente com
+a tabela permitida; em E0, duas foram negadas e três respondidas
+erradamente. O custo consistiu em negar informação a quem não tinha a
+finalidade correspondente; sem a instrução de recusa, converteu-se no
+risco de entregar uma resposta errada no lugar da negativa.
 
-Duas análises feitas sobre os relatórios, sem nova execução,
-complementam a leitura. Uma regra determinista que se abstivesse sempre que a consulta aprovada
-devolvesse resultado vazio ou só com valores nulos, na linha do filtro
-por execução do sistema vencedor do EHRSQL 2024 (Lee et al., 2024a),
-levaria a recusa devida do sistema a 92% em E1 (a versão da regra
-versionada no harness cobre só o resultado vazio e dá 88%; a extensão
-aos resultados nulos foi calculada sobre os relatórios),
-restando duas respostas indevidas (a explicação pedida por "por que" e a
-previsão), ao custo de duas perguntas legítimas, então erradas, virarem
-abstenção. O Reliability Score com penalidade 10 é negativo nas duas
-células porque cada resposta errada entregue custa 23 pontos num
-conjunto de 43 com 58% de perguntas a recusar, e inclui como erro duas
-perguntas legítimas às quais faltou só uma coluna; o valor não é
-comparável ao do EHRSQL 2024, cujo conjunto tem 20% de perguntas a
-recusar, e é apresentado ao lado do RS(0).
+Duas leituras feitas sobre os relatórios, sem nova execução,
+complementam o quadro. Uma regra que se abstivesse sempre que a consulta
+aprovada devolvesse resultado vazio ou só nulos, na linha do filtro por
+execução do sistema vencedor do EHRSQL 2024 (Lee et al., 2024a), levaria
+a recusa devida do sistema a 92% em E1, restando a explicação pedida por
+"por que" e a previsão, ao custo de duas perguntas legítimas, já
+erradas, virarem abstenção (a versão da regra versionada no harness
+cobre só o resultado vazio e dá 88%). O Reliability Score com penalidade
+10 fica muito abaixo de zero no modelo local porque cada resposta errada
+entregue custa 23 pontos num conjunto de 43 com 58% de perguntas a
+recusar, e não é comparável ao do EHRSQL 2024, cujo conjunto tem 20% de
+perguntas a recusar.
 
-A execução do conjunto adversarial revelou ainda um defeito no próprio
+A execução do conjunto adversarial revelou ainda um defeito no
 instrumento de medição. Para medir se uma consulta barrada teria o
 conteúdo certo, o harness a executava de forma diagnóstica, fora da
-trilha de auditoria. A consulta de uma das injeções, barrada pelo
-verificador por conter duas instruções, foi assim executada pelo
-avaliador, e sua segunda instrução exportou a tabela de internações para
-um arquivo, porque a conexão somente leitura impede escrita no banco, mas
-não em arquivo. O sistema, do ponto de vista do usuário, não entregou
-nada. A execução diagnóstica foi restrita a consultas barradas apenas por
-escopo, a conexão passou a negar acesso a arquivos externos, com teste, e
-a etapa foi reexecutada, com as consultas das 258 interações idênticas
-às da primeira execução.
+trilha, e a consulta de uma das injeções, barrada por conter duas
+instruções, exportou assim a tabela de internações para um arquivo,
+porque a conexão somente leitura impede escrita no banco, mas não em
+arquivo. O usuário não recebeu nada. A execução diagnóstica foi restrita
+a consultas barradas apenas por escopo, a conexão passou a negar acesso
+a arquivos externos, com teste, e a etapa foi reexecutada com as 258
+interações idênticas à primeira execução.
 
 ## O que sai do perímetro
 
-A Tabela 7 apresenta o que deixa a máquina em cada motor, levantado a
+A Tabela 6 apresenta o que deixa a máquina em cada motor, levantado a
 partir do código.
 
-Tabela 7. Dados que saem do perímetro, por motor
+Tabela 6. Dados que saem do perímetro, por motor
 
 | Motor | Sai do perímetro | Nunca sai |
 |---|---|---|
@@ -728,107 +689,106 @@ fictícios. Nome próprio não é detectável por padrão e permanece como
 risco: uma pergunta com o nome de um paciente seguiria para o modelo e
 ficaria registrada na trilha, que não pode ser editada sem quebrar a
 cadeia de hashes. Para isso foi projetada, sem implementação, a
-separação entre o fato registrado na cadeia e o texto da pergunta, guardado
-à parte com prazo de retenção e expurgo, o que conciliaria a integridade
-da auditoria com o término do tratamento e o direito de eliminação
-previstos na LGPD (Brasil, 2018). O caminho via API, além do filtro, exigiria de um hospital um dos
-mecanismos de transferência internacional previstos no art. 33 da LGPD e
-um contrato com o operador do modelo, e a implantação real de qualquer
-dos caminhos exigiria o relatório de impacto à proteção de dados do art.
-38, ambos fora do escopo deste trabalho. A implantação local, em que
-nada sai do perímetro, é a opção adotada na literatura mais próxima
-deste trabalho (Al Attrach et al., 2026); a abstração do schema e dos valores antes do
-envio a um modelo remoto (Abedini et al., 2025) é a alternativa para quem
-precisa da API.
+separação entre o fato registrado na cadeia e o texto da pergunta,
+guardado à parte com prazo de retenção e expurgo, o que conciliaria a
+integridade da auditoria com o término do tratamento e o direito de
+eliminação previstos na LGPD (Brasil, 2018). O caminho via API, além do
+filtro, exigiria de um hospital um dos mecanismos de transferência
+internacional do art. 33 da LGPD e um contrato com o operador do modelo,
+e a implantação real de qualquer dos caminhos exigiria o relatório de
+impacto à proteção de dados do art. 38, ambos fora do escopo deste
+trabalho. A implantação local, em que nada sai do perímetro, é a opção
+adotada na literatura mais próxima deste trabalho (Al Attrach et al.,
+2026); a abstração do schema e dos valores antes do envio a um modelo
+remoto (Abedini et al., 2025) é a alternativa para quem precisa da API.
 
 ## Estabilidade e reprodutibilidade
 
 A célula de melhor desempenho do modelo local (C3) e a célula
 operacional (E1) foram repetidas em outro dia, com o servidor do modelo
-reiniciado e os mesmos pesos, semente e máquina. As 183 interações do segundo dia (61 perguntas, três execuções cada)
-repetiram exatamente as consultas do primeiro, com concordância total de
-100% entre os dias e métricas idênticas. A rastreabilidade foi
-verificada em todas as execuções versionadas: as 1.077 interações da matriz, do conjunto adversarial com os dois
-modelos, da ponte com o modelo via API e da repetição têm registro de
-entrada e de saída na trilha, e as cinco cadeias de hashes foram
-conferidas íntegras a partir do arquivo. O modelo via API, ao contrário, mudou a consulta entre chamadas
-contíguas em uma pergunta por célula na matriz e em sete perguntas de E0
-e uma de E1 no conjunto adversarial, quase todas nas recusas
-improvisadas. Com semente fixa e pesos identificados, a inferência local foi
-reproduzível, o que a torna preferível também do ponto de vista da
-auditoria de resultados; a reprodução em outro hardware ou outra versão
-do servidor não foi testada, e é justamente onde a literatura indica que
-o determinismo costuma falhar (Atıl et al., 2025).
+reiniciado e os mesmos pesos, semente e máquina. As 183 interações do
+segundo dia (61 perguntas, três execuções cada) repetiram exatamente as
+consultas do primeiro, com concordância total de 100% entre os dias e
+métricas idênticas. A rastreabilidade foi verificada em todas as
+execuções versionadas: as 1.077 interações da matriz, do conjunto
+adversarial com os dois modelos, da ponte com o modelo via API e da
+repetição têm registro de entrada e de saída na trilha, e as cinco
+cadeias de hashes foram conferidas íntegras a partir do arquivo. O
+modelo via API, ao contrário, mudou a consulta entre chamadas contíguas
+mesmo com temperatura zero: em uma pergunta por célula na matriz (TARa@3
+de 94,4%) e em sete perguntas de E0 e uma de E1 no conjunto adversarial,
+quase todas nas recusas improvisadas, coerente com o não determinismo de
+configurações "deterministas" em serviços hospedados descrito por Atıl
+et al. (2025). Com semente fixa e pesos identificados, a inferência
+local foi reproduzível, o que a torna preferível também para a auditoria
+de resultados; a reprodução em outro hardware ou outra versão do
+servidor não foi testada, e é justamente onde a literatura indica que o
+determinismo costuma falhar.
 
 ## Comparação com a literatura
 
-A Tabela 8 posiciona os resultados em relação a trabalhos com objetivo
-semelhante. As comparações são indicativas: os conjuntos, os schemas e as
-métricas diferem, e o schema deste trabalho é mais simples que os da
+A Tabela 7 posiciona os resultados em relação a trabalhos com objetivo
+semelhante. As comparações são indicativas: os conjuntos, os schemas e
+as métricas diferem, e o schema deste trabalho é mais simples que os da
 literatura, com quatro tabelas e nenhuma pergunta que exija junção.
 
-Tabela 8. Resultados deste trabalho e da literatura
+Tabela 7. Resultados deste trabalho e da literatura
 
 | Aspecto | Literatura | Este trabalho |
 |---|---|---|
-| Execution match, uma chamada sem exemplos, dados clínicos | 43,4%
-(Tanković et al., 2025) a 78% (Li et al., 2026) | 72,2% (local); 90,7%
-(via API) |
+| Execution match, uma chamada sem exemplos, dados clínicos | 43,4% (Tanković et al., 2025) a 78% (Li et al., 2026) | 72,2% (local); 90,7% (via API) |
 | Execution match, agentes com ferramentas e correção | 83,3% a 94% (Al Attrach et al., 2026; Waltl, 2025) | não avaliado |
-| Recusa correta em perguntas sem resposta no schema | 69% (Al Attrach
-et al., 2026, modelo aberto de 20 bilhões) | 60% na família equivalente
-com o modelo local e 100% com o modelo via API (E1); 88% no conjunto
-adversarial completo com ambos |
+| Recusa correta em perguntas sem resposta no schema | 69% (Al Attrach et al., 2026, modelo aberto de 20 bilhões) | 60% na família equivalente com o modelo local e 100% com o modelo via API (E1); 88% no conjunto adversarial completo com ambos |
 | Vazamento com política apenas no prompt | 4,8% a 42,4% (Miyamoto et al., 2026) | 0 violação de política entregue, com verificador |
 | Violação da política de acesso pelo modelo | 7,4% no BIRD para um modelo comercial (Fei et al., 2026) | 0 no sistema em todas as células |
 
 Fonte: Resultados originais da pesquisa
 
 Em acurácia, o modelo local ficou dentro da faixa dos trabalhos de uma
-chamada, e o modelo via API, com o prompt com escopo, acima dela, mas
-abaixo dos sistemas agênticos, que usam várias chamadas, ferramentas e
-correção iterativa, recursos que este trabalho não empregou. Em violação de política, o valor supera os publicados por uma razão de
-arquitetura: os trabalhos citados medem o modelo decidindo sozinho ou
-com verificador baseado em modelo, enquanto aqui um verificador
-determinista em código decide a execução. Em recusa de perguntas sem resposta, a família comparável ficou abaixo
-do valor de Al Attrach et al. (2026) com o modelo local, 60% contra 69%,
-e acima com o modelo via API, que recusou as cinco; o valor de 88% vale
-para o conjunto adversarial completo, em que, no modelo local, o
-verificador responde pela maior parte das recusas. A contribuição do
-trabalho está em medir, sob esse verificador, o que muda quando o modelo
-conhece o escopo do perfil e quando é autorizado a recusar, algo que os
-benchmarks de controle de acesso em Text-to-SQL não isolam (Fei et al.,
-2026; Klisura et al., 2026).
+chamada, e o modelo via API acima dela, mas abaixo dos sistemas
+agênticos, que usam várias chamadas, ferramentas e correção iterativa,
+recursos que este trabalho não empregou. Em violação de política, o zero
+decorre da arquitetura: os trabalhos citados medem o modelo decidindo
+sozinho ou com verificador baseado em modelo, enquanto aqui um
+verificador determinista em código decide a execução. Em recusa de
+perguntas sem resposta, a família comparável ficou abaixo do valor de Al
+Attrach et al. (2026) com o modelo local, 60% contra 69%, e acima com o
+modelo via API, que recusou as cinco. A contribuição do trabalho está em
+medir, sob esse verificador, o que muda quando o modelo conhece o escopo
+do perfil e quando é autorizado a recusar, algo que os benchmarks de
+controle de acesso em Text-to-SQL não isolam (Fei et al., 2026; Klisura
+et al., 2026).
 
 ## Limitações
 
 Os conjuntos têm 18 perguntas legítimas e 25 adversariais, e os
-intervalos de confiança largos impedem afirmar diferenças entre a maioria
-das configurações. As perguntas, as referências e o sistema foram
-escritos pelo mesmo autor; a leitura cega de um anotador independente
-reduziu, mas não eliminou, esse viés. O schema tem quatro tabelas e
-nenhuma junção, e o comportamento com dezenas de tabelas, prompts maiores
-e permissões por coluna não foi avaliado. Os dados são sintéticos, de modo que a conformidade com a LGPD só pôde
-ser demonstrada como propriedade de projeto, e as normas da ANVISA foram
-adotadas por analogia.
-A matriz de perfis foi desenhada pelo autor a partir da finalidade de
-cada função e não foi validada em campo com um hospital; para o gestor,
-a tabela de internações poderia ser exposta só como agregados por tipo,
-faixa etária e situação, sem perda para as perguntas avaliadas, o que
-reduziria o risco de reidentificação no subconjunto em andamento. O k-anonimato
-imposto cobre o conjunto completo de internações; no subconjunto das
-internações em andamento o k mínimo é 3, e não há regra de supressão para
-o caso, esperado em dados reais, de um grupo pequeno violar o limiar.
-Nome próprio na pergunta não é filtrado, e a retenção do texto na trilha
-foi apenas projetada. Três respostas a perguntas sem resposta seguiram
-sendo entregues com a instrução de recusa, e a mitigação de alucinação
-foi, por isso, considerada parcial. A reprodutibilidade exata foi verificada em uma única máquina, e a
-latência do modelo local, de 4 a 5 segundos por pergunta em um notebook,
-não foi avaliada frente a requisitos de uso. A interação tem um único
-turno: o sistema não pede esclarecimento, não mostra ao usuário a
-leitura que adotou e responde à pergunta ambígua com uma das leituras
-possíveis; o anotador independente julgou ambíguas três das 18
-perguntas. A célula C4 com instrução de recusa não foi medida.
+intervalos de confiança largos impedem afirmar diferenças entre a
+maioria das configurações. As perguntas, as referências e o sistema
+foram escritos pelo mesmo autor; a leitura cega de um anotador
+independente reduziu, mas não eliminou, esse viés. O schema tem quatro
+tabelas e nenhuma junção, e o comportamento com dezenas de tabelas,
+prompts maiores e permissões por coluna não foi avaliado. Os dados são
+sintéticos, de modo que a conformidade com a LGPD só pôde ser
+demonstrada como propriedade de projeto, e as normas da ANVISA foram
+adotadas por analogia. A matriz de perfis foi desenhada pelo autor a
+partir da finalidade de cada função e não foi validada em campo com um
+hospital; para o gestor, a tabela de internações poderia ser exposta só
+como agregados por tipo, faixa etária e situação, sem perda para as
+perguntas avaliadas, o que reduziria o risco de reidentificação no
+subconjunto em andamento. O k-anonimato imposto cobre o conjunto
+completo de internações; no subconjunto das internações em andamento o k
+mínimo é 3, e não há regra de supressão para o caso, esperado em dados
+reais, de um grupo pequeno violar o limiar. Nome próprio na pergunta não
+é filtrado, e a retenção do texto na trilha foi apenas projetada. Três
+respostas a perguntas sem resposta seguiram sendo entregues com a
+instrução de recusa, e a mitigação de alucinação foi, por isso,
+considerada parcial. A reprodutibilidade exata foi verificada em uma
+única máquina, e a latência do modelo local, de 4 a 5 segundos por
+pergunta em um notebook, não foi avaliada frente a requisitos de uso. A
+interação tem um único turno: o sistema não pede esclarecimento, não
+mostra ao usuário a leitura que adotou e responde à pergunta ambígua com
+uma das leituras possíveis; o anotador independente julgou ambíguas três
+das 18 perguntas. A célula C4 com instrução de recusa não foi medida.
 
 # Conclusão
 
