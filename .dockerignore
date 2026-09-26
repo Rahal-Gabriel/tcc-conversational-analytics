@@ -15,7 +15,6 @@ __pycache__/
 # Metadados de ferramentas e do git.
 .git/
 .github/
-.claude/
 
 # Segredos e configuracao local (RNC-004): nunca entram na imagem.
 .env

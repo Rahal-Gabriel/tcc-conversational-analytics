@@ -24,8 +24,8 @@ auto-aperfeiçoamento durante a redação da versão final.
 /banca docs/tcc/01_RESULTADOS_PRELIMINARES.md
 ```
 
-O agente está definido em `.claude/agents/banca.md` e o comando em
-`.claude/commands/banca.md`. O agente só escreve o arquivo da rodada; qualquer
+A simulação é feita por um assistente de IA com o prompt de avaliador
+(contexto limpo, sem acesso a esta conversa). O assistente só escreve o arquivo da rodada; qualquer
 ação sugerida é decisão do autor.
 
 ## 3. Ciclo recomendado
@@ -45,5 +45,5 @@ ação sugerida é decisão do autor.
 | 02 | 2026-09-20 | documento inteiro | 4 | 10 | 4 | [2026-09-20_rodada-02.md](2026-09-20_rodada-02.md) |
 | 03 | 2026-09-22 | documento montado (versão final) | 3 | 9 | 8 | [2026-09-22_rodada-03.md](2026-09-22_rodada-03.md) |
 
-> Atualizar esta tabela a cada rodada (o agente grava o arquivo; a linha da
+> Atualizar esta tabela a cada rodada (a simulação grava o arquivo; a linha da
 > tabela é mantida manualmente).
