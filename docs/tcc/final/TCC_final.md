@@ -367,9 +367,10 @@ configuração vencedora foram escritos e versionados antes da execução
 correspondente, e não foram alterados depois dos números. Cada execução
 gerou relatórios com a consulta, o desfecho, o resultado normalizado, o
 hash e a telemetria de cada pergunta em cada repetição, além da trilha de
-auditoria, e esses artefatos foram versionados no repositório com uma
-marca (tag) git no commit que os produziu, permitindo recalcular qualquer
-métrica sem nova chamada ao modelo. O ambiente foi fixado em versão de
+auditoria, e esses artefatos foram versionados no repositório público do
+projeto (disponível em <https://github.com/Rahal-Gabriel/tcc-conversational-analytics>),
+com uma marca (tag) git no commit que os produziu, permitindo recalcular
+qualquer métrica sem nova chamada ao modelo. O ambiente foi fixado em versão de
 Python, dependências travadas e imagem reprodutível, e a integração
 contínua executou, a cada alteração, apenas o motor oráculo.
 
